@@ -23,13 +23,13 @@ import {
     Moon,
     Monitor,
     MessageSquare,
-    FileText,
-    TrendingUp,
+
+
     Smartphone,
     Key,
     LogOut,
     Download,
-    Upload,
+
     X,
     Camera,
 } from 'lucide-react';
@@ -345,10 +345,10 @@ const Settings = () => {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${activeTab === tab.id
-                                                ? 'bg-green-500/10 text-green-400 border border-green-500/30'
-                                                : tab.id === 'danger'
-                                                    ? 'text-red-400 hover:bg-red-500/10'
-                                                    : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'
+                                            ? 'bg-green-500/10 text-green-400 border border-green-500/30'
+                                            : tab.id === 'danger'
+                                                ? 'text-red-400 hover:bg-red-500/10'
+                                                : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'
                                             }`}
                                     >
                                         {tab.icon}
@@ -761,8 +761,8 @@ const Settings = () => {
                                                 key={t.id}
                                                 onClick={() => setTheme(t.id)}
                                                 className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${theme === t.id
-                                                        ? 'border-green-500 bg-green-500/10 text-green-400'
-                                                        : 'border-gray-700 hover:border-gray-600 text-gray-400'
+                                                    ? 'border-green-500 bg-green-500/10 text-green-400'
+                                                    : 'border-gray-700 hover:border-gray-600 text-gray-400'
                                                     }`}
                                             >
                                                 {t.icon}

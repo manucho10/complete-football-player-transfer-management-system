@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-    ArrowLeft, Search, Send, Paperclip, Smile, MoreVertical, Phone, Video,
+    ArrowLeft, Search, Send, Paperclip, Phone, Video,
     Check, CheckCheck, Image as ImageIcon, FileText, X, MessageSquare, Circle, Loader2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
