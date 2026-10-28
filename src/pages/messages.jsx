@@ -1,9 +1,9 @@
 // src/pages/Messages.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     ArrowLeft, Search, Send, Paperclip, Phone, Video,
-    Check, CheckCheck, Image as ImageIcon, FileText, X, MessageSquare, Circle, Loader2
+    Check, CheckCheck, MessageSquare, Loader2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/SupabaseClient';
@@ -27,7 +27,6 @@ const Messages = () => {
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
     const messagesEndRef = useRef(null);
-    const fileInputRef = useRef(null);
 
     // 1. Load Conversations on mount
     useEffect(() => {

@@ -23,13 +23,10 @@ import {
     Moon,
     Monitor,
     MessageSquare,
-
-
     Smartphone,
     Key,
     LogOut,
     Download,
-
     X,
     Camera,
 } from 'lucide-react';

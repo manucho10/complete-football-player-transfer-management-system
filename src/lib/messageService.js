@@ -115,6 +115,7 @@ export const getOrCreateConversation = async (currentUserId, otherUserId) => {
         .or(`and(user1_id.eq.${currentUserId},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${currentUserId})`)
         .maybeSingle();
 
+    if (findError) throw findError;
     if (existing) return existing.id;
 
     // If not, create it

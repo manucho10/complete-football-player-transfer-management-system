@@ -2,7 +2,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    TrendingUp,
     User,
     Key,
     UserPlus,
@@ -214,10 +213,10 @@ const Landing = () => {
                     {/* Footer */}
                     <div className="mt-20 pt-8 border-t border-gray-800 text-center text-sm text-gray-400">
                         <div className="flex flex-wrap justify-center gap-6 mb-4">
-                            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-                            <a href="#" className="hover:text-white transition-colors">GDPR Compliance</a>
-                            <a href="#" className="hover:text-white transition-colors">Contact Support</a>
+                            <span>Privacy Policy</span>
+                            <span>Terms of Service</span>
+                            <span>GDPR Compliance</span>
+                            <span>Contact Support</span>
                         </div>
                         <p>© 2024 TransferHub. All rights reserved.</p>
                     </div>

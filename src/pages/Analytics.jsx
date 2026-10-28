@@ -1,9 +1,9 @@
 // src/pages/Analytics.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft, BarChart3, TrendingUp, TrendingDown, Eye, Users, DollarSign,
-    Star, Target, FileText, Calendar, Download, ChevronDown, Award, Activity,
+    ArrowLeft, BarChart3, TrendingUp, Eye, DollarSign,
+    Star, Target, FileText, Download, ChevronDown, Activity,
     PieChart as PieIcon, LineChart as LineIcon, ArrowUpRight, ArrowDownRight, Loader2
 } from 'lucide-react';
 import {

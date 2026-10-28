@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/Register.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -632,9 +633,9 @@ const Register = () => {
                                             />
                                             <span className="text-sm text-gray-300">
                                                 I agree to the{' '}
-                                                <a href="#" className="text-green-400 hover:text-green-300 underline">Terms of Service</a>{' '}
+                                                <button type="button" className="text-green-400 underline hover:text-green-300">Terms of Service</button>{' '}
                                                 and{' '}
-                                                <a href="#" className="text-green-400 hover:text-green-300 underline">Privacy Policy</a>
+                                                <button type="button" className="text-green-400 underline hover:text-green-300">Privacy Policy</button>
                                             </span>
                                         </label>
                                         {errors.agreeTerms && (
@@ -683,9 +684,9 @@ const Register = () => {
 
                     <p className="text-center text-xs text-gray-500 mt-6">
                         By registering, you agree to our{' '}
-                        <a href="#" className="text-gray-400 hover:text-white underline">Terms</a>{' '}
+                        <button type="button" className="text-gray-400 underline hover:text-gray-300">Terms</button>{' '}
                         and{' '}
-                        <a href="#" className="text-gray-400 hover:text-white underline">Privacy Policy</a>
+                        <button type="button" className="text-gray-400 underline hover:text-gray-300">Privacy Policy</button>
                     </p>
                 </div>
             </div>

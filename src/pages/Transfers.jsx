@@ -1,5 +1,5 @@
 // src/pages/Transfers.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
@@ -11,12 +11,10 @@ import {
     XCircle,
     Clock,
     DollarSign,
-    Calendar,
     Building2,
     ChevronDown,
     MessageSquare,
     FileText,
-    AlertCircle,
     CheckCircle2,
     Handshake,
     Loader2,

@@ -11,7 +11,6 @@ import {
     X,
     Filter,
     Eye,
-    Star,
     MessageSquare,
     FileText,
     Clock,

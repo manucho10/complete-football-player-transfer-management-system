@@ -3,18 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Eye, Star, FileText, DollarSign, BarChart3, Video, User,
-    Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, Zap
+    Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
 import { useAuth } from '../../context/AuthContext';
 import { fetchPlayerDashboardData } from '../../lib/dbService';
+import UploadHighlightModal from '../../components/dashboard/UploadHighlightModal'; // ⭐ Imported Modal
 
 const PlayerDashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    // ⭐ State to control the upload modal
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
     // Fetch Real Data
     useEffect(() => {
@@ -77,8 +82,13 @@ const PlayerDashboard = () => {
         type: a.type === 'offer' ? 'offer' : a.type === 'message' ? 'message' : 'view'
     })) || [];
 
+    // ⭐ Updated Quick Actions with onClick for Upload
     const quickActions = [
-        { label: 'Upload Highlight', icon: <Video className="w-5 h-5" /> },
+        {
+            label: 'Upload Highlight',
+            icon: <Video className="w-5 h-5" />,
+            onClick: () => setIsUploadModalOpen(true)
+        },
         { label: 'Update Profile', icon: <User className="w-5 h-5" />, path: '/profile' },
         { label: 'View Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
         { label: 'Browse Clubs', icon: <Building2 className="w-5 h-5" /> },
@@ -120,7 +130,10 @@ const PlayerDashboard = () => {
                         {quickActions.map((a, i) => (
                             <button
                                 key={i}
-                                onClick={() => a.path ? navigate(a.path) : null}
+                                onClick={() => {
+                                    if (a.onClick) a.onClick();
+                                    else if (a.path) navigate(a.path);
+                                }}
                                 className="flex flex-col items-center gap-2 p-4 bg-gray-700/30 hover:bg-gray-700/60 rounded-xl transition-all"
                             >
                                 <div className={role.text}>{a.icon}</div>
@@ -170,6 +183,19 @@ const PlayerDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* ⭐ Video Upload Modal ⭐ */}
+            {data?.playerStats?.id && (
+                <UploadHighlightModal
+                    isOpen={isUploadModalOpen}
+                    onClose={() => setIsUploadModalOpen(false)}
+                    playerId={data.playerStats.id}
+                    onSuccess={() => {
+                        // You can add a toast notification here if you want
+                        console.log("Video uploaded successfully!");
+                    }}
+                />
+            )}
         </DashboardLayout>
     );
 };
