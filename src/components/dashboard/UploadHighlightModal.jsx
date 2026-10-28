@@ -35,6 +35,10 @@ const UploadHighlightModal = ({ isOpen, onClose, playerId, onSuccess }) => {
 
     const handleUpload = async (e) => {
         e.preventDefault();
+        if (!playerId) {
+            setError("Player profile not found. Please complete your profile first.");
+            return;
+        }
         if (!file || !title.trim() || !playerId) {
             setError('Please provide a title and select a video.');
             return;
