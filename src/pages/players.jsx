@@ -22,7 +22,8 @@ import {
     Loader2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { fetchPlayers } from '../lib/dbService'; // Import the service
+import { fetchPlayers } from '../lib/dbService';
+import CompareModal from '../components/players/CompareModal'; // ⭐ Imported Modal
 
 const Players = () => {
     const navigate = useNavigate();
@@ -34,12 +35,12 @@ const Players = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showFilters, setShowFilters] = useState(false);
     const [sortBy, setSortBy] = useState('rating');
-
+    const [viewMode, setViewMode] = useState('grid');
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [watchlist, setWatchlist] = useState([]);
     const [compareList, setCompareList] = useState([]);
+    const [showCompareModal, setShowCompareModal] = useState(false); // ⭐ New State
 
-    // Supabase Data State
     const [players, setPlayers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -212,8 +213,8 @@ const Players = () => {
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className={`inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${showFilters || activeFilterCount > 0
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                            : 'bg-gray-800/50 border border-gray-700 text-gray-300 hover:bg-gray-700/50'
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                : 'bg-gray-800/50 border border-gray-700 text-gray-300 hover:bg-gray-700/50'
                             }`}
                     >
                         <SlidersHorizontal className="w-4 h-4" />
@@ -375,7 +376,10 @@ const Players = () => {
                             >
                                 Clear
                             </button>
+
+                            {/* ⭐ Wired up Compare Now Button ⭐ */}
                             <button
+                                onClick={() => setShowCompareModal(true)}
                                 disabled={compareList.length < 2}
                                 className="px-4 py-1.5 text-xs bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg font-semibold transition-all"
                             >
@@ -417,8 +421,8 @@ const Players = () => {
                                     <div className="flex items-center justify-between mb-3">
                                         <span
                                             className={`text-[10px] font-semibold px-2 py-0.5 rounded uppercase ${player.availability === 'Available'
-                                                ? 'bg-green-500/20 text-green-400'
-                                                : 'bg-yellow-500/20 text-yellow-400'
+                                                    ? 'bg-green-500/20 text-green-400'
+                                                    : 'bg-yellow-500/20 text-yellow-400'
                                                 }`}
                                         >
                                             {player.availability}
@@ -430,14 +434,13 @@ const Players = () => {
                                         >
                                             <Heart
                                                 className={`w-4 h-4 ${watchlist.includes(player.id)
-                                                    ? 'fill-red-500 text-red-500'
-                                                    : 'text-gray-400'
+                                                        ? 'fill-red-500 text-red-500'
+                                                        : 'text-gray-400'
                                                     }`}
                                             />
                                         </button>
                                     </div>
 
-                                    {/* Avatar */}
                                     <div className="w-16 h-16 bg-gradient-to-r from-gray-600 to-gray-700 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3">
                                         {player.name
                                             .split(' ')
@@ -476,7 +479,6 @@ const Players = () => {
                                         </span>
                                     </div>
 
-                                    {/* Quick stats */}
                                     <div className="grid grid-cols-3 gap-1 pt-2">
                                         <div className="text-center bg-gray-700/30 rounded p-1.5">
                                             <p className="text-sm font-bold">{player.goals || 0}</p>
@@ -505,8 +507,8 @@ const Players = () => {
                                         onClick={() => toggleCompare(player.id)}
                                         disabled={compareList.length >= 3 && !compareList.includes(player.id)}
                                         className={`flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg transition-colors ${compareList.includes(player.id)
-                                            ? 'bg-green-500/20 text-green-400'
-                                            : 'bg-gray-700/50 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed'
+                                                ? 'bg-green-500/20 text-green-400'
+                                                : 'bg-gray-700/50 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed'
                                             }`}
                                     >
                                         {compareList.includes(player.id) ? (
@@ -624,8 +626,8 @@ const Players = () => {
                                 <button
                                     onClick={() => toggleWatchlist(selectedPlayer.id)}
                                     className={`flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition-all ${watchlist.includes(selectedPlayer.id)
-                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                        : 'bg-gray-700/50 hover:bg-gray-700'
+                                            ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                            : 'bg-gray-700/50 hover:bg-gray-700'
                                         }`}
                                 >
                                     <Heart
@@ -646,7 +648,16 @@ const Players = () => {
                 </div>
             )}
 
-            <style jsx>{`
+            {/* ⭐ COMPARE MODAL ⭐ */}
+            {showCompareModal && (
+                <CompareModal
+                    players={players.filter(p => compareList.includes(p.id))}
+                    onClose={() => setShowCompareModal(false)}
+                />
+            )}
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
@@ -661,7 +672,7 @@ const Players = () => {
         .animate-slideDown {
           animation: slideDown 0.2s ease-out;
         }
-      `}</style>
+      `}} />
         </div>
     );
 };
