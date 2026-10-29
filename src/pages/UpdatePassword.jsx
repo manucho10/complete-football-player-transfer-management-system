@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
+import Navbar from '../components/layout/navbar';
 import { supabase } from '../lib/SupabaseClient';
 
 const UpdatePassword = () => {
@@ -13,16 +13,42 @@ const UpdatePassword = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(true); // ⭐ New state to wait for Supabase
 
-    // Verify the user is actually coming from a valid reset link
+    // ⭐ CRITICAL FIX: Listen for the auth state change
     useEffect(() => {
+        // Supabase automatically parses the URL hash (#access_token=...) 
+        // and logs the user in temporarily for password recovery.
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY' || session) {
+                setIsVerifying(false); // We have a valid session, allow the form
+            }
+        });
+
+        // Fallback check in case the event already fired before this component mounted
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                setError('Your reset link is invalid or has expired. Please request a new one.');
+            if (session) {
+                setIsVerifying(false);
+            } else {
+                // Give Supabase 1.5 seconds to process the URL token before showing an error
+                setTimeout(async () => {
+                    const { data: { session: retrySession } } = await supabase.auth.getSession();
+                    if (retrySession) {
+                        setIsVerifying(false);
+                    } else {
+                        setError('Your reset link is invalid or has expired. Please request a new one.');
+                        setIsVerifying(false);
+                    }
+                }, 1500);
             }
         };
+
         checkSession();
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     const handleUpdate = async (e) => {
@@ -70,13 +96,25 @@ const UpdatePassword = () => {
                             </p>
                         </div>
 
-                        {error && (
-                            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
+                        {/* Show a loading spinner while verifying the token */}
+                        {isVerifying ? (
+                            <div className="text-center py-8">
+                                <Loader2 className="w-8 h-8 animate-spin text-green-400 mx-auto mb-4" />
+                                <p className="text-gray-400 text-sm">Verifying your secure link...</p>
                             </div>
-                        )}
-
-                        {success ? (
+                        ) : error && !success ? (
+                            <div className="text-center py-4">
+                                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm text-left">
+                                    <AlertCircle className="w-5 h-5 flex-shrink-0" /> {error}
+                                </div>
+                                <button
+                                    onClick={() => navigate('/forgot-password')}
+                                    className="text-sm text-blue-400 hover:text-blue-300 font-semibold"
+                                >
+                                    Request a new link
+                                </button>
+                            </div>
+                        ) : success ? (
                             <div className="text-center py-4">
                                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <CheckCircle2 className="w-8 h-8 text-green-400" />

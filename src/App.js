@@ -20,14 +20,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
 
 // Placeholder pages
-const ForgotPassword = () => (
-  <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-    <div className="text-center">
-      <h1 className="text-3xl mb-4">Forgot Password</h1>
-      <p className="text-gray-400">Coming soon...</p>
-    </div>
-  </div>
-);
 
 const Unauthorized = () => (
   <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">

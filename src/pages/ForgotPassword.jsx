@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, AlertCircle, CheckCircle2, Loader2, Key } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
+import Navbar from '../components/layout/navbar';
 import { supabase } from '../lib/SupabaseClient';
 
 const ForgotPassword = () => {
