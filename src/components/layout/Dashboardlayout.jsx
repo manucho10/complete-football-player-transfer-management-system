@@ -1,5 +1,5 @@
 // src/components/layout/DashboardLayout.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
     TrendingUp,
@@ -13,37 +13,18 @@ import {
     X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { fetchNotifications } from '../../lib/dbService';
+import { useNotifications } from '../../hooks/useNotifications'; // ⭐ Import Hook
 
 const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }) => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
+    // ⭐ Use the live notification hook
+    const unreadCount = useNotifications();
+
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
-    const [unreadCount, setUnreadCount] = useState(0);
-
-    useEffect(() => {
-        let cancelled = false;
-
-        const loadUnreadCount = async () => {
-            try {
-                const notifications = await fetchNotifications(user.id);
-                if (!cancelled) {
-                    setUnreadCount(notifications.filter((notification) => !notification.read).length);
-                }
-            } catch (error) {
-                console.error('Failed to load unread notifications:', error);
-            }
-        };
-
-        loadUnreadCount();
-        return () => {
-            cancelled = true;
-        };
-    }, [user.id]);
 
     if (!user) {
         return (
@@ -65,11 +46,9 @@ const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }
             setActiveTab(typeof item === 'string' ? item : item.id);
         }
         setSidebarOpen(false);
-        setNotificationsOpen(false);
         setProfileOpen(false);
     };
 
-    // Fallback to initial if no avatar_url exists
     const userInitial = (user.name || user.email || 'U').charAt(0).toUpperCase();
 
     return (
@@ -121,8 +100,8 @@ const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }
                                 key={item.id}
                                 onClick={() => handleNavClick(item)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === item.id && !item.path
-                                    ? `${roleConfig.bg} ${roleConfig.text} border ${roleConfig.border}`
-                                    : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'
+                                        ? `${roleConfig.bg} ${roleConfig.text} border ${roleConfig.border}`
+                                        : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'
                                     }`}
                             >
                                 {item.icon}
@@ -134,8 +113,11 @@ const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }
                     {/* Bottom Actions */}
                     <div className="p-4 border-t border-gray-700 space-y-1">
                         <button
-                            onClick={() => navigate('/settings')}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-700/50 hover:text-white transition-all"
+                            onClick={() => handleNavClick('settings')}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'settings'
+                                    ? `${roleConfig.bg} ${roleConfig.text} border ${roleConfig.border}`
+                                    : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'
+                                }`}
                         >
                             <Settings className="w-5 h-5" />
                             <span className="text-sm font-medium">Settings</span>
@@ -185,65 +167,28 @@ const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }
 
                         {/* Right: Notifications + Profile */}
                         <div className="flex items-center gap-3">
-                            {/* Notifications */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => navigate('/notifications')}
-                                    className="relative p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                                    aria-label="Notifications"
-                                >
-                                    <Bell className="w-5 h-5" />
-                                    {unreadCount > 0 && (
-                                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs font-bold flex items-center justify-center">
-                                            {unreadCount > 9 ? '9+' : unreadCount}
-                                        </span>
-                                    )}
-                                </button>
 
-                                {notificationsOpen && (
-                                    <div className="absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl overflow-hidden animate-fadeIn z-30">
-                                        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-                                            <h3 className="font-semibold">Notifications</h3>
-                                            <button
-                                                onClick={() => setNotificationsOpen(false)}
-                                                className="text-gray-400 hover:text-white"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                        <div className="max-h-64 overflow-y-auto">
-                                            {recentActivity.length === 0 ? (
-                                                <div className="p-4 text-center text-sm text-gray-500">
-                                                    No new notifications
-                                                </div>
-                                            ) : (
-                                                recentActivity.slice(0, 5).map((a, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="p-3 border-b border-gray-700/50 hover:bg-gray-700/50 cursor-pointer"
-                                                    >
-                                                        <p className="text-sm">{a.text}</p>
-                                                        <p className="text-xs text-gray-500 mt-1">{a.time}</p>
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    </div>
+                            {/* ⭐ LIVE NOTIFICATION BELL ⭐ */}
+                            <button
+                                onClick={() => navigate('/notifications')}
+                                className="relative p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                                aria-label="Notifications"
+                            >
+                                <Bell className="w-5 h-5" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center border-2 border-gray-900">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
                                 )}
-                            </div>
+                            </button>
 
                             {/* Profile Dropdown */}
                             <div className="relative">
                                 <button
-                                    onClick={() => {
-                                        setProfileOpen(!profileOpen);
-                                        setNotificationsOpen(false);
-                                    }}
+                                    onClick={() => setProfileOpen(!profileOpen)}
                                     className="flex items-center gap-2 p-1 hover:bg-gray-700 rounded-lg transition-colors"
                                     aria-label="Profile menu"
                                 >
-
-                                    {/* ⭐ UPDATED AVATAR UI ⭐ */}
                                     <div
                                         className={`w-8 h-8 bg-gradient-to-r ${roleConfig.color} rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden`}
                                     >
@@ -257,7 +202,6 @@ const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }
                                             userInitial
                                         )}
                                     </div>
-
                                     <ChevronDown className="w-4 h-4 hidden sm:block" />
                                 </button>
 
@@ -289,12 +233,13 @@ const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }
                                             <button
                                                 onClick={() => {
                                                     setProfileOpen(false);
-                                                    navigate('/settings'); // ⭐ Changed to navigate
+                                                    navigate('/settings');
                                                 }}
                                                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg"
                                             >
                                                 <Settings className="w-4 h-4" /> Settings
                                             </button>
+                                            <div className="my-1 border-t border-gray-700"></div>
                                             <button
                                                 onClick={handleLogout}
                                                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg"
@@ -313,7 +258,8 @@ const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }
                 <main className="flex-1 p-4 sm:p-6 overflow-y-auto">{children}</main>
             </div>
 
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
@@ -321,7 +267,7 @@ const DashboardLayout = ({ children, roleConfig, navItems, recentActivity = [] }
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out;
         }
-      `}</style>
+      `}} />
         </div>
     );
 };

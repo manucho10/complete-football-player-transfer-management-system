@@ -11,13 +11,18 @@ import {
     ChevronDown,
     Settings,
     MessageSquare,
+    Bell,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../hooks/useNotifications'; // ⭐ Import Hook
 
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, isAuthenticated, logout } = useAuth();
+
+    // ⭐ Use the live notification hook
+    const unreadCount = useNotifications();
 
     const [mobileOpen, setMobileOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
@@ -56,8 +61,8 @@ const Navbar = () => {
     return (
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-                    ? 'bg-gray-900/95 backdrop-blur-lg border-b border-gray-700 shadow-lg'
-                    : 'bg-gray-900/80 backdrop-blur-md'
+                ? 'bg-gray-900/95 backdrop-blur-lg border-b border-gray-700 shadow-lg'
+                : 'bg-gray-900/80 backdrop-blur-md'
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,8 +84,8 @@ const Navbar = () => {
                                 key={link.path}
                                 href={link.path}
                                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isActive(link.path)
-                                        ? 'text-green-400 bg-green-500/10'
-                                        : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                                    ? 'text-green-400 bg-green-500/10'
+                                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
                                     }`}
                             >
                                 {link.label}
@@ -115,6 +120,7 @@ const Navbar = () => {
                                     Dashboard
                                 </Link>
 
+                                {/* Desktop Profile Dropdown */}
                                 <div className="relative">
                                     <button
                                         onClick={() => setProfileOpen(!profileOpen)}
@@ -122,16 +128,23 @@ const Navbar = () => {
                                         aria-label="Profile menu"
                                     >
 
-                                        {/* ⭐ UPDATED AVATAR UI ⭐ */}
-                                        <div className="w-9 h-9 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
-                                            {user?.avatar_url ? (
-                                                <img
-                                                    src={user.avatar_url}
-                                                    alt="Avatar"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                userInitial
+                                        {/* ⭐ UPDATED AVATAR UI WITH BADGE ⭐ */}
+                                        <div className="relative">
+                                            <div className="w-9 h-9 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                                                {user?.avatar_url ? (
+                                                    <img
+                                                        src={user.avatar_url}
+                                                        alt="Avatar"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    userInitial
+                                                )}
+                                            </div>
+
+                                            {/* Live Notification Dot */}
+                                            {unreadCount > 0 && (
+                                                <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-gray-900"></span>
                                             )}
                                         </div>
 
@@ -153,28 +166,36 @@ const Navbar = () => {
                                             </div>
                                             <div className="p-2">
                                                 <button
-                                                    onClick={() => {
-                                                        setProfileOpen(false);
-                                                        navigate('/profile');
-                                                    }}
+                                                    onClick={() => { setProfileOpen(false); navigate('/profile'); }}
                                                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg"
                                                 >
                                                     <User className="w-4 h-4" /> Profile
                                                 </button>
+
                                                 <button
-                                                    onClick={() => {
-                                                        setProfileOpen(false);
-                                                        navigate('/messages');
-                                                    }}
+                                                    onClick={() => { setProfileOpen(false); navigate('/messages'); }}
                                                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg"
                                                 >
                                                     <MessageSquare className="w-4 h-4" /> Messages
                                                 </button>
+
+                                                {/* ⭐ Notifications Link in Dropdown ⭐ */}
                                                 <button
-                                                    onClick={() => {
-                                                        setProfileOpen(false);
-                                                        navigate('/settings');
-                                                    }}
+                                                    onClick={() => { setProfileOpen(false); navigate('/notifications'); }}
+                                                    className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <Bell className="w-4 h-4" /> Notifications
+                                                    </div>
+                                                    {unreadCount > 0 && (
+                                                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                                            {unreadCount}
+                                                        </span>
+                                                    )}
+                                                </button>
+
+                                                <button
+                                                    onClick={() => { setProfileOpen(false); navigate('/settings'); }}
                                                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg"
                                                 >
                                                     <Settings className="w-4 h-4" /> Settings
@@ -215,8 +236,8 @@ const Navbar = () => {
                                 href={link.path}
                                 onClick={() => setMobileOpen(false)}
                                 className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.path)
-                                        ? 'text-green-400 bg-green-500/10'
-                                        : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                                    ? 'text-green-400 bg-green-500/10'
+                                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
                                     }`}
                             >
                                 {link.label}
@@ -244,18 +265,19 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <div className="space-y-2 pt-2">
-                                <div className="flex items-center gap-3 px-4 py-3 bg-gray-800/50 rounded-lg">
 
-                                    {/* ⭐ UPDATED MOBILE AVATAR UI ⭐ */}
-                                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold overflow-hidden">
-                                        {user?.avatar_url ? (
-                                            <img
-                                                src={user.avatar_url}
-                                                alt="Avatar"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            userInitial
+                                {/* ⭐ UPDATED MOBILE AVATAR UI WITH BADGE ⭐ */}
+                                <div className="flex items-center gap-3 px-4 py-3 bg-gray-800/50 rounded-lg">
+                                    <div className="relative">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold overflow-hidden">
+                                            {user?.avatar_url ? (
+                                                <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                            ) : (
+                                                userInitial
+                                            )}
+                                        </div>
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-gray-800"></span>
                                         )}
                                     </div>
 
@@ -272,6 +294,22 @@ const Navbar = () => {
                                 >
                                     <LayoutDashboard className="w-4 h-4" /> Dashboard
                                 </Link>
+
+                                <Link
+                                    to="/notifications"
+                                    onClick={() => setMobileOpen(false)}
+                                    className="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700/50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Bell className="w-4 h-4" /> Notifications
+                                    </div>
+                                    {unreadCount > 0 && (
+                                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </Link>
+
                                 <Link
                                     to="/profile"
                                     onClick={() => setMobileOpen(false)}
@@ -299,7 +337,8 @@ const Navbar = () => {
                 </div>
             )}
 
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
@@ -314,7 +353,7 @@ const Navbar = () => {
         .animate-slideDown {
           animation: slideDown 0.2s ease-out;
         }
-      `}</style>
+      `}} />
         </nav>
     );
 };
