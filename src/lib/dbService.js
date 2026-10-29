@@ -339,3 +339,21 @@ export const fetchTeamDashboardData = async (userId) => {
         recentActivity: activity || [],
     };
 };
+// src/lib/dbService.js
+
+// ==========================================
+// PLAYER VIDEOS
+// ==========================================
+export const fetchPlayerVideos = async (playerId) => {
+    const { data, error } = await supabase
+        .from('player_videos')
+        .select('*')
+        .eq('player_id', playerId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Error fetching videos:", error);
+        return [];
+    }
+    return data;
+};
