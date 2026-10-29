@@ -134,7 +134,7 @@ const UploadHighlightModal = ({ isOpen, onClose, playerId, onSuccess }) => {
                         </div>
                         <input
                             type="file"
-                            accept="video/*"
+                            accept="video/*,android/allowCamera"
                             ref={fileInputRef}
                             onChange={handleFileChange}
                             className="hidden"
