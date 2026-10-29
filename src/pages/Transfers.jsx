@@ -1,5 +1,5 @@
 // src/pages/Transfers.jsx
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
@@ -11,16 +11,20 @@ import {
     XCircle,
     Clock,
     DollarSign,
+    Calendar,
     Building2,
     ChevronDown,
     MessageSquare,
     FileText,
+    AlertCircle,
     CheckCircle2,
     Handshake,
     Loader2,
+    Download, // ⭐ Imported Download icon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { fetchTransfers, updateTransferStatus, createTransferOffer } from '../lib/dbService';
+import { generateTransferContract } from '../lib/generateContract'; // ⭐ Imported PDF Generator
 
 const Transfers = () => {
     const navigate = useNavigate();
@@ -35,12 +39,10 @@ const Transfers = () => {
     const [selectedOffer, setSelectedOffer] = useState(null);
     const [showNewOfferModal, setShowNewOfferModal] = useState(false);
 
-    // Supabase Data State
     const [offers, setOffers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // New Offer Form State
     const [newOfferData, setNewOfferData] = useState({
         playerName: '',
         amount: '',
@@ -161,20 +163,14 @@ const Transfers = () => {
     // ================================================================
     const handleStatusChange = async (offerId, newStatus) => {
         try {
-            // Optimistic UI Update
             setOffers((prev) =>
-                prev.map((o) =>
-                    o.id === offerId ? { ...o, status: newStatus } : o
-                )
+                prev.map((o) => (o.id === offerId ? { ...o, status: newStatus } : o))
             );
             setSelectedOffer(null);
-
-            // Database Update
             await updateTransferStatus(offerId, newStatus);
         } catch (error) {
             console.error('Failed to update status:', error);
             alert('Failed to update transfer status. Please try again.');
-            // Note: In a production app, you should revert the optimistic UI update here
         }
     };
 
@@ -184,7 +180,6 @@ const Transfers = () => {
 
         setIsSubmitting(true);
         try {
-            // Create offer in DB
             const newOffer = await createTransferOffer({
                 from_user_id: user.id,
                 from_name: user.name || 'My Club',
@@ -196,7 +191,6 @@ const Transfers = () => {
                 priority: 'medium',
             });
 
-            // Add to local state
             setOffers([newOffer, ...offers]);
             setShowNewOfferModal(false);
             setNewOfferData({ playerName: '', amount: '', duration: '4 years', notes: '' });
@@ -484,6 +478,7 @@ const Transfers = () => {
                                 </div>
                             )}
 
+                            {/* Actions */}
                             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-700">
                                 <button
                                     onClick={() => navigate('/messages')}
@@ -491,6 +486,17 @@ const Transfers = () => {
                                 >
                                     <MessageSquare className="w-4 h-4" /> Message
                                 </button>
+
+                                {/* ⭐ PDF DOWNLOAD BUTTON (Only shows if accepted) ⭐ */}
+                                {selectedOffer.status === 'accepted' && (
+                                    <button
+                                        onClick={() => generateTransferContract(selectedOffer)}
+                                        className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                    >
+                                        <Download className="w-4 h-4" /> Download PDF
+                                    </button>
+                                )}
+
                                 {selectedOffer.status !== 'accepted' && selectedOffer.status !== 'rejected' && (
                                     <>
                                         <button
