@@ -1,9 +1,9 @@
 // src/pages/Messages.jsx
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-    ArrowLeft, Search, Send, Paperclip, Phone, Video,
-    Check, CheckCheck, MessageSquare, Loader2
+    ArrowLeft, Search, Send, Paperclip, Smile, MoreVertical, Phone, Video,
+    Check, CheckCheck, Image as ImageIcon, FileText, X, MessageSquare, Loader2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/SupabaseClient';
@@ -20,15 +20,18 @@ const Messages = () => {
     const [showAttachMenu, setShowAttachMenu] = useState(false);
     const [showMobileThread, setShowMobileThread] = useState(false);
 
-    // Supabase State
+    // Data State
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
     const [isLoadingConversations, setIsLoadingConversations] = useState(true);
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
     const messagesEndRef = useRef(null);
+    const fileInputRef = useRef(null);
 
-    // 1. Load Conversations on mount
+    // ================================================================
+    // 1. FETCH CONVERSATIONS
+    // ================================================================
     useEffect(() => {
         if (!user) return;
 
@@ -40,9 +43,23 @@ const Messages = () => {
         };
 
         fetchConvs();
+
+        // Also listen for new conversations globally
+        const globalChannel = supabase
+            .channel('public:conversations')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
+                fetchConvs(); // Refresh list if a new conversation starts
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(globalChannel);
+        };
     }, [user]);
 
-    // 2. Load Messages when a conversation is selected + Setup Realtime
+    // ================================================================
+    // 2. FETCH MESSAGES & SETUP REAL-TIME
+    // ================================================================
     useEffect(() => {
         if (!selectedId) return;
 
@@ -58,7 +75,7 @@ const Messages = () => {
 
         loadMessages();
 
-        // Setup Realtime Subscription for new messages in this conversation
+        // ⭐ SUPABASE REALTIME SETUP ⭐
         channel = supabase
             .channel(`chat_${selectedId}`)
             .on(
@@ -70,8 +87,9 @@ const Messages = () => {
                     filter: `conversation_id=eq.${selectedId}`,
                 },
                 (payload) => {
-                    // Append new message
+                    // When a new message arrives, append it to the UI instantly
                     const newMsg = payload.new;
+
                     setMessages((prev) => [
                         ...prev,
                         {
@@ -82,9 +100,10 @@ const Messages = () => {
                             read: newMsg.read,
                         },
                     ]);
+
                     scrollToBottom();
 
-                    // Update conversation last message in sidebar
+                    // Also update the sidebar to show the new last message
                     setConversations((prev) =>
                         prev.map((c) =>
                             c.id === selectedId
@@ -108,7 +127,9 @@ const Messages = () => {
         }, 100);
     };
 
-    // Handlers
+    // ================================================================
+    // HANDLERS
+    // ================================================================
     const handleSelectConversation = (id) => {
         setSelectedId(id);
         setSearchParams({ with: id });
@@ -119,11 +140,12 @@ const Messages = () => {
         if (!messageInput.trim() || !selectedId || !user) return;
 
         const text = messageInput.trim();
-        setMessageInput(''); // Clear immediately for UX
+        setMessageInput('');
 
         try {
+            // The database insert will trigger the Realtime listener above, 
+            // which will automatically update the UI for BOTH you and the recipient.
             await sendMessage(selectedId, user.id, text);
-            // Realtime subscription will handle adding it to the UI
         } catch (error) {
             console.error('Failed to send message:', error);
             alert('Failed to send message. Please try again.');
@@ -242,7 +264,9 @@ const Messages = () => {
                                         </div>
                                         <div className="min-w-0">
                                             <p className="font-semibold text-sm truncate">{selectedConversation.participant.name}</p>
-                                            <p className="text-xs text-gray-400 flex items-center gap-1">Online</p>
+                                            <p className="text-xs text-green-400 flex items-center gap-1">
+                                                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Live
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1">
