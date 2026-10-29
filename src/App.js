@@ -16,6 +16,9 @@ import Notifications from './pages/Notifications';
 import Settings from './pages/settings';
 import PlayerProfile from './pages/PlayerProfile';
 import Analytics from './pages/Analytics';
+import ForgotPassword from './pages/ForgotPassword';
+import UpdatePassword from './pages/UpdatePassword';
+
 // Placeholder pages
 const ForgotPassword = () => (
   <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
@@ -53,6 +56,9 @@ function App() {
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/players/:id" element={<PlayerProfile />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
+
 
           {/* ============ PROTECTED ROUTES ============ */}
           <Route
