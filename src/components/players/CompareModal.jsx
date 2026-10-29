@@ -1,13 +1,16 @@
 // src/components/players/CompareModal.jsx
 import React from 'react';
-import { X, Star, Building2, Globe, TrendingUp } from 'lucide-react';
+import { X, TrendingUp, Building2, Globe } from 'lucide-react';
 
 const CompareModal = ({ players, onClose }) => {
-    if (!players || players.length === 0) return null;
+    // ⭐ Fallback: If the modal somehow opens with no players, close it immediately
+    if (!players || players.length === 0) {
+        onClose();
+        return null;
+    }
 
-    // The stats we want to compare
     const attributes = [
-        { key: 'rating', label: 'Overall Rating', color: 'bg-yellow-500' },
+        { key: 'rating', label: 'Overall', color: 'bg-yellow-500' },
         { key: 'pace', label: 'Pace', color: 'bg-green-500' },
         { key: 'shooting', label: 'Shooting', color: 'bg-red-500' },
         { key: 'passing', label: 'Passing', color: 'bg-blue-500' },
@@ -20,7 +23,6 @@ const CompareModal = ({ players, onClose }) => {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn overflow-y-auto">
             <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-4xl w-full my-8">
 
-                {/* Header */}
                 <div className="p-6 border-b border-gray-700 flex items-center justify-between sticky top-0 bg-gray-800 z-10 rounded-t-2xl">
                     <h2 className="text-xl font-bold flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-green-400" /> Player Comparison
@@ -30,7 +32,6 @@ const CompareModal = ({ players, onClose }) => {
                     </button>
                 </div>
 
-                {/* Player Headers */}
                 <div className="p-6 border-b border-gray-700 grid gap-4" style={{ gridTemplateColumns: `repeat(${players.length}, minmax(0, 1fr))` }}>
                     {players.map((player) => (
                         <div key={player.id} className="text-center">
@@ -39,7 +40,6 @@ const CompareModal = ({ players, onClose }) => {
                             </div>
                             <h3 className="font-bold text-lg truncate">{player.name}</h3>
                             <p className="text-sm text-gray-400 mb-2">{player.position}</p>
-
                             <div className="flex flex-col items-center gap-1 text-xs text-gray-400 mb-2">
                                 <span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> {player.club || 'Free Agent'}</span>
                                 <span className="flex items-center gap-1"><Globe className="w-3 h-3" /> {player.nationality || 'Unknown'}</span>
@@ -51,11 +51,11 @@ const CompareModal = ({ players, onClose }) => {
                     ))}
                 </div>
 
-                {/* Comparison Stats */}
                 <div className="p-6 space-y-6">
                     {attributes.map((attr) => {
-                        // Find the highest value for this attribute to highlight it
-                        const maxVal = Math.max(...players.map(p => Number(p[attr.key]) || 0));
+                        // Ensure we parse as numbers, defaulting to 0 if null/undefined
+                        const values = players.map(p => Number(p[attr.key]) || 0);
+                        const maxVal = Math.max(...values);
 
                         return (
                             <div key={attr.key}>

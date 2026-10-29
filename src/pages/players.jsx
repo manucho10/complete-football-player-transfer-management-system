@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { fetchPlayers } from '../lib/dbService';
-import CompareModal from '../components/players/CompareModal'; // ⭐ Imported Modal
+import CompareModal from '../components/players/CompareModal';
 
 const Players = () => {
     const navigate = useNavigate();
@@ -39,7 +39,9 @@ const Players = () => {
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [watchlist, setWatchlist] = useState([]);
     const [compareList, setCompareList] = useState([]);
-    const [showCompareModal, setShowCompareModal] = useState(false); // ⭐ New State
+
+    // ⭐ Modal State
+    const [showCompareModal, setShowCompareModal] = useState(false);
 
     const [players, setPlayers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -117,6 +119,11 @@ const Players = () => {
         return result;
     }, [players, searchQuery, filters, sortBy]);
 
+    // ⭐ Get the actual player objects for the modal
+    const playersToCompare = useMemo(() => {
+        return players.filter((p) => compareList.includes(p.id));
+    }, [players, compareList]);
+
     // ================================================================
     // HANDLERS
     // ================================================================
@@ -150,6 +157,12 @@ const Players = () => {
             if (prev.length >= 3) return prev;
             return [...prev, id];
         });
+    };
+
+    const handleCompareClick = () => {
+        if (playersToCompare.length >= 2) {
+            setShowCompareModal(true);
+        }
     };
 
     const activeFilterCount = Object.values(filters).filter(Boolean).length;
@@ -377,9 +390,8 @@ const Players = () => {
                                 Clear
                             </button>
 
-                            {/* ⭐ Wired up Compare Now Button ⭐ */}
                             <button
-                                onClick={() => setShowCompareModal(true)}
+                                onClick={handleCompareClick}
                                 disabled={compareList.length < 2}
                                 className="px-4 py-1.5 text-xs bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg font-semibold transition-all"
                             >
@@ -651,7 +663,7 @@ const Players = () => {
             {/* ⭐ COMPARE MODAL ⭐ */}
             {showCompareModal && (
                 <CompareModal
-                    players={players.filter(p => compareList.includes(p.id))}
+                    players={playersToCompare}
                     onClose={() => setShowCompareModal(false)}
                 />
             )}
