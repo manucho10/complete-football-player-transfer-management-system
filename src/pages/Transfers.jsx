@@ -148,9 +148,15 @@ const Transfers = () => {
                         </h1>
                         <span className="text-xs text-gray-400 bg-gray-700/50 px-2.5 py-1 rounded-full">{filteredOffers.length} offers</span>
                     </div>
-                    <button onClick={() => setShowNewOfferModal(true)} className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
-                        <Plus className="w-4 h-4" /> New Offer
-                    </button>
+                    {/* ⭐ Restrict New Offer button to Teams and Agents only ⭐ */}
+                    {['team', 'agent'].includes(user.role) && (
+                        <button
+                            onClick={() => setShowNewOfferModal(true)}
+                            className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                        >
+                            <Plus className="w-4 h-4" /> New Offer
+                        </button>
+                    )}
                 </div>
             </div>
 
