@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { fetchTransfers, updateTransferStatus, createTransferOffer } from '../lib/dbService';
 import { generateTransferContract } from '../lib/generateContract';
+import { supabase } from '../lib/SupabaseClient';
 
 const Transfers = () => {
     const navigate = useNavigate();
@@ -103,9 +104,26 @@ const Transfers = () => {
 
         setIsSubmitting(true);
         try {
+            // 1. Find the player's user_id based on the name
+            const { data: playerData, error: playerError } = await supabase
+                .from('players')
+                .select('id, user_id')
+                .ilike('name', `%${newOfferData.playerName}%`) // Case-insensitive search
+                .maybeSingle();
+
+            if (playerError || !playerData) {
+                alert("Player not found. Please ensure the name matches a registered player exactly.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            // 2. Create the offer with BOTH the from_user_id and player_user_id
             const newOffer = await createTransferOffer({
                 from_user_id: user.id,
                 from_name: user.name || 'My Club',
+                to_user_id: playerData.user_id, // ⭐ Set the recipient as the player
+                player_user_id: playerData.user_id, // ⭐ Link directly to the player
+                player_id: playerData.id,
                 player_name: newOfferData.playerName,
                 amount: Number(newOfferData.amount),
                 duration: newOfferData.duration,
@@ -124,6 +142,7 @@ const Transfers = () => {
             setIsSubmitting(false);
         }
     };
+
     const handleCompleteTransfer = async () => {
         try {
             // 1. Find the player in the database
