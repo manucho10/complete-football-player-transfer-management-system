@@ -27,7 +27,7 @@ const PlayerProfile = () => {
     // Data State
     const [player, setPlayer] = useState(null);
     const [videos, setVideos] = useState([]);
-    const [activeVideo, setActiveVideo] = useState(null); // For the video player modal
+    const [activeVideo, setActiveVideo] = useState(null);
 
     // ================================================================
     // FETCH PLAYER & VIDEOS
@@ -40,11 +40,9 @@ const PlayerProfile = () => {
                 setPlayer(data);
 
                 if (data) {
-                    // Fetch videos
                     const videoData = await fetchPlayerVideos(data.id);
                     setVideos(videoData);
 
-                    // Track view (only if not the owner)
                     if (user && user.id !== data.user_id) {
                         await supabase.from('analytics_events').insert({
                             player_id: data.id,
@@ -54,7 +52,6 @@ const PlayerProfile = () => {
                         });
                     }
 
-                    // Check watchlist status
                     if (user && ['scout', 'team'].includes(user.role)) {
                         const { data: watchData } = await supabase
                             .from('watchlists')
@@ -242,6 +239,7 @@ const PlayerProfile = () => {
                             <div className="flex items-center justify-center sm:justify-start gap-4 flex-wrap text-sm text-gray-400">
                                 <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {player.nationality || 'Unknown'}</span>
                                 {player.age && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {player.age} years old</span>}
+                                {player.foot && <span className="flex items-center gap-1.5"><Globe className="w-4 h-4" /> {player.foot} foot</span>}
                             </div>
                         </div>
                     </div>
@@ -298,13 +296,11 @@ const PlayerProfile = () => {
                             </div>
                         )}
 
-                        {/* ⭐ NEW: VIDEO GALLERY ⭐ */}
                         {activeTab === 'videos' && (
                             <div className="bg-gray-800/50 rounded-xl border border-gray-700 p-6 animate-fadeIn">
                                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                     <Video className="w-5 h-5 text-green-400" /> Highlight Reels
                                 </h2>
-
                                 {videos.length === 0 ? (
                                     <div className="text-center py-12">
                                         <Video className="w-12 h-12 text-gray-600 mx-auto mb-3" />
@@ -318,21 +314,12 @@ const PlayerProfile = () => {
                                                 onClick={() => setActiveVideo(video)}
                                                 className="group relative bg-gray-900 rounded-xl overflow-hidden aspect-video border border-gray-700 hover:border-green-500 transition-all text-left"
                                             >
-                                                {/* Play Icon Overlay */}
                                                 <div className="absolute inset-0 flex items-center justify-center z-10">
                                                     <div className="w-14 h-14 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-green-500 group-hover:scale-110 transition-all">
                                                         <Play className="w-6 h-6 text-white fill-current ml-1" />
                                                     </div>
                                                 </div>
-
-                                                {/* Video Preview (Using the video tag to generate a thumbnail) */}
-                                                <video
-                                                    src={video.video_url}
-                                                    className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
-                                                    preload="metadata"
-                                                />
-
-                                                {/* Title Overlay */}
+                                                <video src={video.video_url} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" preload="metadata" />
                                                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 z-10">
                                                     <p className="text-sm font-bold text-white mb-1 line-clamp-1">{video.title}</p>
                                                     <p className="text-[10px] text-gray-400 flex items-center gap-1">
@@ -370,33 +357,16 @@ const PlayerProfile = () => {
 
             {/* ⭐ VIDEO PLAYER MODAL ⭐ */}
             {activeVideo && (
-                <div
-                    className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 sm:p-8 animate-fadeIn"
-                    onClick={() => setActiveVideo(null)}
-                >
-                    <button
-                        onClick={() => setActiveVideo(null)}
-                        className="absolute top-4 right-4 sm:top-8 sm:right-8 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-50 text-white"
-                    >
+                <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 sm:p-8 animate-fadeIn" onClick={() => setActiveVideo(null)}>
+                    <button onClick={() => setActiveVideo(null)} className="absolute top-4 right-4 sm:top-8 sm:right-8 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-50 text-white">
                         <X className="w-6 h-6" />
                     </button>
-
-                    <div
-                        className="w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <video
-                            src={activeVideo.video_url}
-                            controls
-                            autoPlay
-                            className="w-full aspect-video bg-black"
-                        />
+                    <div className="w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800" onClick={(e) => e.stopPropagation()}>
+                        <video src={activeVideo.video_url} controls autoPlay className="w-full aspect-video bg-black" />
                         <div className="p-4 sm:p-6 flex items-center justify-between bg-gray-800">
                             <div>
                                 <h3 className="text-lg font-bold text-white mb-1">{activeVideo.title}</h3>
-                                <p className="text-xs text-gray-400">
-                                    Uploaded on {new Date(activeVideo.created_at).toLocaleDateString()}
-                                </p>
+                                <p className="text-xs text-gray-400">Uploaded on {new Date(activeVideo.created_at).toLocaleDateString()}</p>
                             </div>
                             <div className="flex items-center gap-2 text-green-400 text-sm font-semibold bg-green-500/10 px-3 py-1.5 rounded-lg">
                                 <Star className="w-4 h-4 fill-current" /> {player.name}
@@ -406,6 +376,70 @@ const PlayerProfile = () => {
                 </div>
             )}
 
+            {/* ⭐ CONTACT MODAL ⭐ */}
+            {showContactModal && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowContactModal(false)}>
+                    <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-green-500/20 text-green-400 rounded-lg flex items-center justify-center">
+                                    <MessageSquare className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold">Contact {player.name}</h2>
+                                    <p className="text-xs text-gray-400">Send a message about this player</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowContactModal(false)} className="p-2 hover:bg-gray-700/50 rounded-lg">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                                <textarea
+                                    rows={5}
+                                    value={contactMessage}
+                                    onChange={(e) => setContactMessage(e.target.value)}
+                                    placeholder={`Hi, we're interested in discussing a potential move for ${player.name}...`}
+                                    className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 resize-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button onClick={() => setShowContactModal(false)} className="flex-1 bg-gray-700 hover:bg-gray-600 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSendMessage}
+                                disabled={!contactMessage.trim() || isSending}
+                                className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-40 disabled:cursor-not-allowed py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                            >
+                                {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Message'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+        .line-clamp-1 {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}} />
         </div>
     );
 };
