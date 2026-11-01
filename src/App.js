@@ -18,7 +18,7 @@ import PlayerProfile from './pages/PlayerProfile';
 import Analytics from './pages/Analytics';
 import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
-
+import Squad from './pages/Squad';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -115,6 +115,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Analytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/squad"
+            element={
+              <ProtectedRoute>
+                <Squad />
               </ProtectedRoute>
             }
           />

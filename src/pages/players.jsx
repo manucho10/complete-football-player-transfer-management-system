@@ -165,6 +165,7 @@ const Players = () => {
         }
     };
 
+
     const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
     if (!user) return null;
@@ -226,8 +227,8 @@ const Players = () => {
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className={`inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${showFilters || activeFilterCount > 0
-                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                : 'bg-gray-800/50 border border-gray-700 text-gray-300 hover:bg-gray-700/50'
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                            : 'bg-gray-800/50 border border-gray-700 text-gray-300 hover:bg-gray-700/50'
                             }`}
                     >
                         <SlidersHorizontal className="w-4 h-4" />
@@ -433,8 +434,8 @@ const Players = () => {
                                     <div className="flex items-center justify-between mb-3">
                                         <span
                                             className={`text-[10px] font-semibold px-2 py-0.5 rounded uppercase ${player.availability === 'Available'
-                                                    ? 'bg-green-500/20 text-green-400'
-                                                    : 'bg-yellow-500/20 text-yellow-400'
+                                                ? 'bg-green-500/20 text-green-400'
+                                                : 'bg-yellow-500/20 text-yellow-400'
                                                 }`}
                                         >
                                             {player.availability}
@@ -446,8 +447,8 @@ const Players = () => {
                                         >
                                             <Heart
                                                 className={`w-4 h-4 ${watchlist.includes(player.id)
-                                                        ? 'fill-red-500 text-red-500'
-                                                        : 'text-gray-400'
+                                                    ? 'fill-red-500 text-red-500'
+                                                    : 'text-gray-400'
                                                     }`}
                                             />
                                         </button>
@@ -519,8 +520,8 @@ const Players = () => {
                                         onClick={() => toggleCompare(player.id)}
                                         disabled={compareList.length >= 3 && !compareList.includes(player.id)}
                                         className={`flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg transition-colors ${compareList.includes(player.id)
-                                                ? 'bg-green-500/20 text-green-400'
-                                                : 'bg-gray-700/50 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed'
+                                            ? 'bg-green-500/20 text-green-400'
+                                            : 'bg-gray-700/50 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed'
                                             }`}
                                     >
                                         {compareList.includes(player.id) ? (
@@ -638,8 +639,8 @@ const Players = () => {
                                 <button
                                     onClick={() => toggleWatchlist(selectedPlayer.id)}
                                     className={`flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition-all ${watchlist.includes(selectedPlayer.id)
-                                            ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                            : 'bg-gray-700/50 hover:bg-gray-700'
+                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                        : 'bg-gray-700/50 hover:bg-gray-700'
                                         }`}
                                 >
                                     <Heart

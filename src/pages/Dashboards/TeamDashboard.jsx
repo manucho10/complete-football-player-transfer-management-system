@@ -39,7 +39,7 @@ const TeamDashboard = () => {
 
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
-        { id: 'squad', label: 'Squad', icon: <Users className="w-5 h-5" />, path: '/players' },
+        { id: 'squad', label: 'Squad', icon: <Users className="w-5 h-5" />, path: '/squad' }, // ⭐ Link to Squad
         { id: 'targets', label: 'Transfer Targets', icon: <Target className="w-5 h-5" />, path: '/players' },
         { id: 'offers', label: 'Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
@@ -97,7 +97,7 @@ const TeamDashboard = () => {
     const quickActions = [
         { label: 'New Offer', icon: <Plus className="w-5 h-5" />, path: '/transfers' },
         { label: 'Search Players', icon: <Search className="w-5 h-5" />, path: '/players' },
-        { label: 'Squad Overview', icon: <Users className="w-5 h-5" /> },
+        { label: 'View Squad', icon: <Users className="w-5 h-5" />, path: '/squad' }, // ⭐ Update this
         { label: 'Budget Report', icon: <BarChart3 className="w-5 h-5" /> },
     ];
 

@@ -124,6 +124,39 @@ const Transfers = () => {
             setIsSubmitting(false);
         }
     };
+    const handleCompleteTransfer = async () => {
+        try {
+            // 1. Find the player in the database
+            const { data: playerData } = await supabase
+                .from('players')
+                .select('id')
+                .eq('name', selectedOffer.playerName)
+                .maybeSingle();
+
+            if (!playerData) {
+                alert("Player record not found in database. Ensure their name matches exactly.");
+                return;
+            }
+
+            // 2. Update the player to belong to this Team
+            await supabase
+                .from('players')
+                .update({
+                    team_id: user.id,
+                    club: user.name || 'My Club', // Update their club text
+                    availability: 'Under Contract'
+                })
+                .eq('id', playerData.id);
+
+            // 3. Mark the transfer as officially completed (you could add a 'completed' status)
+            alert("Player successfully added to your squad!");
+            navigate('/squad');
+
+        } catch (error) {
+            console.error(error);
+            alert("Failed to complete transfer.");
+        }
+    };
 
     const formatMoney = (amount, currency = '€') => {
         if (!amount) return '€0';
@@ -331,16 +364,27 @@ const Transfers = () => {
 
                             {/* Actions */}
                             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-700">
+                                <>
 
-                                {/* ⭐ PDF DOWNLOAD BUTTON ⭐ */}
-                                {selectedOffer.status === 'accepted' && (
-                                    <button
-                                        onClick={() => generateTransferContract(selectedOffer)}
-                                        className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
-                                    >
-                                        <Download className="w-4 h-4" /> Download PDF
-                                    </button>
-                                )}
+                                    {/* ⭐ PDF DOWNLOAD BUTTON ⭐ */}
+                                    {selectedOffer.status === 'accepted' && (
+                                        <button
+                                            onClick={() => generateTransferContract(selectedOffer)}
+                                            className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                        >
+                                            <Download className="w-4 h-4" /> Download PDF
+                                        </button>
+                                    )}
+                                    {/* ⭐ ONLY SHOW FOR THE BUYING TEAM ⭐ */}
+                                    {['team', 'agent'].includes(user.role) && (
+                                        <button
+                                            onClick={handleCompleteTransfer}
+                                            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                        >
+                                            <CheckCircle2 className="w-4 h-4" /> Sign Player
+                                        </button>
+                                    )}
+                                </>
 
                                 <button onClick={() => navigate('/messages')} className="inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
                                     <MessageSquare className="w-4 h-4" /> Message
