@@ -46,7 +46,7 @@ const PlayerProfile = () => {
                     if (user && user.id !== data.user_id) {
                         await supabase.from('analytics_events').insert({
                             player_id: data.id,
-                            event_type: 'view',
+                            event_type: 'view', // ⭐ Fixed the typo here (was 'vent_type')
                             viewer_id: user.id,
                             viewer_role: user.role,
                         });

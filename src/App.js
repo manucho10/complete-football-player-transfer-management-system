@@ -19,6 +19,7 @@ import Analytics from './pages/Analytics';
 import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
 import Squad from './pages/Squad';
+import Watchlist from './pages/Watchlist';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -111,7 +112,7 @@ function App() {
             }
           />
           <Route
-            path="/analytics"
+            path="/Analytics"
             element={
               <ProtectedRoute>
                 <Analytics />
@@ -123,6 +124,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Squad />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/watchlist"
+            element={
+              <ProtectedRoute>
+                <Watchlist />
               </ProtectedRoute>
             }
           />

@@ -39,6 +39,7 @@ const ScoutDashboard = () => {
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'discover', label: 'Discover Players', icon: <Search className="w-5 h-5" />, path: '/players' },
+        { id: 'watchlist', label: 'My Watchlist', icon: <Star className="w-5 h-5" />, path: '/watchlist' },
         { id: 'watchlist', label: 'My Watchlist', icon: <Star className="w-5 h-5" />, path: '/players' }, // Can point to a dedicated watchlist page later
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
     ];

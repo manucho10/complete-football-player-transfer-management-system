@@ -355,3 +355,37 @@ export const fetchPlayerVideos = async (playerId) => {
     }
     return data;
 };
+// src/lib/dbService.js
+
+// ==========================================
+// WATCHLIST
+// ==========================================
+export const fetchMyWatchlist = async (userId) => {
+    const { data, error } = await supabase
+        .from('watchlists')
+        .select(`
+      id,
+      created_at,
+      player:players(*)
+    `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Error fetching watchlist:", error);
+        return [];
+    }
+
+    // Extract just the player objects from the joined data
+    return data.map(item => item.player).filter(Boolean);
+};
+
+export const removeFromWatchlist = async (userId, playerId) => {
+    const { error } = await supabase
+        .from('watchlists')
+        .delete()
+        .eq('user_id', userId)
+        .eq('player_id', playerId);
+
+    if (error) throw error;
+};
