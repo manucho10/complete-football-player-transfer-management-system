@@ -47,26 +47,24 @@ export const fetchPlayerById = async (id) => {
 // ==========================================
 
 // src/lib/dbService.js
+
 export const fetchTransfers = async (userId) => {
     const { data, error } = await supabase
         .from('transfers')
-        .select(`
-      *,
-      player:players(name, position, club),
-      from_user:profiles!transfers_from_user_id_fkey(full_name),
-      to_user:profiles!transfers_to_user_id_fkey(full_name)
-    `)
-        // ⭐ ADDED player_user_id TO THE FILTER ⭐
+        .select('*')
         .or(`from_user_id.eq.${userId},to_user_id.eq.${userId},player_user_id.eq.${userId}`)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }); // This line is likely the issue
 
-    if (error) throw error;
+    if (error) {
+        console.error("Supabase error fetching transfers:", error);
+        return [];
+    }
 
     return data.map(t => ({
         ...t,
-        playerName: t.player?.name || t.player_name,
-        fromName: t.from_user?.full_name || t.from_name,
-        toName: t.to_user?.full_name || t.to_name,
+        playerName: t.player_name || 'Unknown Player',
+        fromName: t.from_name || 'Unknown Club',
+        toName: t.to_name || 'Unknown Club',
     }));
 };
 
