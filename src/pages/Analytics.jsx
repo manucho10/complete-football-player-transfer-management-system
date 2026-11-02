@@ -1,10 +1,10 @@
 // src/pages/Analytics.jsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft, BarChart3, TrendingUp, Eye, DollarSign,
-    Star, Target, FileText, Download, ChevronDown, Activity,
-    PieChart as PieIcon, LineChart as LineIcon, ArrowUpRight, ArrowDownRight, Loader2
+    ArrowLeft, BarChart3, TrendingUp, Eye, Users, DollarSign, Star,
+    Target, FileText, Activity, PieChart as PieIcon, LineChart as LineIcon,
+    ArrowUpRight, Loader2, CheckCircle2
 } from 'lucide-react';
 import {
     LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
@@ -18,16 +18,15 @@ const Analytics = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
 
-    const [timeRange, setTimeRange] = useState('30d');
     const [activeChart, setActiveChart] = useState('overview');
     const [isLoading, setIsLoading] = useState(true);
 
     // Data State
     const [kpis, setKpis] = useState([]);
-    const [viewsOverTime, setViewsOverTime] = useState([]);
+    const [activityData, setActivityData] = useState([]);
     const [sourceBreakdown, setSourceBreakdown] = useState([]);
     const [performanceRadar, setPerformanceRadar] = useState([]);
-    const [topItems, setTopItems] = useState([]); // Top Clubs or Top Players
+    const [topClubs, setTopClubs] = useState([]);
 
     // ================================================================
     // FETCH REAL DATA FROM SUPABASE
@@ -38,8 +37,13 @@ const Analytics = () => {
         const loadData = async () => {
             setIsLoading(true);
             try {
-                // 1. Fetch Player Data (if user is a player)
                 let playerData = null;
+                let viewsCount = 0;
+                let offersCount = 0;
+                let interestsCount = 0;
+                let totalDealValue = 0;
+
+                // 1. Fetch Player Data (if user is a player)
                 if (user.role === 'player') {
                     const { data } = await supabase
                         .from('players')
@@ -49,71 +53,42 @@ const Analytics = () => {
                     playerData = data;
                 }
 
-                // 2. Fetch Analytics Events (Views, Interests)
-                let analyticsQuery = supabase
-                    .from('analytics_events')
-                    .select('*')
-                    .order('created_at', { ascending: true });
-
+                // 2. Fetch Analytics Events (Views & Interests)
+                let eventsQuery = supabase.from('analytics_events').select('*');
                 if (playerData?.id) {
-                    analyticsQuery = analyticsQuery.eq('player_id', playerData.id);
+                    eventsQuery = eventsQuery.eq('player_id', playerData.id);
+                } else {
+                    // If not a player, get events where they were the viewer
+                    eventsQuery = eventsQuery.eq('viewer_id', user.id);
                 }
+                const { data: events } = await eventsQuery;
 
-                const { data: events } = await analyticsQuery;
-
-                // 3. Fetch Transfers (Offers)
+                // 3. Fetch Transfers
                 const { data: transfers } = await supabase
                     .from('transfers')
                     .select('*')
-                    .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`);
+                    .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id},player_user_id.eq.${user.id}`);
 
                 // ==========================================
-                // PROCESS THE DATA FOR THE UI
+                // CALCULATE REAL METRICS
                 // ==========================================
-
-                // A. Calculate KPIs
-                const totalViews = events?.filter(e => e.event_type === 'view').length || 0;
-                const totalInterests = events?.filter(e => e.event_type === 'interest').length || 0;
-                const totalOffers = transfers?.length || 0;
-                const marketValue = playerData?.market_value || '€0';
-
-                if (user.role === 'player') {
-                    setKpis([
-                        { label: 'Profile Views', value: totalViews.toLocaleString(), change: '+0%', up: true, icon: <Eye className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-                        { label: 'Club Interests', value: totalInterests.toLocaleString(), change: '+0', up: true, icon: <Star className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
-                        { label: 'Offers Received', value: totalOffers.toString(), change: '+0', up: true, icon: <FileText className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
-                        { label: 'Market Value', value: marketValue, change: 'Live', up: true, icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
-                    ]);
-                } else {
-                    // Generic KPIs for Scout/Team/Agent
-                    setKpis([
-                        { label: 'Total Players Viewed', value: totalViews.toString(), change: '+0', up: true, icon: <Eye className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-                        { label: 'Shortlisted Players', value: totalInterests.toString(), change: '+0', up: true, icon: <Star className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
-                        { label: 'Active Negotiations', value: totalOffers.toString(), change: '+0', up: true, icon: <FileText className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
-                        { label: 'Success Rate', value: '0%', change: 'Live', up: true, icon: <Target className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
-                    ]);
-                }
-
-                // B. Format Time-Series Data (Last 6 Weeks for the Chart)
-                const weeks = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'];
-                const mockViews = [120, 250, 310, 480, 520, totalViews]; // We append real total at the end
-                const formattedTimeData = weeks.map((week, i) => ({
-                    date: week,
-                    views: mockViews[i] || 0,
-                    interests: Math.floor(mockViews[i] * 0.15), // Mock interest ratio
-                }));
-                setViewsOverTime(formattedTimeData);
-
-                // C. Breakdown Data (Simulated based on real data)
-                setSourceBreakdown([
-                    { name: 'Direct Profile', value: totalViews > 0 ? 45 : 0, color: '#3b82f6' },
-                    { name: 'Search Results', value: totalViews > 0 ? 30 : 0, color: '#10b981' },
-                    { name: 'Recommendations', value: totalViews > 0 ? 15 : 0, color: '#f59e0b' },
-                    { name: 'Social Media', value: totalViews > 0 ? 10 : 0, color: '#8b5cf6' },
-                ]);
-
-                // D. Radar Data (Real Player Stats)
                 if (playerData) {
+                    viewsCount = events?.filter(e => e.event_type === 'view').length || 0;
+                    interestsCount = events?.filter(e => e.event_type === 'interest').length || 0;
+                    offersCount = transfers?.filter(t => t.player_user_id === user.id).length || 0;
+
+                    totalDealValue = transfers
+                        ?.filter(t => t.player_user_id === user.id && t.status === 'accepted')
+                        .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+
+                    setKpis([
+                        { label: 'Profile Views', value: viewsCount.toLocaleString(), change: 'Live', icon: <Eye className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
+                        { label: 'Club Interests', value: interestsCount.toString(), change: 'Live', icon: <Star className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
+                        { label: 'Offers Received', value: offersCount.toString(), change: 'Live', icon: <FileText className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
+                        { label: 'Deal Value', value: `€${(totalDealValue / 1000000).toFixed(1)}M`, change: 'Live', icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
+                    ]);
+
+                    // Calculate Radar Stats
                     setPerformanceRadar([
                         { skill: 'Pace', value: playerData.pace || 0 },
                         { skill: 'Shooting', value: playerData.shooting || 0 },
@@ -123,29 +98,62 @@ const Analytics = () => {
                         { skill: 'Physical', value: playerData.physical || 0 },
                     ]);
                 } else {
+                    // Scout/Team/Agent Metrics
+                    viewsCount = events?.filter(e => e.event_type === 'view').length || 0;
+                    offersCount = transfers?.filter(t => t.status === 'accepted').length || 0;
+
+                    totalDealValue = transfers
+                        ?.filter(t => t.status === 'accepted')
+                        .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+
+                    setKpis([
+                        { label: 'Players Scouted', value: viewsCount.toString(), change: 'Live', icon: <Eye className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
+                        { label: 'Active Negotiations', value: transfers?.filter(t => t.status === 'pending' || t.status === 'negotiating').length.toString() || '0', change: 'Live', icon: <FileText className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
+                        { label: 'Deals Closed', value: offersCount.toString(), change: 'Live', icon: <CheckCircle2 className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
+                        { label: 'Total Deal Value', value: `€${(totalDealValue / 1000000).toFixed(1)}M`, change: 'Live', icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
+                    ]);
+
                     setPerformanceRadar([
                         { skill: 'Scouting', value: 85 },
                         { skill: 'Analysis', value: 92 },
-                        { skill: 'Networking', value: 78 },
-                        { skill: 'Reporting', value: 88 },
-                        { skill: 'Negotiation', value: 75 },
+                        { skill: 'Negotiation', value: 78 },
+                        { skill: 'Networking', value: 88 },
+                        { skill: 'Reporting', value: 75 },
                         { skill: 'Data', value: 82 },
                     ]);
                 }
 
-                // E. Top Items (Fetch real Top Clubs or Top Players)
-                // For this demo, we will just mock a list based on the user's role
-                if (user.role === 'player') {
-                    setTopItems([
-                        { name: 'FC Barcelona', views: 45, interest: 'High' },
-                        { name: 'Ajax Amsterdam', views: 32, interest: 'Medium' },
-                        { name: 'FC Porto', views: 18, interest: 'Medium' },
+                // Format Time-Series Data (Simulated trend based on real total)
+                const baseViews = Math.max(viewsCount, 10);
+                const timelineData = [
+                    { date: 'Week 1', views: Math.floor(baseViews * 0.1), interests: Math.floor(baseViews * 0.02) },
+                    { date: 'Week 2', views: Math.floor(baseViews * 0.25), interests: Math.floor(baseViews * 0.05) },
+                    { date: 'Week 3', views: Math.floor(baseViews * 0.4), interests: Math.floor(baseViews * 0.1) },
+                    { date: 'Week 4', views: Math.floor(baseViews * 0.6), interests: Math.floor(baseViews * 0.15) },
+                    { date: 'Week 5', views: Math.floor(baseViews * 0.8), interests: Math.floor(baseViews * 0.18) },
+                    { date: 'Current', views: baseViews, interests: interestsCount },
+                ];
+                setActivityData(timelineData);
+
+                // Breakdown Data
+                setSourceBreakdown([
+                    { name: 'Direct Profile', value: viewsCount > 0 ? 60 : 0, color: '#3b82f6' },
+                    { name: 'Search', value: viewsCount > 0 ? 30 : 0, color: '#10b981' },
+                    { name: 'Recommendations', value: viewsCount > 0 ? 10 : 0, color: '#f59e0b' },
+                ]);
+
+                // Top Clubs (Mocked for now, can be connected to actual view logs later)
+                if (playerData) {
+                    setTopClubs([
+                        { name: 'FC Barcelona', views: Math.floor(viewsCount * 0.4), interest: 'High' },
+                        { name: 'Ajax Amsterdam', views: Math.floor(viewsCount * 0.2), interest: 'Medium' },
+                        { name: 'Manchester United', views: Math.floor(viewsCount * 0.15), interest: 'Medium' },
                     ]);
                 } else {
-                    setTopItems([
-                        { name: 'Lucas Ferreira', views: 120, interest: 'High' },
-                        { name: 'Omar Diallo', views: 98, interest: 'High' },
-                        { name: 'Marcus Silva', views: 75, interest: 'Medium' },
+                    setTopClubs([
+                        { name: 'Lucas Ferreira', views: 45, interest: 'High' },
+                        { name: 'Omar Diallo', views: 32, interest: 'Medium' },
+                        { name: 'Marcus Silva', views: 18, interest: 'Medium' },
                     ]);
                 }
 
@@ -157,7 +165,7 @@ const Analytics = () => {
         };
 
         loadData();
-    }, [user, timeRange]);
+    }, [user]);
 
     if (!user) return null;
 
@@ -166,13 +174,6 @@ const Analytics = () => {
         { id: 'trends', label: 'Trends', icon: <LineIcon className="w-4 h-4" /> },
         { id: 'breakdown', label: 'Breakdown', icon: <PieIcon className="w-4 h-4" /> },
         { id: 'performance', label: 'Performance', icon: <BarChart3 className="w-4 h-4" /> },
-    ];
-
-    const timeRanges = [
-        { id: '7d', label: '7 days' },
-        { id: '30d', label: '30 days' },
-        { id: '90d', label: '90 days' },
-        { id: '1y', label: '1 year' },
     ];
 
     const CustomTooltip = ({ active, payload, label }) => {
@@ -191,63 +192,22 @@ const Analytics = () => {
         return null;
     };
 
-    const handleExport = () => {
-        const csv = [
-            ['Date', 'Views', 'Interests'],
-            ...viewsOverTime.map((d) => [d.date, d.views, d.interests]),
-        ].map((row) => row.join(',')).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `analytics-${timeRange}-${Date.now()}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
             {/* Top Bar */}
             <div className="bg-gray-800/50 backdrop-blur-lg border-b border-gray-700 sticky top-0 z-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-                    <div className="flex items-center justify-between gap-4 flex-wrap">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate('/dashboard')}
-                                className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors"
-                            >
-                                <ArrowLeft className="w-4 h-4" />
-                                <span className="hidden sm:inline">Dashboard</span>
-                            </button>
-                            <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-                                <BarChart3 className="w-5 h-5 text-green-400" />
-                                Analytics
-                            </h1>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <div className="relative">
-                                <select
-                                    value={timeRange}
-                                    onChange={(e) => setTimeRange(e.target.value)}
-                                    className="appearance-none bg-gray-700/50 border border-gray-600 rounded-lg pl-4 pr-10 py-2 text-sm text-white focus:outline-none focus:border-green-500 cursor-pointer"
-                                >
-                                    {timeRanges.map((r) => (
-                                        <option key={r.id} value={r.id}>{r.label}</option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                            </div>
-
-                            <button
-                                onClick={handleExport}
-                                className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                            >
-                                <Download className="w-4 h-4" />
-                                <span className="hidden sm:inline">Export CSV</span>
-                            </button>
-                        </div>
-                    </div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span className="hidden sm:inline">Dashboard</span>
+                    </button>
+                    <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-green-400" />
+                        Analytics
+                    </h1>
                 </div>
             </div>
 
@@ -255,7 +215,7 @@ const Analytics = () => {
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-20">
                         <Loader2 className="w-12 h-12 animate-spin text-green-400 mb-4" />
-                        <p className="text-gray-400">Calculating analytics from database...</p>
+                        <p className="text-gray-400">Calculating your real analytics...</p>
                     </div>
                 ) : (
                     <>
@@ -265,8 +225,8 @@ const Analytics = () => {
                                 <div key={i} className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-5 hover:border-gray-600 transition-all">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className={`p-2 rounded-lg ${kpi.color}`}>{kpi.icon}</div>
-                                        <div className={`flex items-center gap-1 text-xs font-semibold ${kpi.up ? 'text-green-400' : 'text-red-400'}`}>
-                                            {kpi.up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                                        <div className="flex items-center gap-1 text-xs font-semibold text-green-400">
+                                            <ArrowUpRight className="w-3 h-3" />
                                             {kpi.change}
                                         </div>
                                     </div>
@@ -306,7 +266,7 @@ const Analytics = () => {
                                     </div>
                                     <div style={{ width: '100%', height: 320 }}>
                                         <ResponsiveContainer>
-                                            <AreaChart data={viewsOverTime}>
+                                            <AreaChart data={activityData}>
                                                 <defs>
                                                     <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                                                         <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -369,7 +329,7 @@ const Analytics = () => {
                                 </div>
                                 <div style={{ width: '100%', height: 400 }}>
                                     <ResponsiveContainer>
-                                        <LineChart data={viewsOverTime}>
+                                        <LineChart data={activityData}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                                             <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
                                             <YAxis stroke="#9ca3af" fontSize={12} />
@@ -394,7 +354,7 @@ const Analytics = () => {
                                     </div>
                                     <div style={{ width: '100%', height: 300 }}>
                                         <ResponsiveContainer>
-                                            <BarChart data={viewsOverTime}>
+                                            <BarChart data={activityData}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                                                 <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
                                                 <YAxis stroke="#9ca3af" fontSize={12} />
@@ -413,7 +373,7 @@ const Analytics = () => {
                                         <TrendingUp className="w-5 h-5 text-green-400" />
                                     </div>
                                     <div className="space-y-3">
-                                        {topItems.map((item, i) => (
+                                        {topClubs.map((item, i) => (
                                             <div key={i} className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg">
                                                 <div className="w-8 h-8 bg-gradient-to-r from-gray-600 to-gray-700 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0">
                                                     #{i + 1}
@@ -484,7 +444,8 @@ const Analytics = () => {
                 )}
             </div>
 
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
@@ -492,7 +453,7 @@ const Analytics = () => {
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out;
         }
-      `}</style>
+      `}} />
         </div>
     );
 };
