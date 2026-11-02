@@ -46,6 +46,7 @@ export const fetchPlayerById = async (id) => {
 // TRANSFERS
 // ==========================================
 
+// src/lib/dbService.js
 export const fetchTransfers = async (userId) => {
     const { data, error } = await supabase
         .from('transfers')
@@ -55,12 +56,12 @@ export const fetchTransfers = async (userId) => {
       from_user:profiles!transfers_from_user_id_fkey(full_name),
       to_user:profiles!transfers_to_user_id_fkey(full_name)
     `)
-        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId}`)
+        // ⭐ ADDED player_user_id TO THE FILTER ⭐
+        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId},player_user_id.eq.${userId}`)
         .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    // Format for the UI
     return data.map(t => ({
         ...t,
         playerName: t.player?.name || t.player_name,

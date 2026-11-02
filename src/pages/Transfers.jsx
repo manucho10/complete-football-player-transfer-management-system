@@ -121,9 +121,9 @@ const Transfers = () => {
             const newOffer = await createTransferOffer({
                 from_user_id: user.id,
                 from_name: user.name || 'My Club',
-                to_user_id: playerData.user_id, // ⭐ Set the recipient as the player
-                player_user_id: playerData.user_id, // ⭐ Link directly to the player
-                player_id: playerData.id,
+                to_user_id: playerData.user_id,     // ⭐ Must be the player's ID
+                player_user_id: playerData.user_id, // ⭐ Must be the player's ID
+                player_id: playerData.id,           // ⭐ Must be the player record ID
                 player_name: newOfferData.playerName,
                 amount: Number(newOfferData.amount),
                 duration: newOfferData.duration,
@@ -317,7 +317,7 @@ const Transfers = () => {
                                                             <p className="text-xs text-gray-500">{new Date(offer.created_at).toLocaleDateString()}</p>
                                                         </div>
                                                     </div>
-                                                </button>
+                                                    bv                                                </button>
                                             );
                                         })}
                                     </div>
@@ -363,14 +363,26 @@ const Transfers = () => {
                             </div>
 
                             <div>
-                                <h3 className="font-semibold mb-3 flex items-center gap-2"><Building2 className="w-4 h-4 text-green-400" /> Parties Involved</h3>
+                                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Building2 className="w-4 h-4 text-green-400" /> Parties Involved
+                                </h3>
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
-                                        <div><p className="text-xs text-gray-400">From (Buying Club)</p><p className="font-semibold">{selectedOffer.from_name || 'Unknown'}</p></div>
+                                        <div>
+                                            <p className="text-xs text-gray-400">From (Buying Club)</p>
+                                            <p className="font-semibold">{selectedOffer.from_name || 'Unknown'}</p>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
-                                        <div><p className="text-xs text-gray-400">To (Selling Club)</p><p className="font-semibold">{selectedOffer.to_name || 'Unknown'}</p></div>
-                                    </div>
+
+                                    {/* ⭐ Only show "To" if the logged-in user is NOT the player ⭐ */}
+                                    {user.id !== selectedOffer.player_user_id && (
+                                        <div className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
+                                            <div>
+                                                <p className="text-xs text-gray-400">To (Selling Club)</p>
+                                                <p className="font-semibold">{selectedOffer.to_name || 'Unknown'}</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
