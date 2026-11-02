@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Eye, Star, FileText, DollarSign, BarChart3, Video, User,
-    Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2
+    Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, TrendingUp
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';

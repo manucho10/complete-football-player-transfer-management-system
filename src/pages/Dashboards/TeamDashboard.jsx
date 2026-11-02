@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Users, Target, DollarSign, FileText, Search, BarChart3,
     Plus, Calendar, AlertCircle, Clock, CheckCircle2,
-    MessageSquare, ArrowUpRight, Loader2, Star, X
+    MessageSquare, ArrowUpRight, Loader2, Star, X, TrendingUp
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
