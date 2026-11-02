@@ -187,7 +187,13 @@ const Players = () => {
             alert('Failed to update watchlist');
         }
     };
-
+    const toggleCompare = (id) => {
+        setCompareList((prev) => {
+            if (prev.includes(id)) return prev.filter((x) => x !== id);
+            if (prev.length >= 3) return prev;
+            return [...prev, id];
+        });
+    };
     const handleCompareClick = () => {
         if (playersToCompare.length >= 2) {
             setShowCompareModal(true);
