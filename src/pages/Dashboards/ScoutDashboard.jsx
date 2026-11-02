@@ -10,7 +10,7 @@ import { roleConfig } from '../../config/roleConfig';
 import { useAuth } from '../../context/AuthContext';
 import { fetchScoutDashboardData } from '../../lib/dbService';
 
-const ScoutDashboard = () => {
+function ScoutDashboard() {
     const navigate = useNavigate();
     const { user } = useAuth();
 
