@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Users, Target, DollarSign, FileText, Search, BarChart3,
     Plus, Calendar, AlertCircle, Clock, CheckCircle2,
-    MessageSquare, ArrowUpRight, Loader2, Star, X, TrendingUp
+    MessageSquare, ArrowUpRight, Loader2, Star, X, TrendingUp, UserPlus
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
@@ -41,6 +41,19 @@ const TeamDashboard = () => {
         };
 
         loadData();
+    }, [user]);
+    const [hiredScouts, setHiredScouts] = useState([]);
+
+    useEffect(() => {
+        const fetchHiredScouts = async () => {
+            const { data } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('role', 'scout')
+                .eq('team_id', user.id);
+            if (data) setHiredScouts(data);
+        };
+        if (user) fetchHiredScouts();
     }, [user]);
 
     // ⭐ Handle Sending the Message
@@ -140,6 +153,7 @@ const TeamDashboard = () => {
         { label: 'New Offer', icon: <Plus className="w-5 h-5" />, path: '/transfers' },
         { label: 'Search Players', icon: <Search className="w-5 h-5" />, path: '/players' },
         { label: 'View Squad', icon: <Users className="w-5 h-5" />, path: '/squad' },
+        { label: 'Hire Scouts', icon: <UserPlus className="w-5 h-5" />, path: '/find-scouts' },
         { label: 'Budget Report', icon: <BarChart3 className="w-5 h-5" /> },
     ];
 
@@ -268,6 +282,34 @@ const TeamDashboard = () => {
                                     <div key={i} className="flex items-start gap-3 p-3 bg-gray-700/30 rounded-lg">
                                         <div className="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0">
                                             <CheckCircle2 className="w-4 h-4" />
+                                        </div>
+                                        {/* Hired Scouts Section */}
+                                        <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 mt-6">
+                                            <h3 className="font-semibold mb-4 flex items-center gap-2">
+                                                <UserPlus className="w-5 h-5 text-red-400" /> My Scouting Network
+                                            </h3>
+                                            {hiredScouts.length === 0 ? (
+                                                <div className="text-center py-4">
+                                                    <p className="text-sm text-gray-400 mb-3">You haven't hired any scouts yet.</p>
+                                                    <button onClick={() => navigate('/find-scouts')} className="text-xs bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-semibold">
+                                                        Hire Scouts
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-3 overflow-x-auto pb-2">
+                                                    {hiredScouts.map(scout => (
+                                                        <div key={scout.id} className="bg-gray-700/30 rounded-lg p-3 min-w-[150px] flex-shrink-0 flex items-center gap-3">
+                                                            <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
+                                                                {scout.full_name?.charAt(0)}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-semibold truncate">{scout.full_name}</p>
+                                                                <p className="text-[10px] text-green-400">Active</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm">{a.text}</p>
