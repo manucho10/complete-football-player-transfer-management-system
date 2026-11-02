@@ -24,7 +24,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { fetchPlayers } from '../lib/dbService';
 import CompareModal from '../components/players/CompareModal';
-
+import { supabase } from '../lib/SupabaseClient';
 const Players = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -73,7 +73,23 @@ const Players = () => {
         };
         loadPlayers();
     }, []);
+    // Fetch user's real watchlist on load
+    useEffect(() => {
+        const loadWatchlist = async () => {
+            if (!user) return;
 
+            const { data } = await supabase
+                .from('watchlists')
+                .select('player_id')
+                .eq('user_id', user.id);
+
+            if (data) {
+                setWatchlist(data.map(item => item.player_id));
+            }
+        };
+
+        loadWatchlist();
+    }, [user]);
     // ================================================================
     // FILTER + SORT
     // ================================================================
@@ -145,18 +161,31 @@ const Players = () => {
         setSearchQuery('');
     };
 
-    const toggleWatchlist = (id) => {
-        setWatchlist((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-        );
-    };
+    const toggleWatchlist = async (playerId) => {
+        if (!user) return;
 
-    const toggleCompare = (id) => {
-        setCompareList((prev) => {
-            if (prev.includes(id)) return prev.filter((x) => x !== id);
-            if (prev.length >= 3) return prev;
-            return [...prev, id];
-        });
+        try {
+            if (watchlist.includes(playerId)) {
+                // Remove from DB
+                await supabase
+                    .from('watchlists')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('player_id', playerId);
+
+                setWatchlist((prev) => prev.filter((id) => id !== playerId));
+            } else {
+                // Add to DB
+                await supabase
+                    .from('watchlists')
+                    .insert({ user_id: user.id, player_id: playerId });
+
+                setWatchlist((prev) => [...prev, playerId]);
+            }
+        } catch (error) {
+            console.error('Failed to update watchlist:', error);
+            alert('Failed to update watchlist');
+        }
     };
 
     const handleCompareClick = () => {

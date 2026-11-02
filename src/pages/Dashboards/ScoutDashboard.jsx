@@ -40,7 +40,6 @@ const ScoutDashboard = () => {
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'discover', label: 'Discover Players', icon: <Search className="w-5 h-5" />, path: '/players' },
         { id: 'watchlist', label: 'My Watchlist', icon: <Star className="w-5 h-5" />, path: '/watchlist' },
-        { id: 'watchlist', label: 'My Watchlist', icon: <Star className="w-5 h-5" />, path: '/players' }, // Can point to a dedicated watchlist page later
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
     ];
 
@@ -96,7 +95,7 @@ const ScoutDashboard = () => {
     const quickActions = [
         { label: 'Search Players', icon: <Search className="w-5 h-5" />, path: '/players' },
         { label: 'New Report', icon: <FileText className="w-5 h-5" /> },
-        { label: 'View Watchlist', icon: <Star className="w-5 h-5" />, path: '/players' },
+        { label: 'View Watchlist', icon: <Star className="w-5 h-5" />, path: '/watchlist' },
         { label: 'Match Schedule', icon: <Calendar className="w-5 h-5" /> },
     ];
 
