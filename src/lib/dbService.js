@@ -47,13 +47,12 @@ export const fetchPlayerById = async (id) => {
 // ==========================================
 
 // src/lib/dbService.js
-
 export const fetchTransfers = async (userId) => {
     const { data, error } = await supabase
         .from('transfers')
-        .select('*')
+        .select('*') // Simple select, no joins
         .or(`from_user_id.eq.${userId},to_user_id.eq.${userId},player_user_id.eq.${userId}`)
-        .order('created_at', { ascending: false }); // This line is likely the issue
+        .order('id', { ascending: false }); // Order by ID instead of created_at
 
     if (error) {
         console.error("Supabase error fetching transfers:", error);
