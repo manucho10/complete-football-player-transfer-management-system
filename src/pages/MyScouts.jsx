@@ -1,5 +1,5 @@
 // src/pages/MyScouts.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Search, Loader2, Mail, MessageSquare, UserMinus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -13,7 +13,7 @@ const MyScouts = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
 
-    const loadScouts = async () => {
+    const loadScouts = useCallback(async () => {
         if (!user) return;
         setIsLoading(true);
         try {
@@ -24,11 +24,11 @@ const MyScouts = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         loadScouts();
-    }, [user]);
+    }, [loadScouts]);
 
     const handleFire = async (scoutId) => {
         if (!window.confirm('Are you sure you want to release this scout from your team?')) return;

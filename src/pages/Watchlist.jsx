@@ -12,20 +12,21 @@ const Watchlist = () => {
     const [players, setPlayers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const loadWatchlist = async () => {
-        if (!user) return;
-        setIsLoading(true);
-        try {
-            const data = await fetchMyWatchlist(user.id);
-            setPlayers(data);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
+        if (!user) return;
+
+        const loadWatchlist = async () => {
+            setIsLoading(true);
+            try {
+                const data = await fetchMyWatchlist(user.id);
+                setPlayers(data);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         loadWatchlist();
     }, [user]);
 

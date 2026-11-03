@@ -408,50 +408,62 @@ export const fetchHiredScouts = async (teamId) => {
     }
     return data;
 };
+// src/lib/dbService.js
+
 export const fetchTeamScoutActivity = async (teamId) => {
-    // 1. Get hired scouts
-    const { data: scouts } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('team_id', teamId)
-        .eq('role', 'scout');
+    try {
+        // 1. Get all scouts hired by this team
+        const { data: scouts, error: scoutError } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .eq('team_id', teamId)
+            .eq('role', 'scout');
 
-    if (!scouts || scouts.length === 0) return [];
-    const scoutIds = scouts.map(s => s.id);
+        if (scoutError || !scouts || scouts.length === 0) {
+            console.log("No scouts found for this team.");
+            return [];
+        }
 
-    // 2. Get recent events
-    const { data: events, error } = await supabase
-        .from('analytics_events')
-        .select('*')
-        .in('viewer_id', scoutIds)
-        .order('created_at', { ascending: false })
-        .limit(10);
+        const scoutIds = scouts.map(s => s.id);
 
-    if (error) {
-        console.error("Error:", error);
+        // 2. Fetch recent analytics events by these scouts
+        const { data: events, error: eventError } = await supabase
+            .from('analytics_events')
+            .select('*')
+            .in('viewer_id', scoutIds)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (eventError || !events || events.length === 0) {
+            console.log("No activity events found for these scouts.");
+            return [];
+        }
+
+        // 3. Fetch player names manually (avoids complex JOIN errors)
+        const playerIds = [...new Set(events.map(e => e.player_id))];
+        const { data: players } = await supabase
+            .from('players')
+            .select('id, name, position, club')
+            .in('id', playerIds);
+
+        // 4. Combine the data
+        return events.map(event => {
+            const scout = scouts.find(s => s.id === event.viewer_id);
+            const player = players?.find(p => p.id === event.player_id);
+
+            return {
+                id: event.id,
+                scoutName: scout?.full_name || 'Unknown Scout',
+                action: event.event_type === 'view' ? 'viewed' : 'watchlisted',
+                playerName: player?.name || 'Unknown Player',
+                playerPosition: player?.position || 'N/A',
+                playerClub: player?.club || 'N/A',
+                time: new Date(event.created_at).toLocaleDateString(),
+            };
+        });
+
+    } catch (error) {
+        console.error("Error fetching scout activity:", error);
         return [];
     }
-
-    // 3. Get player names manually to avoid complex joins
-    const playerIds = [...new Set(events.map(e => e.player_id))];
-    const { data: players } = await supabase
-        .from('players')
-        .select('id, name, position, club')
-        .in('id', playerIds);
-
-    // 4. Format data
-    return events.map(event => {
-        const scout = scouts.find(s => s.id === event.viewer_id);
-        const player = players?.find(p => p.id === event.player_id);
-
-        return {
-            id: event.id,
-            scoutName: scout?.full_name || 'Unknown Scout',
-            action: event.event_type === 'view' ? 'viewed' : 'watchlisted',
-            playerName: player?.name || 'Unknown Player',
-            playerPosition: player?.position || '',
-            playerClub: player?.club || '',
-            time: new Date(event.created_at).toLocaleDateString(),
-        };
-    });
 };

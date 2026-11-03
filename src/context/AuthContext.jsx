@@ -108,7 +108,6 @@ export const AuthProvider = ({ children }) => {
             dateOfBirth: profileRow?.date_of_birth || null,
             agencyName: profileRow?.agency_name || null,
             licenseNumber: profileRow?.license_number || null,
-            scoutClub: profileRow?.scout_club || null,
             teamName: profileRow?.team_name || null,
             league: profileRow?.league || null,
             transferBudget: profileRow?.transfer_budget || null,

@@ -51,11 +51,16 @@ const TeamDashboard = () => {
         const loadData = async () => {
             setIsLoading(true);
             try {
+                // Fetch main dashboard data
                 const result = await fetchTeamDashboardData(user.id);
                 setData(result);
 
                 // ⭐ Fetch Scout Activity
                 const activity = await fetchTeamScoutActivity(user.id);
+
+                // This will print exactly what the database returned to your browser console
+                console.log("Scout Activity Data:", activity);
+
                 setScoutActivity(activity);
 
             } catch (error) {
