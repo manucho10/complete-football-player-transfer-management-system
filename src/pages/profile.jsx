@@ -8,9 +8,10 @@ import {
     Shield,
     Mail,
     Phone,
+    MapPin,
     Calendar,
     Globe,
-    Building2,
+    Building2, // ⭐ Imported Building2
     Award,
     FileText,
     Target,
@@ -19,6 +20,7 @@ import {
     Camera,
     Edit3,
     X,
+    Check,
     AlertCircle,
     CheckCircle2,
     Loader2,
@@ -180,13 +182,8 @@ const Profile = () => {
         setIsLoading(true);
 
         try {
-            // 🔌 REPLACE with real API call:
-            // await fetch('/api/users/me', { method: 'PUT', body: JSON.stringify(formData) });
-
-            // 🧪 Simulate network delay
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            // Update user in AuthContext
             updateUser({
                 name: formData.fullName,
                 email: formData.email,
@@ -220,7 +217,6 @@ const Profile = () => {
         setIsEditing(false);
         setErrors({});
         setSuccessMessage('');
-        // Reset form to user's saved data
         setFormData({
             fullName: user.name || '',
             email: user.email || '',
@@ -241,13 +237,11 @@ const Profile = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-            {/* Background decorations */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r ${role.color} rounded-full mix-blend-multiply filter blur-3xl opacity-10`}></div>
             </div>
 
             <div className="relative max-w-4xl mx-auto p-4 sm:p-6">
-                {/* Top Bar */}
                 <div className="flex items-center justify-between mb-6">
                     <button
                         onClick={() => navigate('/dashboard')}
@@ -273,7 +267,6 @@ const Profile = () => {
                     )}
                 </div>
 
-                {/* Success Message */}
                 {successMessage && (
                     <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2 text-green-400 text-sm animate-fadeIn">
                         <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
@@ -281,7 +274,6 @@ const Profile = () => {
                     </div>
                 )}
 
-                {/* Error Message */}
                 {errors.general && (
                     <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm animate-fadeIn">
                         <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -314,11 +306,20 @@ const Profile = () => {
                                 {formData.fullName || user.name}
                             </h1>
                             <p className="text-white/80 mb-3">{formData.email}</p>
+
                             <div className="flex items-center justify-center sm:justify-start gap-3 flex-wrap">
                                 <span className={`inline-flex items-center gap-1.5 bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold`}>
                                     {role.icon}
                                     {role.label}
                                 </span>
+
+                                {/* ⭐ NEW: Hired by Club Badge ⭐ */}
+                                {user.role === 'scout' && user.team_id && (
+                                    <span className="inline-flex items-center gap-1.5 bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-semibold border border-blue-500/30">
+                                        <Building2 className="w-3 h-3" /> Hired by Club
+                                    </span>
+                                )}
+
                                 <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold">
                                     <TrendingUp className="w-3 h-3" />
                                     Active
@@ -337,11 +338,8 @@ const Profile = () => {
                         </h2>
 
                         <div className="grid sm:grid-cols-2 gap-4">
-                            {/* Full Name */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Full Name
-                                </label>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                     <input
@@ -361,11 +359,8 @@ const Profile = () => {
                                 )}
                             </div>
 
-                            {/* Email */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Email Address
-                                </label>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                     <input
@@ -385,11 +380,8 @@ const Profile = () => {
                                 )}
                             </div>
 
-                            {/* Phone */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Phone Number
-                                </label>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
                                 <div className="relative">
                                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                     <input
@@ -404,11 +396,8 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            {/* Role (read-only) */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Role
-                                </label>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
                                 <div className="relative">
                                     <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500">
                                         {role.icon}
@@ -420,9 +409,7 @@ const Profile = () => {
                                         className="w-full bg-gray-700/30 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-gray-400 cursor-not-allowed"
                                     />
                                 </div>
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Role cannot be changed after registration
-                                </p>
+                                <p className="mt-1 text-xs text-gray-500">Role cannot be changed after registration</p>
                             </div>
                         </div>
                     </div>
@@ -436,9 +423,7 @@ const Profile = () => {
 
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Position
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Position</label>
                                     <div className="relative">
                                         <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <select
@@ -464,9 +449,7 @@ const Profile = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Date of Birth
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Date of Birth</label>
                                     <div className="relative">
                                         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -481,9 +464,7 @@ const Profile = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Current Club
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Current Club</label>
                                     <div className="relative">
                                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -505,9 +486,7 @@ const Profile = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Nationality
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Nationality</label>
                                     <div className="relative">
                                         <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -540,9 +519,7 @@ const Profile = () => {
 
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Agency Name
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Agency Name</label>
                                     <div className="relative">
                                         <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -564,9 +541,7 @@ const Profile = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        FIFA Agent License Number
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">FIFA Agent License Number</label>
                                     <div className="relative">
                                         <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -599,9 +574,7 @@ const Profile = () => {
 
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Club / Agency You Scout For
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Club / Agency You Scout For</label>
                                     <div className="relative">
                                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -623,9 +596,7 @@ const Profile = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Scouting License Number
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Scouting License Number</label>
                                     <div className="relative">
                                         <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -658,9 +629,7 @@ const Profile = () => {
 
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div className="sm:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Club / Team Name
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Club / Team Name</label>
                                     <div className="relative">
                                         <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -682,9 +651,7 @@ const Profile = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        League
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">League</label>
                                     <div className="relative">
                                         <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
@@ -706,9 +673,7 @@ const Profile = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Transfer Budget (€)
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Budget (€)</label>
                                     <input
                                         type="number"
                                         name="transferBudget"

@@ -3,19 +3,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Eye, Star, FileText, Target, Search, BarChart3, Calendar,
-    Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, TrendingUp
+    Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2
 } from 'lucide-react';
-import DashboardLayout from '../../components/layout/Dashboardlayout';
+import DashboardLayout from '../../components/layout/Dashboardlayout'; // Ensure correct capitalization
 import { roleConfig } from '../../config/roleConfig';
 import { useAuth } from '../../context/AuthContext';
 import { fetchScoutDashboardData } from '../../lib/dbService';
+import { supabase } from '../../lib/SupabaseClient'; // ⭐ Imported Supabase
 
-function ScoutDashboard() {
+const ScoutDashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
 
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [teamName, setTeamName] = useState(''); // ⭐ State for Team Name
 
     // Fetch Real Data
     useEffect(() => {
@@ -26,6 +28,17 @@ function ScoutDashboard() {
             try {
                 const result = await fetchScoutDashboardData(user.id);
                 setData(result);
+
+                // ⭐ Fetch the Team's name if they are hired
+                if (user.team_id) {
+                    const { data: teamData } = await supabase
+                        .from('profiles')
+                        .select('full_name')
+                        .eq('id', user.team_id)
+                        .single();
+
+                    if (teamData) setTeamName(teamData.full_name);
+                }
             } catch (error) {
                 console.error("Failed to load dashboard:", error);
             } finally {
@@ -38,7 +51,6 @@ function ScoutDashboard() {
 
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
-        { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
         { id: 'discover', label: 'Discover Players', icon: <Search className="w-5 h-5" />, path: '/players' },
         { id: 'watchlist', label: 'My Watchlist', icon: <Star className="w-5 h-5" />, path: '/watchlist' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
@@ -106,11 +118,17 @@ function ScoutDashboard() {
                 {/* Welcome Banner */}
                 <div className={`bg-gradient-to-r ${role.color} rounded-2xl p-6 sm:p-8`}>
                     <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
-                    <p className="text-white/80">
-                        {data?.stats.watchlist > 0
-                            ? `You have ${data.stats.watchlist} players on your watchlist. Time to check their latest stats!`
-                            : "Start browsing the player database to build your watchlist."}
+                    <p className="text-white/80 font-medium">
+                        {/* ⭐ Show Team Name if Hired ⭐ */}
+                        {teamName
+                            ? `You are currently scouting for ${teamName}.`
+                            : "You are a free agent scout. Apply to a team to get started."}
                     </p>
+                    {data?.stats.watchlist > 0 && (
+                        <p className="text-white/60 text-sm mt-2">
+                            You have {data.stats.watchlist} players on your watchlist. Time to check their latest stats!
+                        </p>
+                    )}
                 </div>
 
                 {/* Stats Grid */}
