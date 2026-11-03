@@ -4,12 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import {
     Users, Target, DollarSign, FileText, Search, BarChart3,
     Plus, Calendar, AlertCircle, Clock, CheckCircle2,
-    MessageSquare, ArrowUpRight, Loader2, Star, X, TrendingUp, UserPlus
+    MessageSquare, ArrowUpRight, Loader2, Star, X, TrendingUp, UserPlus, Activity
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
 import { useAuth } from '../../context/AuthContext';
-import { fetchTeamDashboardData } from '../../lib/dbService';
+import { fetchTeamDashboardData, fetchTeamScoutActivity } from '../../lib/dbService';
 import { supabase } from '../../lib/SupabaseClient';
 
 const TeamDashboard = () => {
@@ -43,17 +43,29 @@ const TeamDashboard = () => {
         loadData();
     }, [user]);
     const [hiredScouts, setHiredScouts] = useState([]);
+    const [scoutActivity, setScoutActivity] = useState([]);
 
     useEffect(() => {
-        const fetchHiredScouts = async () => {
-            const { data } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('role', 'scout')
-                .eq('team_id', user.id);
-            if (data) setHiredScouts(data);
+        if (!user) return;
+
+        const loadData = async () => {
+            setIsLoading(true);
+            try {
+                const result = await fetchTeamDashboardData(user.id);
+                setData(result);
+
+                // ⭐ Fetch Scout Activity
+                const activity = await fetchTeamScoutActivity(user.id);
+                setScoutActivity(activity);
+
+            } catch (error) {
+                console.error("Failed to load dashboard:", error);
+            } finally {
+                setIsLoading(false);
+            }
         };
-        if (user) fetchHiredScouts();
+
+        loadData();
     }, [user]);
 
     // ⭐ Handle Sending the Message
@@ -322,6 +334,38 @@ const TeamDashboard = () => {
                             </div>
                         )}
                     </div>
+                </div>
+                {/* ⭐ SCOUT ACTIVITY FEED ⭐ */}
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-red-400" /> Live Scout Activity
+                    </h3>
+
+                    {scoutActivity.length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-4">
+                            No recent scouting activity. Hire scouts to start tracking players.
+                        </p>
+                    ) : (
+                        <div className="space-y-3">
+                            {scoutActivity.map((activity) => (
+                                <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-700/30 rounded-lg">
+                                    <div className="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0">
+                                        <Search className="w-4 h-4" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm">
+                                            <span className="font-semibold text-white">{activity.scoutName}</span>
+                                            {' '}{activity.action}{' '}
+                                            <span className="font-semibold text-green-400">{activity.playerName}</span>
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            {activity.playerPosition} • {activity.playerClub} • {activity.time}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Squad Status (Progress Bars) */}

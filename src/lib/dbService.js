@@ -408,3 +408,50 @@ export const fetchHiredScouts = async (teamId) => {
     }
     return data;
 };
+// src/lib/dbService.js
+
+// ==========================================
+// TEAM SCOUT ACTIVITY
+// ==========================================
+export const fetchTeamScoutActivity = async (teamId) => {
+    // 1. Get all scouts hired by this team
+    const { data: scouts, error: scoutError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('team_id', teamId)
+        .eq('role', 'scout');
+
+    if (scoutError || !scouts || scouts.length === 0) return [];
+
+    const scoutIds = scouts.map(s => s.id);
+
+    // 2. Fetch recent analytics events (views/interests) by these scouts
+    const { data: events, error: eventError } = await supabase
+        .from('analytics_events')
+        .select(`
+      *,
+      player:players(name, position, club)
+    `)
+        .in('viewer_id', scoutIds)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+    if (eventError) {
+        console.error("Error fetching scout activity:", eventError);
+        return [];
+    }
+
+    // 3. Format the data for the UI
+    return events.map(event => {
+        const scout = scouts.find(s => s.id === event.viewer_id);
+        return {
+            id: event.id,
+            scoutName: scout?.full_name || 'Unknown Scout',
+            action: event.event_type === 'view' ? 'viewed' : 'watchlisted',
+            playerName: event.player?.name || 'Unknown Player',
+            playerPosition: event.player?.position || '',
+            playerClub: event.player?.club || '',
+            time: new Date(event.created_at).toLocaleDateString(),
+        };
+    });
+};
