@@ -617,109 +617,108 @@ const Profile = () => {
                                 )}
                             </div>
                         </div>
+                    )}
+
+                    {/* SECTION: Team Fields */}
+                    {user.role === 'team' && (
+                        <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+                            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                <Shield className="w-5 h-5 text-red-400" /> Team Details
+                            </h2>
+
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                <div className="sm:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Club / Team Name</label>
+                                    <div className="relative">
+                                        <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                        <input
+                                            type="text"
+                                            name="teamName"
+                                            value={formData.teamName}
+                                            onChange={handleChange}
+                                            disabled={!isEditing}
+                                            placeholder="e.g., Real Madrid CF"
+                                            className={`w-full bg-gray-700/50 border rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${errors.teamName ? 'border-red-500' : 'border-gray-600 focus:border-red-500'
+                                                }`}
+                                        />
+                                    </div>
+                                    {errors.teamName && (
+                                        <p className="mt-1 text-xs text-red-400 flex items-center gap-1">
+                                            <AlertCircle className="w-3 h-3" /> {errors.teamName}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">League</label>
+                                    <div className="relative">
+                                        <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                        <input
+                                            type="text"
+                                            name="league"
+                                            value={formData.league}
+                                            onChange={handleChange}
+                                            disabled={!isEditing}
+                                            placeholder="e.g., La Liga"
+                                            className={`w-full bg-gray-700/50 border rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${errors.league ? 'border-red-500' : 'border-gray-600 focus:border-red-500'
+                                                }`}
+                                        />
+                                    </div>
+                                    {errors.league && (
+                                        <p className="mt-1 text-xs text-red-400 flex items-center gap-1">
+                                            <AlertCircle className="w-3 h-3" /> {errors.league}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Budget (€)</label>
+                                    <input
+                                        type="number"
+                                        name="transferBudget"
+                                        value={formData.transferBudget}
+                                        onChange={handleChange}
+                                        disabled={!isEditing}
+                                        placeholder="e.g., 50000000"
+                                        className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     )}
 
-            {/* SECTION: Team Fields */}
-            {user.role === 'team' && (
-                <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-red-400" /> Team Details
-                    </h2>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="sm:col-span-2">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Club / Team Name</label>
-                            <div className="relative">
-                                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                <input
-                                    type="text"
-                                    name="teamName"
-                                    value={formData.teamName}
-                                    onChange={handleChange}
-                                    disabled={!isEditing}
-                                    placeholder="e.g., Real Madrid CF"
-                                    className={`w-full bg-gray-700/50 border rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${errors.teamName ? 'border-red-500' : 'border-gray-600 focus:border-red-500'
-                                        }`}
-                                />
-                            </div>
-                            {errors.teamName && (
-                                <p className="mt-1 text-xs text-red-400 flex items-center gap-1">
-                                    <AlertCircle className="w-3 h-3" /> {errors.teamName}
-                                </p>
-                            )}
+                    {/* Save Button (only in edit mode) */}
+                    {isEditing && (
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={handleCancel}
+                                disabled={isLoading}
+                                className="flex-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2"
+                            >
+                                <X className="w-4 h-4" /> Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="w-4 h-4" /> Save Changes
+                                    </>
+                                )}
+                            </button>
                         </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">League</label>
-                            <div className="relative">
-                                <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                <input
-                                    type="text"
-                                    name="league"
-                                    value={formData.league}
-                                    onChange={handleChange}
-                                    disabled={!isEditing}
-                                    placeholder="e.g., La Liga"
-                                    className={`w-full bg-gray-700/50 border rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${errors.league ? 'border-red-500' : 'border-gray-600 focus:border-red-500'
-                                        }`}
-                                />
-                            </div>
-                            {errors.league && (
-                                <p className="mt-1 text-xs text-red-400 flex items-center gap-1">
-                                    <AlertCircle className="w-3 h-3" /> {errors.league}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Budget (€)</label>
-                            <input
-                                type="number"
-                                name="transferBudget"
-                                value={formData.transferBudget}
-                                onChange={handleChange}
-                                disabled={!isEditing}
-                                placeholder="e.g., 50000000"
-                                className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 disabled:opacity-60 disabled:cursor-not-allowed"
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Save Button (only in edit mode) */}
-            {isEditing && (
-                <div className="flex gap-3">
-                    <button
-                        type="button"
-                        onClick={handleCancel}
-                        disabled={isLoading}
-                        className="flex-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2"
-                    >
-                        <X className="w-4 h-4" /> Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2"
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" /> Saving...
-                            </>
-                        ) : (
-                            <>
-                                <Save className="w-4 h-4" /> Save Changes
-                            </>
-                        )}
-                    </button>
-                </div>
-            )}
-        </form>
+                    )}
+                </form>
             </div >
 
-    <style jsx>{`
+            <style jsx>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
