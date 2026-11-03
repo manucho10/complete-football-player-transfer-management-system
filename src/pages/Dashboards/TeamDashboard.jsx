@@ -168,6 +168,7 @@ const TeamDashboard = () => {
     return (
         <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={recentActivity}>
             <div className="space-y-6">
+                <h1 className="text-4xl text-red-500 font-bold">LIVE TEST - HIRE SCOUTS</h1>
 
                 {/* ⭐ Success Banner */}
                 {successMessage && (
