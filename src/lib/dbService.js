@@ -389,3 +389,22 @@ export const removeFromWatchlist = async (userId, playerId) => {
 
     if (error) throw error;
 };
+// src/lib/dbService.js
+
+// ==========================================
+// SCOUTS
+// ==========================================
+export const fetchHiredScouts = async (teamId) => {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'scout')
+        .eq('team_id', teamId)
+        .order('full_name', { ascending: true });
+
+    if (error) {
+        console.error("Error fetching hired scouts:", error);
+        return [];
+    }
+    return data;
+};

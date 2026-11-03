@@ -21,6 +21,7 @@ import UpdatePassword from './pages/UpdatePassword';
 import Squad from './pages/Squad';
 import Watchlist from './pages/Watchlist';
 import FindScouts from './pages/FindScouts';
+import MyScouts from './pages/MyScouts';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -141,6 +142,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FindScouts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-scouts"
+            element={
+              <ProtectedRoute>
+                <MyScouts />
               </ProtectedRoute>
             }
           />
