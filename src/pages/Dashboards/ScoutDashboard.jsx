@@ -26,11 +26,15 @@ const ScoutDashboard = () => {
         const loadData = async () => {
             setIsLoading(true);
             try {
+                // 1. Fetch Dashboard Stats
                 const result = await fetchScoutDashboardData(user.id);
                 setData(result);
 
-                // ⭐ Fetch the Team's name if they are hired
-                if (user.team_id) {
+                // 2. Set the Team Name from the user object
+                if (user.team_id && user.scoutClub) {
+                    setTeamName(user.scoutClub);
+                } else if (user.team_id) {
+                    // Fallback: If team_id exists but scoutClub didn't save, fetch it
                     const { data: teamData } = await supabase
                         .from('profiles')
                         .select('full_name')

@@ -99,6 +99,8 @@ export const AuthProvider = ({ children }) => {
             country: profileRow?.country || null,
             bio: profileRow?.bio || null,
             avatar_url: profileRow?.avatar_url || null,
+            team_id: profileRow?.team_id || null,           // ⭐ Add this
+            scoutClub: profileRow?.scout_club || null,      // ⭐ Add this
             // Role-specific fields
             position: profileRow?.position || null,
             currentClub: profileRow?.current_club || null,
