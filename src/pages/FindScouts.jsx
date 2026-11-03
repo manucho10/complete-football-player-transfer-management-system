@@ -32,14 +32,17 @@ const FindScouts = () => {
     const handleHire = async (scoutId) => {
         setHiringId(scoutId);
         try {
+            // ⭐ We update BOTH team_id and scout_club here
             const { error } = await supabase
                 .from('profiles')
-                .update({ team_id: user.id })
+                .update({
+                    team_id: user.id,
+                    scout_club: user.name || 'Hired Club' // <-- Pass the Team's name
+                })
                 .eq('id', scoutId);
 
             if (error) throw error;
 
-            // Remove scout from the list so they can't be hired twice
             setScouts((prev) => prev.filter((s) => s.id !== scoutId));
             alert("Scout successfully hired!");
         } catch (error) {

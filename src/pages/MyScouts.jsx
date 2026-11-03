@@ -34,9 +34,10 @@ const MyScouts = () => {
         if (!window.confirm('Are you sure you want to release this scout from your team?')) return;
 
         try {
+            // ⭐ Clear team_id AND scout_club
             await supabase
                 .from('profiles')
-                .update({ team_id: null })
+                .update({ team_id: null, scout_club: null })
                 .eq('id', scoutId);
 
             setScouts((prev) => prev.filter((s) => s.id !== scoutId));
