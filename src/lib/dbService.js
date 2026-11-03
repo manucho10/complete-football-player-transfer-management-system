@@ -408,49 +408,49 @@ export const fetchHiredScouts = async (teamId) => {
     }
     return data;
 };
-// src/lib/dbService.js
-
-// ==========================================
-// TEAM SCOUT ACTIVITY
-// ==========================================
 export const fetchTeamScoutActivity = async (teamId) => {
-    // 1. Get all scouts hired by this team
-    const { data: scouts, error: scoutError } = await supabase
+    // 1. Get hired scouts
+    const { data: scouts } = await supabase
         .from('profiles')
         .select('id, full_name')
         .eq('team_id', teamId)
         .eq('role', 'scout');
 
-    if (scoutError || !scouts || scouts.length === 0) return [];
-
+    if (!scouts || scouts.length === 0) return [];
     const scoutIds = scouts.map(s => s.id);
 
-    // 2. Fetch recent analytics events (views/interests) by these scouts
-    const { data: events, error: eventError } = await supabase
+    // 2. Get recent events
+    const { data: events, error } = await supabase
         .from('analytics_events')
-        .select(`
-      *,
-      player:players(name, position, club)
-    `)
+        .select('*')
         .in('viewer_id', scoutIds)
         .order('created_at', { ascending: false })
         .limit(10);
 
-    if (eventError) {
-        console.error("Error fetching scout activity:", eventError);
+    if (error) {
+        console.error("Error:", error);
         return [];
     }
 
-    // 3. Format the data for the UI
+    // 3. Get player names manually to avoid complex joins
+    const playerIds = [...new Set(events.map(e => e.player_id))];
+    const { data: players } = await supabase
+        .from('players')
+        .select('id, name, position, club')
+        .in('id', playerIds);
+
+    // 4. Format data
     return events.map(event => {
         const scout = scouts.find(s => s.id === event.viewer_id);
+        const player = players?.find(p => p.id === event.player_id);
+
         return {
             id: event.id,
             scoutName: scout?.full_name || 'Unknown Scout',
             action: event.event_type === 'view' ? 'viewed' : 'watchlisted',
-            playerName: event.player?.name || 'Unknown Player',
-            playerPosition: event.player?.position || '',
-            playerClub: event.player?.club || '',
+            playerName: player?.name || 'Unknown Player',
+            playerPosition: player?.position || '',
+            playerClub: player?.club || '',
             time: new Date(event.created_at).toLocaleDateString(),
         };
     });
