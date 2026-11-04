@@ -86,7 +86,7 @@ const Transfers = () => {
         try {
             setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: newStatus } : o)));
 
-            // ⭐ Update the currently selected offer so the PDF button appears instantly
+            // Update the currently selected offer so the PDF button appears instantly
             if (selectedOffer && selectedOffer.id === offerId) {
                 setSelectedOffer((prev) => ({ ...prev, status: newStatus }));
             }
@@ -94,10 +94,10 @@ const Transfers = () => {
             await updateTransferStatus(offerId, newStatus);
         } catch (error) {
             console.error('Failed to update status:', error);
-            alert('Failed to update transfer status. Please try again.');
+            // ⭐ SHOW THE REAL ERROR
+            alert(`Failed to update: ${error.message || 'Unknown error'}`);
         }
     };
-
     const handleCreateOffer = async (e) => {
         e.preventDefault();
         if (!newOfferData.playerName || !newOfferData.amount) return;
