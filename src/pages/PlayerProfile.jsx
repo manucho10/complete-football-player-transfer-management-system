@@ -33,14 +33,19 @@ const PlayerProfile = () => {
     // ================================================================
     // FETCH PLAYER & VIDEOS
     // ================================================================
+    // ================================================================
+    // FETCH PLAYER & VIDEOS
+    // ================================================================
     useEffect(() => {
         const loadData = async () => {
             setIsLoading(true);
             try {
+                // 1. Fetch the raw player data from the database
                 const data = await fetchPlayerById(id);
 
                 if (data) {
-                    // ⭐ If they are signed, OVERWRITE the club name with the Team's name
+                    // 2. If the player has a team_id, they are signed!
+                    // We need to fetch the Team's real name to override the old club text.
                     if (data.team_id) {
                         const { data: teamData } = await supabase
                             .from('profiles')
@@ -49,21 +54,22 @@ const PlayerProfile = () => {
                             .single();
 
                         if (teamData && teamData.full_name) {
-                            data.club = teamData.full_name; // Override old club text
+                            data.club = teamData.full_name; // Override the old club name
                         }
                     }
-                    // ⭐ If they have NO team_id, they are a free agent
+                    // 3. If they have no team_id, they are a Free Agent
                     else {
                         data.club = 'Free Agent';
                     }
 
+                    // 4. Save the updated player object to React state
                     setPlayer(data);
 
-                    // Fetch videos
+                    // 5. Fetch their highlight videos
                     const videoData = await fetchPlayerVideos(data.id);
                     setVideos(videoData);
 
-                    // Track view (only if not the owner)
+                    // 6. Track the profile view for analytics (if it's not the player themselves)
                     if (user && user.id !== data.user_id) {
                         await supabase.from('analytics_events').insert({
                             player_id: data.id,
@@ -73,7 +79,7 @@ const PlayerProfile = () => {
                         });
                     }
 
-                    // Check watchlist status
+                    // 7. Check if this player is already on the current user's watchlist
                     if (user && ['scout', 'team'].includes(user.role)) {
                         const { data: watchData } = await supabase
                             .from('watchlists')
@@ -94,8 +100,7 @@ const PlayerProfile = () => {
         };
 
         if (id) loadData();
-    }, [id, user]);
-
+    }, [id, user]); // Re-runs whenever the URL id or logged-in user changes
     // ================================================================
     // HANDLERS
     // ================================================================
