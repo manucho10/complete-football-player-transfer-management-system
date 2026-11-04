@@ -30,6 +30,7 @@ const PlayerProfile = () => {
     const [activeVideo, setActiveVideo] = useState(null);
 
     // ================================================================
+    // ================================================================
     // FETCH PLAYER & VIDEOS
     // ================================================================
     useEffect(() => {
@@ -39,7 +40,7 @@ const PlayerProfile = () => {
                 const data = await fetchPlayerById(id);
 
                 if (data) {
-                    // ⭐ NEW: Fetch the team's actual name if the player is signed
+                    // ⭐ If they are signed, OVERWRITE the club name with the Team's name
                     if (data.team_id) {
                         const { data: teamData } = await supabase
                             .from('profiles')
@@ -47,9 +48,13 @@ const PlayerProfile = () => {
                             .eq('id', data.team_id)
                             .single();
 
-                        if (teamData) {
-                            data.club = teamData.full_name; // Override the club text with the real team name
+                        if (teamData && teamData.full_name) {
+                            data.club = teamData.full_name; // Override old club text
                         }
+                    }
+                    // ⭐ If they have NO team_id, they are a free agent
+                    else {
+                        data.club = 'Free Agent';
                     }
 
                     setPlayer(data);

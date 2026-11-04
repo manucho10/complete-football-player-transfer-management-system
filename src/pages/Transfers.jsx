@@ -84,17 +84,22 @@ const Transfers = () => {
 
     const handleStatusChange = async (offerId, newStatus) => {
         try {
-            setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: newStatus } : o)));
+            // 1. Update the database. The trigger will handle the squad update automatically.
+            await updateTransferStatus(offerId, newStatus);
 
-            // Update the currently selected offer so the PDF button appears instantly
+            // 2. Update the UI
+            setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: newStatus } : o)));
             if (selectedOffer && selectedOffer.id === offerId) {
                 setSelectedOffer((prev) => ({ ...prev, status: newStatus }));
             }
 
-            await updateTransferStatus(offerId, newStatus);
+            // 3. If they accepted, tell the player it was successful
+            if (newStatus === 'accepted') {
+                alert("Offer accepted! The player has been added to the squad.");
+                setSelectedOffer(null);
+            }
         } catch (error) {
             console.error('Failed to update status:', error);
-            // ⭐ SHOW THE REAL ERROR
             alert(`Failed to update: ${error.message || 'Unknown error'}`);
         }
     };
