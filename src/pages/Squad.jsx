@@ -1,7 +1,7 @@
 // src/pages/Squad.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Users, Star, Loader2, UserMinus, Eye } from 'lucide-react';
+import { ArrowLeft, Users, Search, Loader2, Star, Eye, UserMinus, HeartPulse } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/SupabaseClient';
 
@@ -12,20 +12,21 @@ const Squad = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
 
-    useEffect(() => {
-        const loadSquad = async () => {
-            setIsLoading(true);
-            // Fetch players where team_id matches the logged-in Team's ID
-            const { data, error } = await supabase
-                .from('players')
-                .select('*')
-                .eq('team_id', user.id)
-                .order('position', { ascending: true });
+    const fetchSquad = async () => {
+        setIsLoading(true);
+        // Fetch players where team_id matches the logged-in Team's ID
+        const { data, error } = await supabase
+            .from('players')
+            .select('*')
+            .eq('team_id', user.id)
+            .order('position', { ascending: true });
 
-            if (!error) setSquad(data || []);
-            setIsLoading(false);
-        };
-        if (user) loadSquad();
+        if (!error) setSquad(data || []);
+        setIsLoading(false);
+    };
+
+    useEffect(() => {
+        if (user) fetchSquad();
     }, [user]);
 
     const handleRelease = async (playerId) => {
@@ -33,13 +34,15 @@ const Squad = () => {
 
         await supabase
             .from('players')
-            .update({ team_id: null, club: 'Free Agent' })
+            .update({ team_id: null, club: 'Free Agent', availability: 'Available' })
             .eq('id', playerId);
 
-        setSquad((prev) => prev.filter((p) => p.id !== playerId));
+        fetchSquad(); // Refresh list
     };
 
-    const filteredSquad = squad.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+    const filteredSquad = squad.filter(p =>
+        p.name.toLowerCase().includes(search.toLowerCase())
+    );
 
     if (!user) return null;
 
@@ -71,6 +74,12 @@ const Squad = () => {
                             className="w-full bg-gray-800/50 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-red-500"
                         />
                     </div>
+                    <button
+                        onClick={() => navigate('/players')}
+                        className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all"
+                    >
+                        Sign New Player
+                    </button>
                 </div>
 
                 {isLoading ? (
@@ -106,6 +115,31 @@ const Squad = () => {
                                         <Star className="w-4 h-4 fill-current" /> {player.rating}
                                     </div>
                                 </div>
+
+                                {/* Body: Updated with Condition and Contract */}
+                                <div className="p-4 space-y-3">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-gray-400 flex items-center gap-1.5"><HeartPulse className="w-3.5 h-3.5" /> Condition</span>
+                                        <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${player.condition === 'Fit' ? 'bg-green-500/20 text-green-400' :
+                                            player.condition === 'Injured' ? 'bg-red-500/20 text-red-400' :
+                                                player.condition === 'Suspended' ? 'bg-orange-500/20 text-orange-400' :
+                                                    'bg-yellow-500/20 text-yellow-400'
+                                            }`}>
+                                            {player.condition || 'Fit'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-gray-400">Contract Ends</span>
+                                        <span className="text-white">
+                                            {player.contract_end_date ? new Date(player.contract_end_date).getFullYear() : 'Unknown'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm border-t border-gray-700 pt-2">
+                                        <span className="text-gray-400">Market Value</span>
+                                        <span className="font-semibold text-green-400">{player.market_value || 'N/A'}</span>
+                                    </div>
+                                </div>
+
                                 <div className="p-3 flex gap-2 border-t border-gray-700">
                                     <button onClick={() => navigate(`/players/${player.id}`)} className="flex-1 flex items-center justify-center gap-1.5 bg-gray-700/50 hover:bg-gray-700 text-xs font-semibold py-2 rounded-lg">
                                         <Eye className="w-3.5 h-3.5" /> View

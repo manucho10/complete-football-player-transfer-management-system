@@ -9,7 +9,7 @@ import {
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
 import { useAuth } from '../../context/AuthContext';
-import { fetchTeamDashboardData, fetchTeamScoutActivity } from '../../lib/dbService';
+import { fetchTeamDashboardData, fetchTeamScoutActivity, fetchClubOverview } from '../../lib/dbService';
 import { supabase } from '../../lib/SupabaseClient';
 
 const TeamDashboard = () => {
@@ -20,6 +20,7 @@ const TeamDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [scoutActivity, setScoutActivity] = useState([]);
     const [hiredScouts, setHiredScouts] = useState([]);
+    const [clubOverview, setClubOverview] = useState(null);
 
     // Contact Modal State
     const [contactPlayer, setContactPlayer] = useState(null);
@@ -48,6 +49,10 @@ const TeamDashboard = () => {
                     .eq('role', 'scout')
                     .eq('team_id', user.id);
                 if (scouts) setHiredScouts(scouts);
+
+                // 4. Fetch Club Overview
+                const overview = await fetchClubOverview(user.id);
+                setClubOverview(overview);
 
             } catch (error) {
                 console.error("Failed to load dashboard:", error);
@@ -404,6 +409,95 @@ const TeamDashboard = () => {
                     </div>
                 </div>
             )}
+            {/* ==================== CLUB OVERVIEW ==================== */}
+            <div className="grid lg:grid-cols-2 gap-6 mt-6">
+
+                {/* Fixtures */}
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-red-400" /> Upcoming Fixtures
+                    </h3>
+                    <div className="space-y-3">
+                        {clubOverview?.fixtures.map(fix => (
+                            <div key={fix.id} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
+                                <div>
+                                    <p className="text-sm font-semibold">{fix.home ? 'vs' : '@'} {fix.opponent}</p>
+                                    <p className="text-xs text-gray-400">{fix.competition}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm font-semibold text-red-400">{fix.date}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* League Table */}
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-blue-400" /> League Position
+                    </h3>
+                    <div className="space-y-2">
+                        {clubOverview?.leagueTable.map(row => (
+                            <div key={row.pos} className={`flex items-center justify-between p-2 rounded-lg ${row.team === 'My Team' ? 'bg-red-500/20 border border-red-500/30' : 'bg-gray-700/30'}`}>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs text-gray-400 w-4">{row.pos}</span>
+                                    <span className={`text-sm font-semibold ${row.team === 'My Team' ? 'text-red-400' : ''}`}>{row.team}</span>
+                                </div>
+                                <span className="text-sm font-bold">{row.pts} pts</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* New Signings */}
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <UserPlus className="w-5 h-5 text-green-400" /> New Signings
+                    </h3>
+                    {clubOverview?.newSignings.length === 0 ? (
+                        <p className="text-sm text-gray-500">No recent signings.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {clubOverview?.newSignings.map(player => (
+                                <div key={player.id} className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg">
+                                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
+                                        {player.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold">{player.name}</p>
+                                        <p className="text-xs text-gray-400">{player.position}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Expiring Contracts */}
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-yellow-400" /> Expiring Contracts
+                    </h3>
+                    {clubOverview?.expiringContracts.length === 0 ? (
+                        <p className="text-sm text-gray-500">No expiring contracts found.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {clubOverview?.expiringContracts.map(player => (
+                                <div key={player.id} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
+                                    <div>
+                                        <p className="text-sm font-semibold">{player.name}</p>
+                                        <p className="text-xs text-gray-400">{player.position}</p>
+                                    </div>
+                                    <span className="text-xs font-semibold text-yellow-400">
+                                        {new Date(player.contract_end_date).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
 
             <style dangerouslySetInnerHTML={{
                 __html: `
