@@ -84,20 +84,41 @@ const Transfers = () => {
 
     const handleStatusChange = async (offerId, newStatus) => {
         try {
-            // 1. Update the database. The trigger will handle the squad update automatically.
+            // 1. Update the transfer status in the database
             await updateTransferStatus(offerId, newStatus);
 
-            // 2. Update the UI
-            setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: newStatus } : o)));
-            if (selectedOffer && selectedOffer.id === offerId) {
-                setSelectedOffer((prev) => ({ ...prev, status: newStatus }));
+            // 2. If accepted, update the Player's squad AND the Profile's current club
+            if (newStatus === 'accepted' && selectedOffer) {
+
+                // A. Update the players table
+                const { error: playerError } = await supabase
+                    .from('players')
+                    .update({
+                        team_id: selectedOffer.from_user_id,
+                        club: selectedOffer.from_name,
+                        availability: 'Under Contract'
+                    })
+                    .eq('id', selectedOffer.player_id);
+
+                if (playerError) throw playerError;
+
+                // B. Update the profiles table (This fixes the Settings page!)
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .update({
+                        current_club: selectedOffer.from_name
+                    })
+                    .eq('id', selectedOffer.player_user_id);
+
+                if (profileError) throw profileError;
+
+                alert("Offer accepted! Player added to squad and profile updated.");
             }
 
-            // 3. If they accepted, tell the player it was successful
-            if (newStatus === 'accepted') {
-                alert("Offer accepted! The player has been added to the squad.");
-                setSelectedOffer(null);
-            }
+            // 3. Update the UI
+            setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: newStatus } : o)));
+            setSelectedOffer(null);
+
         } catch (error) {
             console.error('Failed to update status:', error);
             alert(`Failed to update: ${error.message || 'Unknown error'}`);

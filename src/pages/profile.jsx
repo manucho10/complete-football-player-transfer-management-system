@@ -31,7 +31,7 @@ import { supabase } from '../lib/SupabaseClient'; // ⭐ Added Supabase
 
 const Profile = () => {
     const navigate = useNavigate();
-    const { user, updateUser } = useAuth();
+    const { user, updateUser, refreshProfile } = useAuth();
 
     // Edit mode
     const [isEditing, setIsEditing] = useState(false);
@@ -92,6 +92,7 @@ const Profile = () => {
         };
 
         fetchLatestData();
+        refreshProfile();
     }, [user]);
 
     if (!user) return null;
