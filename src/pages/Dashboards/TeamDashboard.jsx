@@ -18,8 +18,10 @@ const TeamDashboard = () => {
 
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [scoutActivity, setScoutActivity] = useState([]);
+    const [hiredScouts, setHiredScouts] = useState([]);
 
-    // ⭐ Contact Modal State
+    // Contact Modal State
     const [contactPlayer, setContactPlayer] = useState(null);
     const [contactMessage, setContactMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
@@ -31,38 +33,22 @@ const TeamDashboard = () => {
         const loadData = async () => {
             setIsLoading(true);
             try {
-                const result = await fetchTeamDashboardData(user.id);
-                setData(result);
-            } catch (error) {
-                console.error("Failed to load dashboard:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadData();
-    }, [user]);
-    const [hiredScouts, setHiredScouts] = useState([]);
-    const [scoutActivity, setScoutActivity] = useState([]);
-
-    useEffect(() => {
-        if (!user) return;
-
-        const loadData = async () => {
-            setIsLoading(true);
-            try {
-                // Fetch main dashboard data
+                // 1. Fetch main dashboard data
                 const result = await fetchTeamDashboardData(user.id);
                 setData(result);
 
-                // ⭐ Fetch Scout Activity
+                // 2. Fetch Scout Activity
                 const activity = await fetchTeamScoutActivity(user.id);
-
-                // This will print exactly what the database returned to your browser console
-                console.log("Scout Activity Data:", activity);
-
                 setScoutActivity(activity);
 
+                // 3. Fetch Hired Scouts
+                const { data: scouts } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('role', 'scout')
+                    .eq('team_id', user.id);
+                if (scouts) setHiredScouts(scouts);
+
             } catch (error) {
                 console.error("Failed to load dashboard:", error);
             } finally {
@@ -73,20 +59,15 @@ const TeamDashboard = () => {
         loadData();
     }, [user]);
 
-    // ⭐ Handle Sending the Message
+    // Handle Sending the Message
     const handleSendMessage = async () => {
         if (!contactMessage.trim() || !contactPlayer) return;
         setIsSending(true);
 
         try {
-            // Find the user_id linked to this player record
             const playerUserId = contactPlayer.user_id;
+            if (!playerUserId) throw new Error("This player hasn't linked their account yet.");
 
-            if (!playerUserId) {
-                throw new Error("This player hasn't linked their account yet. Try messaging another player.");
-            }
-
-            // Check if conversation exists
             const { data: existingConv } = await supabase
                 .from('conversations')
                 .select('id')
@@ -95,26 +76,22 @@ const TeamDashboard = () => {
 
             let conversationId = existingConv?.id;
 
-            // Create conversation if it doesn't exist
             if (!conversationId) {
                 const { data: newConv, error: convError } = await supabase
                     .from('conversations')
                     .insert({ user1_id: user.id, user2_id: playerUserId })
                     .select()
                     .single();
-
                 if (convError) throw convError;
                 conversationId = newConv.id;
             }
 
-            // Insert message
             await supabase.from('messages').insert({
                 conversation_id: conversationId,
                 sender_id: user.id,
                 text: contactMessage,
             });
 
-            // Update conversation metadata
             await supabase.from('conversations').update({
                 last_message: contactMessage,
                 last_message_at: new Date().toISOString()
@@ -172,10 +149,8 @@ const TeamDashboard = () => {
         { label: 'Search Players', icon: <Search className="w-5 h-5" />, path: '/players' },
         { label: 'View Squad', icon: <Users className="w-5 h-5" />, path: '/squad' },
         { label: 'Hire Scouts', icon: <UserPlus className="w-5 h-5" />, path: '/find-scouts' },
-        { label: 'Budget Report', icon: <BarChart3 className="w-5 h-5" /> },
     ];
 
-    // Mock Squad Status Data 
     const squadStatus = [
         { position: 'Goalkeepers', count: 3, needed: 3 },
         { position: 'Defenders', count: 8, needed: 9 },
@@ -186,9 +161,6 @@ const TeamDashboard = () => {
     return (
         <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={recentActivity}>
             <div className="space-y-6">
-
-
-                {/* ⭐ Success Banner */}
                 {successMessage && (
                     <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-2 text-green-400 text-sm animate-fadeIn">
                         <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> {successMessage}
@@ -240,13 +212,11 @@ const TeamDashboard = () => {
 
                 {/* Two Columns */}
                 <div className="grid lg:grid-cols-2 gap-6">
-
-                    {/* Top Transfer Targets with Contact Button */}
+                    {/* Top Transfer Targets */}
                     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
                         <h3 className="font-semibold mb-4 flex items-center gap-2">
                             <Target className="w-5 h-5 text-red-400" /> Top Transfer Targets
                         </h3>
-
                         {data?.topTargets.length === 0 ? (
                             <div className="text-center py-8">
                                 <Target className="w-10 h-10 text-gray-600 mx-auto mb-2" />
@@ -256,14 +226,10 @@ const TeamDashboard = () => {
                             <div className="space-y-3">
                                 {data?.topTargets.map((target, i) => (
                                     <div key={i} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
-                                        <button
-                                            onClick={() => navigate(`/players/${target.id}`)}
-                                            className="text-left flex-1"
-                                        >
+                                        <button onClick={() => navigate(`/players/${target.id}`)} className="text-left flex-1">
                                             <p className="text-sm font-semibold hover:text-green-400 transition-colors">{target.name}</p>
                                             <p className="text-xs text-gray-400">{target.position} • {target.club}</p>
                                         </button>
-
                                         <div className="flex items-center gap-3">
                                             <div className="text-right">
                                                 <span className="text-sm font-semibold text-green-400 block">{target.market_value || 'N/A'}</span>
@@ -271,13 +237,7 @@ const TeamDashboard = () => {
                                                     <Star className="w-3 h-3 fill-current" /> {target.rating || 'N/A'}
                                                 </div>
                                             </div>
-
-                                            {/* ⭐ CONTACT BUTTON ⭐ */}
-                                            <button
-                                                onClick={() => setContactPlayer(target)}
-                                                className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                                                title="Contact Player"
-                                            >
+                                            <button onClick={() => setContactPlayer(target)} className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">
                                                 <MessageSquare className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -292,7 +252,6 @@ const TeamDashboard = () => {
                         <h3 className="font-semibold mb-4 flex items-center gap-2">
                             <Clock className="w-5 h-5 text-gray-400" /> Recent Activity
                         </h3>
-
                         {recentActivity.length === 0 ? (
                             <p className="text-sm text-gray-500 text-center py-4">No recent activity.</p>
                         ) : (
@@ -301,34 +260,6 @@ const TeamDashboard = () => {
                                     <div key={i} className="flex items-start gap-3 p-3 bg-gray-700/30 rounded-lg">
                                         <div className="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0">
                                             <CheckCircle2 className="w-4 h-4" />
-                                        </div>
-                                        {/* Hired Scouts Section */}
-                                        <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 mt-6">
-                                            <h3 className="font-semibold mb-4 flex items-center gap-2">
-                                                <UserPlus className="w-5 h-5 text-red-400" /> My Scouting Network
-                                            </h3>
-                                            {hiredScouts.length === 0 ? (
-                                                <div className="text-center py-4">
-                                                    <p className="text-sm text-gray-400 mb-3">You haven't hired any scouts yet.</p>
-                                                    <button onClick={() => navigate('/find-scouts')} className="text-xs bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-semibold">
-                                                        Hire Scouts
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex gap-3 overflow-x-auto pb-2">
-                                                    {hiredScouts.map(scout => (
-                                                        <div key={scout.id} className="bg-gray-700/30 rounded-lg p-3 min-w-[150px] flex-shrink-0 flex items-center gap-3">
-                                                            <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
-                                                                {scout.full_name?.charAt(0)}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-semibold truncate">{scout.full_name}</p>
-                                                                <p className="text-[10px] text-green-400">Active</p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm">{a.text}</p>
@@ -340,12 +271,41 @@ const TeamDashboard = () => {
                         )}
                     </div>
                 </div>
-                {/* ⭐ SCOUT ACTIVITY FEED ⭐ */}
+
+                {/* My Scouting Network */}
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <UserPlus className="w-5 h-5 text-red-400" /> My Scouting Network
+                    </h3>
+                    {hiredScouts.length === 0 ? (
+                        <div className="text-center py-4">
+                            <p className="text-sm text-gray-400 mb-3">You haven't hired any scouts yet.</p>
+                            <button onClick={() => navigate('/find-scouts')} className="text-xs bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-semibold">
+                                Hire Scouts
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex gap-3 overflow-x-auto pb-2">
+                            {hiredScouts.map(scout => (
+                                <div key={scout.id} className="bg-gray-700/30 rounded-lg p-3 min-w-[150px] flex-shrink-0 flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
+                                        {scout.full_name?.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold truncate">{scout.full_name}</p>
+                                        <p className="text-[10px] text-green-400">Active</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Live Scout Activity */}
                 <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
                     <h3 className="font-semibold mb-4 flex items-center gap-2">
                         <Activity className="w-5 h-5 text-red-400" /> Live Scout Activity
                     </h3>
-
                     {scoutActivity.length === 0 ? (
                         <p className="text-sm text-gray-500 text-center py-4">
                             No recent scouting activity. Hire scouts to start tracking players.
@@ -373,7 +333,7 @@ const TeamDashboard = () => {
                     )}
                 </div>
 
-                {/* Squad Status (Progress Bars) */}
+                {/* Squad Depth */}
                 <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
                     <h3 className="font-semibold mb-4 flex items-center gap-2">
                         <Users className="w-5 h-5 text-red-400" /> Squad Depth
@@ -397,10 +357,9 @@ const TeamDashboard = () => {
                         ))}
                     </div>
                 </div>
-
             </div>
 
-            {/* ⭐ CONTACT MODAL ⭐ */}
+            {/* Contact Modal */}
             {contactPlayer && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setContactPlayer(null)}>
                     <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
@@ -418,7 +377,6 @@ const TeamDashboard = () => {
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
-
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
@@ -431,7 +389,6 @@ const TeamDashboard = () => {
                                 />
                             </div>
                         </div>
-
                         <div className="flex gap-3 mt-6">
                             <button onClick={() => setContactPlayer(null)} className="flex-1 bg-gray-700 hover:bg-gray-600 py-2.5 rounded-lg text-sm font-semibold transition-all">
                                 Cancel
