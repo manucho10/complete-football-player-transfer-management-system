@@ -136,6 +136,7 @@ export const deleteNotification = async (id) => {
 // DASHBOARD (Player Specific)
 // ==========================================
 
+
 export const fetchPlayerDashboardData = async (userId) => {
     // 1. Get Player ID and Stats
     const { data: playerData, error: playerError } = await supabase
@@ -146,6 +147,20 @@ export const fetchPlayerDashboardData = async (userId) => {
 
     if (playerError) console.error("Player stats error:", playerError);
 
+    // ⭐ NEW: If the player has a team_id, fetch the actual Team's name
+    let currentClubName = playerData?.club || 'Free Agent';
+    if (playerData?.team_id) {
+        const { data: teamData } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', playerData.team_id)
+            .single();
+
+        if (teamData) {
+            currentClubName = teamData.full_name;
+        }
+    }
+
     // 2. Get Profile Views count
     const { count: viewsCount } = await supabase
         .from('analytics_events')
@@ -153,22 +168,20 @@ export const fetchPlayerDashboardData = async (userId) => {
         .eq('player_id', playerData?.id)
         .eq('event_type', 'view');
 
-    // 3. Get Active Offers count (transfers where the player is the subject)
-    // Note: In a real app, transfers might be linked by player_id. 
-    // For now, we'll count transfers where 'to_name' or 'player_name' matches the player.
+    // 3. Get Active Offers count
     const { count: offersCount } = await supabase
         .from('transfers')
         .select('*', { count: 'exact', head: true })
         .eq('player_id', playerData?.id)
         .in('status', ['pending', 'negotiating']);
 
-    // 4. Get Watchlist count (how many scouts saved this player)
+    // 4. Get Watchlist count
     const { count: watchlistCount } = await supabase
         .from('watchlists')
         .select('*', { count: 'exact', head: true })
         .eq('player_id', playerData?.id);
 
-    // 5. Get Recent Notifications (Activity Feed)
+    // 5. Get Recent Notifications
     const { data: activity } = await supabase
         .from('notifications')
         .select('*')
@@ -178,6 +191,7 @@ export const fetchPlayerDashboardData = async (userId) => {
 
     return {
         playerStats: playerData || null,
+        currentClub: currentClubName, // ⭐ Pass the updated club name
         stats: {
             views: viewsCount || 0,
             offers: offersCount || 0,
@@ -187,7 +201,6 @@ export const fetchPlayerDashboardData = async (userId) => {
         recentActivity: activity || [],
     };
 };
-// src/lib/dbService.js
 
 // ==========================================
 // DASHBOARD (Scout Specific)

@@ -101,6 +101,9 @@ const PlayerDashboard = () => {
                 {/* Welcome Banner */}
                 <div className={`bg-gradient-to-r ${role.color} rounded-2xl p-6 sm:p-8`}>
                     <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
+                    <p className="text-white/80 mb-2">
+                        Current Club: <span className="font-bold text-white">{data?.currentClub || 'Free Agent'}</span>
+                    </p>
                     <p className="text-white/80">
                         {data?.stats.offers > 0
                             ? `You have ${data.stats.offers} active offers. Keep an eye on your messages!`
