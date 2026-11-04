@@ -37,29 +37,38 @@ const PlayerProfile = () => {
             setIsLoading(true);
             try {
                 const data = await fetchPlayerById(id);
-                setPlayer(data);
 
                 if (data) {
+                    // ⭐ NEW: Fetch the team's actual name if the player is signed
+                    if (data.team_id) {
+                        const { data: teamData } = await supabase
+                            .from('profiles')
+                            .select('full_name')
+                            .eq('id', data.team_id)
+                            .single();
+
+                        if (teamData) {
+                            data.club = teamData.full_name; // Override the club text with the real team name
+                        }
+                    }
+
+                    setPlayer(data);
+
+                    // Fetch videos
                     const videoData = await fetchPlayerVideos(data.id);
                     setVideos(videoData);
 
-                    // Track the view
+                    // Track view (only if not the owner)
                     if (user && user.id !== data.user_id) {
-                        const { error: trackingError } = await supabase.from('analytics_events').insert({
+                        await supabase.from('analytics_events').insert({
                             player_id: data.id,
                             event_type: 'view',
                             viewer_id: user.id,
                             viewer_role: user.role,
                         });
-
-                        // Log an error if the database rejects the insert
-                        if (trackingError) {
-                            console.error("Failed to track view:", trackingError);
-                        } else {
-                            console.log("View successfully tracked!");
-                        }
                     }
 
+                    // Check watchlist status
                     if (user && ['scout', 'team'].includes(user.role)) {
                         const { data: watchData } = await supabase
                             .from('watchlists')
@@ -94,15 +103,7 @@ const PlayerProfile = () => {
                 setSuccessMessage('Removed from watchlist');
             } else {
                 await supabase.from('watchlists').insert({ user_id: user.id, player_id: player.id });
-
-                const { error: interestError } = await supabase.from('analytics_events').insert({
-                    player_id: player.id,
-                    event_type: 'interest',
-                    viewer_id: user.id,
-                    viewer_role: user.role
-                });
-                if (interestError) console.error('Failed to track interest:', interestError);
-
+                await supabase.from('analytics_events').insert({ player_id: player.id, event_type: 'interest', viewer_id: user.id, viewer_role: user.role });
                 setIsWatchlisted(true);
                 setSuccessMessage('Added to watchlist!');
             }
