@@ -43,13 +43,21 @@ const PlayerProfile = () => {
                     const videoData = await fetchPlayerVideos(data.id);
                     setVideos(videoData);
 
+                    // Track the view
                     if (user && user.id !== data.user_id) {
-                        await supabase.from('analytics_events').insert({
+                        const { error: trackingError } = await supabase.from('analytics_events').insert({
                             player_id: data.id,
-                            event_type: 'view', // ⭐ Fixed the typo here (was 'vent_type')
+                            event_type: 'view',
                             viewer_id: user.id,
                             viewer_role: user.role,
                         });
+
+                        // Log an error if the database rejects the insert
+                        if (trackingError) {
+                            console.error("Failed to track view:", trackingError);
+                        } else {
+                            console.log("View successfully tracked!");
+                        }
                     }
 
                     if (user && ['scout', 'team'].includes(user.role)) {
@@ -86,7 +94,15 @@ const PlayerProfile = () => {
                 setSuccessMessage('Removed from watchlist');
             } else {
                 await supabase.from('watchlists').insert({ user_id: user.id, player_id: player.id });
-                await supabase.from('analytics_events').insert({ player_id: player.id, event_type: 'interest', viewer_id: user.id, viewer_role: user.role });
+
+                const { error: interestError } = await supabase.from('analytics_events').insert({
+                    player_id: player.id,
+                    event_type: 'interest',
+                    viewer_id: user.id,
+                    viewer_role: user.role
+                });
+                if (interestError) console.error('Failed to track interest:', interestError);
+
                 setIsWatchlisted(true);
                 setSuccessMessage('Added to watchlist!');
             }

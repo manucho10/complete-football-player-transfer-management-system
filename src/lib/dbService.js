@@ -410,9 +410,11 @@ export const fetchHiredScouts = async (teamId) => {
 };
 // src/lib/dbService.js
 
+// src/lib/dbService.js
+
 export const fetchTeamScoutActivity = async (teamId) => {
     try {
-        // 1. Get all scouts hired by this team
+        // 1. Get the list of Scout IDs that belong to this Team
         const { data: scouts, error: scoutError } = await supabase
             .from('profiles')
             .select('id, full_name')
@@ -420,26 +422,26 @@ export const fetchTeamScoutActivity = async (teamId) => {
             .eq('role', 'scout');
 
         if (scoutError || !scouts || scouts.length === 0) {
-            console.log("No scouts found for this team.");
+            console.log("No scouts found for this team in the profiles table.");
             return [];
         }
 
         const scoutIds = scouts.map(s => s.id);
 
-        // 2. Fetch recent analytics events by these scouts
+        // 2. Get the latest analytics events for those specific scout IDs
         const { data: events, error: eventError } = await supabase
             .from('analytics_events')
             .select('*')
-            .in('viewer_id', scoutIds)
+            .in('viewer_id', scoutIds) // 👈 This checks if the viewer is one of your scouts
             .order('created_at', { ascending: false })
             .limit(10);
 
         if (eventError || !events || events.length === 0) {
-            console.log("No activity events found for these scouts.");
+            console.log("No events found for these scouts in analytics_events.");
             return [];
         }
 
-        // 3. Fetch player names manually (avoids complex JOIN errors)
+        // 3. Fetch the player names for those events
         const playerIds = [...new Set(events.map(e => e.player_id))];
         const { data: players } = await supabase
             .from('players')
