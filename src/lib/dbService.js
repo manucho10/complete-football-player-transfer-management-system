@@ -75,7 +75,10 @@ export const updateTransferStatus = async (transferId, status) => {
         .select()
         .single();
 
-    if (error) throw error;
+    if (error) {
+        // ⭐ This forces the real Supabase error to show up in the alert
+        throw new Error(error.message);
+    }
     return data;
 };
 
