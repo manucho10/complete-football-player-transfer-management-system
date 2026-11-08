@@ -22,6 +22,7 @@ import Squad from './pages/Squad';
 import Watchlist from './pages/Watchlist';
 import FindScouts from './pages/FindScouts';
 import MyScouts from './pages/MyScouts';
+import AITalentFinder from './pages/AITalentFinder';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -150,6 +151,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <MyScouts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-scout"
+            element={
+              <ProtectedRoute>
+                <AITalentFinder />
               </ProtectedRoute>
             }
           />

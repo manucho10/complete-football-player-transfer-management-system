@@ -119,6 +119,7 @@ const TeamDashboard = () => {
         { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
         { id: 'squad', label: 'Squad', icon: <Users className="w-5 h-5" />, path: '/squad' },
         { id: 'scouts', label: 'My Scouts', icon: <UserPlus className="w-5 h-5" />, path: '/my-scouts' },
+        { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
         { id: 'targets', label: 'Transfer Targets', icon: <Target className="w-5 h-5" />, path: '/players' },
         { id: 'offers', label: 'Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
