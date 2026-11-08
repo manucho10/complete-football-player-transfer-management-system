@@ -487,12 +487,8 @@ export const fetchTeamScoutActivity = async (teamId) => {
 };
 // src/lib/dbService.js
 
-// ==========================================
-// TEAM CLUB OVERVIEW
-// ==========================================
 export const fetchClubOverview = async (teamId) => {
-    // 1. Get Expiring Contracts (Players whose contract ends soon)
-    // For demo, we'll fetch all players under contract
+    // 1. Get Expiring Contracts
     const { data: squad } = await supabase
         .from('players')
         .select('*')
@@ -502,24 +498,30 @@ export const fetchClubOverview = async (teamId) => {
         .sort((a, b) => new Date(a.contract_end_date) - new Date(b.contract_end_date))
         .slice(0, 3) || [];
 
-    // 2. Get New Signings (Players added recently)
+    // 2. Get New Signings
     const newSignings = squad?.slice(0, 3) || [];
 
-    // 3. Mock Fixtures (Since we don't have a matches table yet)
-    const fixtures = [
-        { id: 1, opponent: 'FC Barcelona', date: 'Sat, Oct 12', home: false, competition: 'La Liga' },
-        { id: 2, opponent: 'Real Madrid', date: 'Wed, Oct 16', home: true, competition: 'Champions League' },
-        { id: 3, opponent: 'Sevilla FC', date: 'Sun, Oct 20', home: true, competition: 'La Liga' },
-    ];
+    // 3. Fetch REAL Fixtures from DB
+    const { data: fixtures } = await supabase
+        .from('fixtures')
+        .select('*')
+        .eq('team_id', teamId)
+        .order('match_date', { ascending: true })
+        .limit(3);
 
-    // 4. Mock League Table Position
+    // 4. Mock League Table (We can connect this to a real table later)
     const leagueTable = [
         { pos: 1, team: 'Real Madrid', pts: 24 },
         { pos: 2, team: 'FC Barcelona', pts: 22 },
         { pos: 3, team: 'Atletico Madrid', pts: 19 },
-        { pos: 4, team: 'My Team', pts: 18 }, // We will highlight this
+        { pos: 4, team: 'My Team', pts: 18 },
         { pos: 5, team: 'Villarreal', pts: 15 },
     ];
 
-    return { expiringContracts, newSignings, fixtures, leagueTable };
+    return {
+        expiringContracts,
+        newSignings,
+        fixtures: fixtures || [], // Now pulling from DB
+        leagueTable
+    };
 };
