@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, Briefcase, DollarSign, Award, BarChart3, Plus,
-    Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, TrendingUp
+    Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, TrendingUp, Sparkles,
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
@@ -40,6 +40,7 @@ const AgentDashboard = () => {
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
         { id: 'clients', label: 'My Clients', icon: <Users className="w-5 h-5" />, path: '/players' },
+        { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
         { id: 'negotiations', label: 'Negotiations', icon: <Briefcase className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
         { id: 'commission', label: 'Commission', icon: <DollarSign className="w-5 h-5" /> },

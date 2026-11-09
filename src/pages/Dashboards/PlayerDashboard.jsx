@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Eye, Star, FileText, DollarSign, BarChart3, Video, User,
-    Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, TrendingUp
+    Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, TrendingUp, Sparkles,
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
@@ -44,6 +44,7 @@ const PlayerDashboard = () => {
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
         { id: 'discover', label: 'Discover Clubs', icon: <Building2 className="w-5 h-5" /> },
+        { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
         { id: 'offers', label: 'My Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
         { id: 'profile', label: 'My Profile', icon: <User className="w-5 h-5" />, path: '/profile' },
