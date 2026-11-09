@@ -48,7 +48,9 @@ export const fetchPlayerById = async (id) => {
 
 // src/lib/dbService.js
 export const fetchTransfers = async (userId) => {
-    // Fetch ALL transfers first to see if the connection works
+    console.log("1. Fetching transfers for User ID:", userId);
+
+    // Fetch ALL transfers
     const { data, error } = await supabase
         .from('transfers')
         .select('*')
@@ -59,13 +61,21 @@ export const fetchTransfers = async (userId) => {
         return [];
     }
 
-    // Filter them manually in JavaScript just to be 100% sure
-    const myTransfers = data.filter(t =>
-        t.from_user_id === userId ||
-        t.to_user_id === userId ||
-        t.player_user_id === userId ||
-        t.agent_id === userId
-    );
+    console.log("2. All transfers in DB:", data);
+
+    // Filter them manually
+    const myTransfers = data.filter(t => {
+        const isMine =
+            t.from_user_id === userId ||
+            t.to_user_id === userId ||
+            t.player_user_id === userId ||
+            t.agent_id === userId;
+
+        if (isMine) console.log("Found a matching transfer:", t);
+        return isMine;
+    });
+
+    console.log("3. Filtered transfers for this user:", myTransfers);
 
     return myTransfers.map(t => ({
         ...t,
