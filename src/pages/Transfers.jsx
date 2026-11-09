@@ -446,52 +446,15 @@ const Transfers = () => {
                             {/* Actions */}
                             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-700">
                                 <>
-                                    {/* ⭐ AGENT NEGOTIATION UI ⭐ */}
+                                    {/* ⭐ AGENT NEGOTIATION BUTTON ⭐ */}
                                     {user.role === 'agent' && selectedOffer.status !== 'accepted' && selectedOffer.status !== 'rejected' && (
                                         <div className="pt-4 border-t border-gray-700">
-                                            {!showNegotiationForm ? (
-                                                <button
-                                                    onClick={() => {
-                                                        setCounterAmount(selectedOffer.amount);
-                                                        setCounterSalary(selectedOffer.salary || '');
-                                                        setShowNegotiationForm(true);
-                                                    }}
-                                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition-all"
-                                                >
-                                                    Negotiate on Behalf of Client
-                                                </button>
-                                            ) : (
-                                                <div className="bg-gray-700/30 p-4 rounded-xl space-y-4 border border-purple-500/30">
-                                                    <h4 className="text-sm font-bold text-purple-400">Submit Counter-Offer</h4>
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <div>
-                                                            <label className="block text-xs text-gray-400 mb-1">New Transfer Fee (€)</label>
-                                                            <input
-                                                                type="number"
-                                                                value={counterAmount}
-                                                                onChange={(e) => setCounterAmount(e.target.value)}
-                                                                className="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-sm text-white"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-xs text-gray-400 mb-1">New Salary (€/yr)</label>
-                                                            <input
-                                                                type="text"
-                                                                value={counterSalary}
-                                                                onChange={(e) => setCounterSalary(e.target.value)}
-                                                                placeholder="e.g. 2.5M"
-                                                                className="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-sm text-white"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <button onClick={() => setShowNegotiationForm(false)} className="flex-1 bg-gray-700 py-2 rounded-lg text-sm">Cancel</button>
-                                                        <button onClick={handleCounterOffer} disabled={isNegotiating} className="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg text-sm font-bold">
-                                                            {isNegotiating ? 'Sending...' : 'Send to Club'}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
+                                            <button
+                                                onClick={() => navigate(`/negotiate/${selectedOffer.id}`)}
+                                                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Handshake className="w-5 h-5" /> Negotiate on Behalf of Client
+                                            </button>
                                         </div>
                                     )}
 

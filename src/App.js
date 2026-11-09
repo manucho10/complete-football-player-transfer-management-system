@@ -26,6 +26,7 @@ import AITalentFinder from './pages/AITalentFinder';
 import BrowseClubs from './pages/BrowseClubs';
 import ClubProfile from './pages/ClubProfile';
 import MyRoster from './pages/MyRoster';
+import NegotiateTransfer from './pages/NegotiateTransfer';
 
 // Placeholder pages
 
@@ -190,6 +191,10 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/negotiate/:id" element=
+            {<ProtectedRoute>
+              <NegotiateTransfer />
+            </ProtectedRoute>} />
 
           {/* ============ ROLE-RESTRICTED ROUTES ============ */}
 
