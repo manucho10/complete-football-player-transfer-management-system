@@ -1,7 +1,7 @@
 // src/pages/ClubProfile.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Shield, MapPin, DollarSign, Award, Users, MessageSquare, Loader2, AlertCircle, X } from 'lucide-react';
+import { ArrowLeft, Shield, MapPin, DollarSign, Award, Users, MessageSquare, Loader2, AlertCircle, X, CheckCircle2, } from 'lucide-react';
 import { supabase } from '../lib/SupabaseClient';
 import { useAuth } from '../context/AuthContext';
 
