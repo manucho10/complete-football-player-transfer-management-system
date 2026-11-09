@@ -5,7 +5,7 @@ import {
     ArrowLeft, Star, MapPin, Calendar, Globe, Building2, TrendingUp,
     Eye, Target, Award, BarChart3, Video, Play, Heart, MessageSquare,
     Share2, X, AlertCircle, CheckCircle2, Trophy, Zap, Shield, Activity,
-    FileText, Loader2, Clock
+    FileText, Loader2, Clock, Plus,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { fetchPlayerById, fetchPlayerVideos } from '../lib/dbService';
