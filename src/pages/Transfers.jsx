@@ -33,8 +33,10 @@ const Transfers = () => {
     const [counterSalary, setCounterSalary] = useState('');
     const [isNegotiating, setIsNegotiating] = useState(false);
 
+
     useEffect(() => {
         if (!user) return;
+
         const loadTransfers = async () => {
             setIsLoading(true);
             try {
@@ -46,6 +48,7 @@ const Transfers = () => {
                 setIsLoading(false);
             }
         };
+
         loadTransfers();
     }, [user]);
 
@@ -435,11 +438,14 @@ const Transfers = () => {
                                     )}
                                 </div>
                             </div>
-
                             {selectedOffer.notes && (
                                 <div>
-                                    <h3 className="font-semibold mb-2 flex items-center gap-2"><FileText className="w-4 h-4 text-green-400" /> Notes</h3>
-                                    <p className="text-sm text-gray-300 bg-gray-700/30 rounded-lg p-3">{selectedOffer.notes}</p>
+                                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                                        <FileText className="w-4 h-4 text-green-400" /> Notes
+                                    </h3>
+                                    <p className="text-sm text-gray-300 bg-gray-700/30 rounded-lg p-3">
+                                        {selectedOffer.notes}
+                                    </p>
                                 </div>
                             )}
 
