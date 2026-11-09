@@ -93,7 +93,7 @@ const PlayerDashboard = () => {
         },
         { label: 'Update Profile', icon: <User className="w-5 h-5" />, path: '/profile' },
         { label: 'View Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
-        { label: 'Browse Clubs', icon: <Building2 className="w-5 h-5" /> },
+
         { label: 'Browse Clubs', icon: <Building2 className="w-5 h-5" />, path: '/browse-clubs' },
     ];
 
