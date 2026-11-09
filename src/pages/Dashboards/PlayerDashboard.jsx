@@ -43,7 +43,7 @@ const PlayerDashboard = () => {
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
-        { id: 'discover', label: 'Discover Clubs', icon: <Building2 className="w-5 h-5" /> },
+        { id: 'discover', label: 'Discover Clubs', icon: <Building2 className="w-5 h-5" />, path: '/browse-clubs' },
         { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
         { id: 'offers', label: 'My Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
@@ -94,6 +94,7 @@ const PlayerDashboard = () => {
         { label: 'Update Profile', icon: <User className="w-5 h-5" />, path: '/profile' },
         { label: 'View Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
         { label: 'Browse Clubs', icon: <Building2 className="w-5 h-5" /> },
+        { label: 'Browse Clubs', icon: <Building2 className="w-5 h-5" />, path: '/browse-clubs' },
     ];
 
     return (
