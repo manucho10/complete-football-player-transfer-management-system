@@ -34,6 +34,11 @@ const AgentDashboard = () => {
         };
 
         loadData();
+
+        // ⭐ Add this: Refetch when the window gets focus
+        window.addEventListener('focus', loadData);
+        return () => window.removeEventListener('focus', loadData);
+
     }, [user]);
 
     const navItems = [
