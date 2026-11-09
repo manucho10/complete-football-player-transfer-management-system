@@ -48,10 +48,10 @@ export const fetchPlayerById = async (id) => {
 
 // src/lib/dbService.js
 export const fetchTransfers = async (userId) => {
+    // Fetch ALL transfers first to see if the connection works
     const { data, error } = await supabase
         .from('transfers')
         .select('*')
-        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId},player_user_id.eq.${userId},agent_id.eq.${userId}`)
         .order('id', { ascending: false });
 
     if (error) {
@@ -59,9 +59,16 @@ export const fetchTransfers = async (userId) => {
         return [];
     }
 
-    return data.map(t => ({
+    // Filter them manually in JavaScript just to be 100% sure
+    const myTransfers = data.filter(t =>
+        t.from_user_id === userId ||
+        t.to_user_id === userId ||
+        t.player_user_id === userId ||
+        t.agent_id === userId
+    );
+
+    return myTransfers.map(t => ({
         ...t,
-        // ⭐ Force status to lowercase and default to 'pending' if null
         status: (t.status || 'pending').toLowerCase(),
         playerName: t.player_name || 'Unknown Player',
         fromName: t.from_name || 'Unknown Club',
