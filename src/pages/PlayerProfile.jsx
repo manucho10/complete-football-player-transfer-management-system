@@ -230,6 +230,23 @@ const PlayerProfile = () => {
                         <button onClick={handleContact} className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
                             <MessageSquare className="w-4 h-4" /> <span className="hidden sm:inline">Contact</span>
                         </button>
+                        {/* ⭐ Add Client Button (Only for Agents) */}
+                        {user?.role === 'agent' && (
+                            <button
+                                onClick={async () => {
+                                    if (!window.confirm(`Do you want to add ${player.name} to your roster?`)) return;
+                                    const { error } = await supabase
+                                        .from('players')
+                                        .update({ agent_id: user.id })
+                                        .eq('id', player.id);
+                                    if (error) alert("Failed to add client.");
+                                    else alert(`${player.name} is now on your roster!`);
+                                }}
+                                className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                            >
+                                <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Sign Client</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

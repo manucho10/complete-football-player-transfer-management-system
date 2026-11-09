@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, Briefcase, DollarSign, Award, BarChart3, Plus,
-    Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, TrendingUp, Sparkles,
+    Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, Star, Search, Sparkles
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
@@ -38,12 +38,10 @@ const AgentDashboard = () => {
 
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
-        { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
-        { id: 'clients', label: 'My Clients', icon: <Users className="w-5 h-5" />, path: '/players' },
         { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
+        { id: 'clients', label: 'My Roster', icon: <Users className="w-5 h-5" />, path: '/players' },
         { id: 'negotiations', label: 'Negotiations', icon: <Briefcase className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
-        { id: 'commission', label: 'Commission', icon: <DollarSign className="w-5 h-5" /> },
     ];
 
     const role = roleConfig.agent;
@@ -60,34 +58,10 @@ const AgentDashboard = () => {
     }
 
     const stats = [
-        {
-            label: 'Active Clients',
-            value: data?.stats.activeClients || 0,
-            change: 'Live', up: true,
-            icon: <Users className="w-5 h-5" />,
-            color: 'text-purple-400 bg-purple-500/10'
-        },
-        {
-            label: 'Open Negotiations',
-            value: data?.stats.openNegotiations || 0,
-            change: 'Live', up: true,
-            icon: <Briefcase className="w-5 h-5" />,
-            color: 'text-blue-400 bg-blue-500/10'
-        },
-        {
-            label: 'Commission MTD',
-            value: `€${(data?.stats.commission / 1000).toFixed(0) || 0}K`,
-            change: 'Est.', up: true,
-            icon: <DollarSign className="w-5 h-5" />,
-            color: 'text-green-400 bg-green-500/10'
-        },
-        {
-            label: 'Deals Closed',
-            value: data?.stats.closedDeals || 0,
-            change: 'Live', up: true,
-            icon: <Award className="w-5 h-5" />,
-            color: 'text-yellow-400 bg-yellow-500/10'
-        },
+        { label: 'Active Clients', value: data?.stats.activeClients || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
+        { label: 'Open Negotiations', value: data?.stats.openNegotiations || 0, change: 'Live', up: true, icon: <Briefcase className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
+        { label: 'Commission MTD', value: `€${(data?.stats.commission / 1000).toFixed(0) || 0}K`, change: 'Est.', up: true, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
+        { label: 'Deals Closed', value: data?.stats.closedDeals || 0, change: 'Live', up: true, icon: <Award className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
     ];
 
     const recentActivity = data?.recentActivity.map((a) => ({
@@ -97,14 +71,15 @@ const AgentDashboard = () => {
 
     const quickActions = [
         { label: 'Add Client', icon: <Plus className="w-5 h-5" /> },
-        { label: 'New Negotiation', icon: <Briefcase className="w-5 h-5" />, path: '/transfers' },
-        { label: 'View Roster', icon: <Users className="w-5 h-5" />, path: '/players' },
-        { label: 'Commission Report', icon: <BarChart3 className="w-5 h-5" /> },
+        { label: 'Negotiations', icon: <Briefcase className="w-5 h-5" />, path: '/transfers' },
+        { label: 'Search Players', icon: <Search className="w-5 h-5" />, path: '/players' },
+        { label: 'AI Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
     ];
 
     return (
         <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={recentActivity}>
             <div className="space-y-6">
+
                 {/* Welcome Banner */}
                 <div className={`bg-gradient-to-r ${role.color} rounded-2xl p-6 sm:p-8`}>
                     <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
@@ -160,23 +135,33 @@ const AgentDashboard = () => {
                         {data?.clients.length === 0 ? (
                             <div className="text-center py-8">
                                 <Users className="w-10 h-10 text-gray-600 mx-auto mb-2" />
-                                <p className="text-sm text-gray-400">No clients assigned yet.</p>
+                                <p className="text-sm text-gray-400 mb-4">You don't represent any players yet.</p>
+                                <button onClick={() => navigate('/players')} className="text-xs bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg font-semibold">
+                                    Find Players
+                                </button>
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {data?.clients.map((client, i) => (
+                                {data?.clients.slice(0, 5).map((client, i) => (
                                     <button
                                         key={i}
                                         onClick={() => navigate(`/players/${client.id}`)}
                                         className="w-full text-left flex items-center justify-between p-3 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg transition-colors"
                                     >
-                                        <div>
-                                            <p className="text-sm font-semibold">{client.name}</p>
-                                            <p className="text-xs text-gray-400">{client.position}</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-lg font-bold text-purple-400">
+                                                {client.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold">{client.name}</p>
+                                                <p className="text-xs text-gray-400">{client.position} • {client.club}</p>
+                                            </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-semibold text-purple-400">{client.market_value || '€0'}</p>
-                                            <p className="text-xs text-gray-400">{client.availability}</p>
+                                            <p className="text-sm font-semibold text-green-400">{client.market_value || 'N/A'}</p>
+                                            <div className="flex items-center justify-end gap-1 text-yellow-400 text-xs">
+                                                <Star className="w-3 h-3 fill-current" /> {client.rating}
+                                            </div>
                                         </div>
                                     </button>
                                 ))}

@@ -257,14 +257,15 @@ export const fetchScoutDashboardData = async (userId) => {
 // ==========================================
 // DASHBOARD (Agent Specific)
 // ==========================================
+// src/lib/dbService.js
+
 export const fetchAgentDashboardData = async (userId) => {
     // 1. Fetch Clients (Players managed by this agent)
-    // We look for players where agent_id = userId (you may need to add this column to your players table later)
-    // For now, we will just fetch a general list to display if the column doesn't exist yet.
     const { data: clients } = await supabase
         .from('players')
-        .select('id, name, position, market_value, availability')
-        .limit(5);
+        .select('*')
+        .eq('agent_id', userId)
+        .order('rating', { ascending: false });
 
     // 2. Fetch Transfers involving this agent
     const { data: transfers } = await supabase
@@ -275,7 +276,7 @@ export const fetchAgentDashboardData = async (userId) => {
     const openNegotiations = transfers?.filter(t => ['pending', 'negotiating'].includes(t.status)) || [];
     const closedDeals = transfers?.filter(t => t.status === 'accepted') || [];
 
-    // 3. Calculate Commission (Mock calculation: 5% of closed deals)
+    // 3. Calculate Commission (5% of closed deals)
     const totalCommission = closedDeals.reduce((sum, deal) => sum + (Number(deal.amount) * 0.05), 0);
 
     // 4. Recent Notifications
@@ -297,7 +298,6 @@ export const fetchAgentDashboardData = async (userId) => {
         recentActivity: activity || [],
     };
 };
-// src/lib/dbService.js
 
 // ==========================================
 // DASHBOARD (Team Specific)
