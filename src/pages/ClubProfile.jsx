@@ -1,7 +1,7 @@
 // src/pages/ClubProfile.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Shield, MapPin, DollarSign, Award, Users, MessageSquare, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Shield, MapPin, DollarSign, Award, Users, MessageSquare, Loader2, AlertCircle, X } from 'lucide-react';
 import { supabase } from '../lib/SupabaseClient';
 import { useAuth } from '../context/AuthContext';
 
@@ -49,6 +49,7 @@ const ClubProfile = () => {
         if (id) loadClubData();
     }, [id]);
 
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white">
@@ -69,6 +70,64 @@ const ClubProfile = () => {
             </div>
         );
     }
+    // Modal State
+    const [showContactModal, setShowContactModal] = useState(false);
+    const [contactMessage, setContactMessage] = useState('');
+    const [isSending, setIsSending] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+
+    // Handle Sending Message
+    const handleSendMessage = async () => {
+        if (!contactMessage.trim() || !user) return;
+        setIsSending(true);
+
+        try {
+            // 1. Check if a conversation exists
+            const { data: existingConv } = await supabase
+                .from('conversations')
+                .select('id')
+                .or(`and(user1_id.eq.${user.id},user2_id.eq.${club.id}),and(user1_id.eq.${club.id},user2_id.eq.${user.id})`)
+                .maybeSingle();
+
+            let conversationId = existingConv?.id;
+
+            // 2. Create conversation if it doesn't exist
+            if (!conversationId) {
+                const { data: newConv, error: convError } = await supabase
+                    .from('conversations')
+                    .insert({ user1_id: user.id, user2_id: club.id })
+                    .select()
+                    .single();
+
+                if (convError) throw convError;
+                conversationId = newConv.id;
+            }
+
+            // 3. Insert the message
+            await supabase.from('messages').insert({
+                conversation_id: conversationId,
+                sender_id: user.id,
+                text: contactMessage,
+            });
+
+            // 4. Update conversation metadata
+            await supabase.from('conversations').update({
+                last_message: contactMessage,
+                last_message_at: new Date().toISOString()
+            }).eq('id', conversationId);
+
+            setShowContactModal(false);
+            setContactMessage('');
+            setSuccessMessage('Message sent successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+
+        } catch (error) {
+            console.error(error);
+            alert('Failed to send message.');
+        } finally {
+            setIsSending(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
@@ -80,7 +139,7 @@ const ClubProfile = () => {
                         <ArrowLeft className="w-4 h-4" /> Back
                     </button>
                     <button
-                        onClick={() => navigate('/messages')}
+                        onClick={() => setShowContactModal(true)} // ⭐ Opens modal instead of navigating
                         className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
                     >
                         <MessageSquare className="w-4 h-4" /> Contact Club
@@ -146,6 +205,50 @@ const ClubProfile = () => {
                 </div>
 
             </div>
+            {/* CONTACT MODAL */}
+            {showContactModal && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowContactModal(false)}>
+                    <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center">
+                                    <MessageSquare className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold">Contact {club.team_name || club.full_name}</h2>
+                                    <p className="text-xs text-gray-400">Send a direct message to the club</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowContactModal(false)} className="p-2 hover:bg-gray-700/50 rounded-lg">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <textarea
+                                rows={5}
+                                value={contactMessage}
+                                onChange={(e) => setContactMessage(e.target.value)}
+                                placeholder={`Hi, I'm interested in joining ${club.team_name || club.full_name}...`}
+                                className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+                            />
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button onClick={() => setShowContactModal(false)} className="flex-1 bg-gray-700 hover:bg-gray-600 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSendMessage}
+                                disabled={!contactMessage.trim() || isSending}
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-40 disabled:cursor-not-allowed py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                            >
+                                {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Message'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
