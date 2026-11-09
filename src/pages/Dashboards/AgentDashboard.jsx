@@ -70,7 +70,7 @@ const AgentDashboard = () => {
     })) || [];
 
     const quickActions = [
-        { label: 'Add Client', icon: <Plus className="w-5 h-5" /> },
+        { label: 'Add Client', icon: <Plus className="w-5 h-5" />, path: '/players' }, // ⭐ Added path
         { label: 'Negotiations', icon: <Briefcase className="w-5 h-5" />, path: '/transfers' },
         { label: 'Search Players', icon: <Search className="w-5 h-5" />, path: '/players' },
         { label: 'AI Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
