@@ -296,7 +296,10 @@ export const fetchAgentDashboardData = async (userId) => {
     const closedDeals = transfers?.filter(t => t.status === 'accepted') || [];
 
     // 3. Calculate Commission (5% of closed deals)
-    const totalCommission = closedDeals.reduce((sum, deal) => sum + (Number(deal.amount) * 0.05), 0);
+    const totalCommission = closedDeals.reduce((sum, deal) => {
+        return sum + (Number(deal.agent_commission) || 0);
+    }, 0);
+
 
     // 4. Recent Notifications
     const { data: activity } = await supabase
@@ -543,4 +546,27 @@ export const fetchClubOverview = async (teamId) => {
         fixtures: fixtures || [], // Now pulling from DB
         leagueTable
     };
+};
+// src/lib/dbService.js
+
+export const submitCounterOffer = async (transferId, newAmount, newSalary, commissionRate = 5) => {
+    // Calculate the agent's commission (e.g., 5% of the new amount)
+    const commission = newAmount * (commissionRate / 100);
+
+    const { data, error } = await supabase
+        .from('transfers')
+        .update({
+            amount: newAmount,
+            salary: newSalary,
+            agent_commission: commission,
+            is_counter_offer: true,
+            status: 'negotiating', // Reset to negotiating
+            notes: 'Counter-offer submitted by Agent.'
+        })
+        .eq('id', transferId)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
 };
