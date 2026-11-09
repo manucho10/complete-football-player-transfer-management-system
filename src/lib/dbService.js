@@ -51,7 +51,6 @@ export const fetchTransfers = async (userId) => {
     const { data, error } = await supabase
         .from('transfers')
         .select('*')
-        // ⭐ Added agent_id to the OR filter
         .or(`from_user_id.eq.${userId},to_user_id.eq.${userId},player_user_id.eq.${userId},agent_id.eq.${userId}`)
         .order('id', { ascending: false });
 
@@ -62,6 +61,8 @@ export const fetchTransfers = async (userId) => {
 
     return data.map(t => ({
         ...t,
+        // ⭐ Force status to lowercase and default to 'pending' if null
+        status: (t.status || 'pending').toLowerCase(),
         playerName: t.player_name || 'Unknown Player',
         fromName: t.from_name || 'Unknown Club',
         toName: t.to_name || 'Unknown Club',

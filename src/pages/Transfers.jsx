@@ -65,7 +65,7 @@ const Transfers = () => {
     }, [offers, searchQuery, statusFilter]);
 
     const offersByStatus = {
-        pending: filteredOffers.filter((o) => o.status === 'pending'),
+        pending: filteredOffers.filter((o) => o.status === 'pending' || !['negotiating', 'accepted', 'rejected'].includes(o.status)),
         negotiating: filteredOffers.filter((o) => o.status === 'negotiating'),
         accepted: filteredOffers.filter((o) => o.status === 'accepted'),
         rejected: filteredOffers.filter((o) => o.status === 'rejected'),
