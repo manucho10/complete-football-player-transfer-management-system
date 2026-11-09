@@ -39,7 +39,7 @@ const AgentDashboard = () => {
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
-        { id: 'clients', label: 'My Roster', icon: <Users className="w-5 h-5" />, path: '/players' },
+        { id: 'clients', label: 'My Roster', icon: <Users className="w-5 h-5" />, path: '/my-roster' },
         { id: 'negotiations', label: 'Negotiations', icon: <Briefcase className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
     ];

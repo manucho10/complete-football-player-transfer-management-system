@@ -25,6 +25,8 @@ import MyScouts from './pages/MyScouts';
 import AITalentFinder from './pages/AITalentFinder';
 import BrowseClubs from './pages/BrowseClubs';
 import ClubProfile from './pages/ClubProfile';
+import MyRoster from './pages/MyRoster';
+
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -177,6 +179,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ClubProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-roster"
+            element={
+              <ProtectedRoute>
+                <MyRoster />
               </ProtectedRoute>
             }
           />
