@@ -1,7 +1,7 @@
 // src/pages/BrowseClubs.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Shield, Loader2, DollarSign, Award, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Search, Shield, Loader2, DollarSign, Award, Eye } from 'lucide-react';
 import { supabase } from '../lib/SupabaseClient';
 
 const BrowseClubs = () => {
@@ -111,10 +111,10 @@ const BrowseClubs = () => {
                                     </div>
 
                                     <button
-                                        onClick={() => navigate('/messages')}
+                                        onClick={() => navigate(`/clubs/${club.id}`)}
                                         className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-colors"
                                     >
-                                        <MessageSquare className="w-4 h-4" /> Contact Club
+                                        <Eye className="w-4 h-4" /> View Club Profile
                                     </button>
                                 </div>
                             </div>
