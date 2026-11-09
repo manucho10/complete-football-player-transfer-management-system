@@ -50,9 +50,10 @@ export const fetchPlayerById = async (id) => {
 export const fetchTransfers = async (userId) => {
     const { data, error } = await supabase
         .from('transfers')
-        .select('*') // Simple select, no joins
-        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId},player_user_id.eq.${userId}`)
-        .order('id', { ascending: false }); // Order by ID instead of created_at
+        .select('*')
+        // ⭐ Added agent_id to the OR filter
+        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId},player_user_id.eq.${userId},agent_id.eq.${userId}`)
+        .order('id', { ascending: false });
 
     if (error) {
         console.error("Supabase error fetching transfers:", error);
