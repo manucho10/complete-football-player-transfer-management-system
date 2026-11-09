@@ -1,7 +1,7 @@
 // src/pages/BrowseClubs.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Shield, Loader2, DollarSign, Award, Eye } from 'lucide-react';
+import { ArrowLeft, Search, Shield, Loader2, DollarSign, Award, Eye, X } from 'lucide-react';
 import { supabase } from '../lib/SupabaseClient';
 
 const BrowseClubs = () => {

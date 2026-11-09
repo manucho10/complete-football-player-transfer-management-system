@@ -13,6 +13,11 @@ const ClubProfile = () => {
     const [club, setClub] = useState(null);
     const [squad, setSquad] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    // Modal State
+    const [showContactModal, setShowContactModal] = useState(false);
+    const [contactMessage, setContactMessage] = useState('');
+    const [isSending, setIsSending] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         const loadClubData = async () => {
@@ -48,6 +53,59 @@ const ClubProfile = () => {
 
         if (id) loadClubData();
     }, [id]);
+    // ⭐ Add this function to handle the message sending
+    const handleSendMessage = async () => {
+        if (!contactMessage.trim() || !user) return;
+        setIsSending(true);
+
+        try {
+            // 1. Check if a conversation already exists
+            const { data: existingConv } = await supabase
+                .from('conversations')
+                .select('id')
+                .or(`and(user1_id.eq.${user.id},user2_id.eq.${club.id}),and(user1_id.eq.${club.id},user2_id.eq.${user.id})`)
+                .maybeSingle();
+
+            let conversationId = existingConv?.id;
+
+            // 2. Create a new conversation if it doesn't exist
+            if (!conversationId) {
+                const { data: newConv, error: convError } = await supabase
+                    .from('conversations')
+                    .insert({ user1_id: user.id, user2_id: club.id })
+                    .select()
+                    .single();
+
+                if (convError) throw convError;
+                conversationId = newConv.id;
+            }
+
+            // 3. Insert the message
+            await supabase.from('messages').insert({
+                conversation_id: conversationId,
+                sender_id: user.id,
+                text: contactMessage,
+            });
+
+            // 4. Update the conversation's last message time
+            await supabase.from('conversations').update({
+                last_message: contactMessage,
+                last_message_at: new Date().toISOString()
+            }).eq('id', conversationId);
+
+            // 5. Show success and close modal
+            setShowContactModal(false);
+            setContactMessage('');
+            setSuccessMessage('Message sent successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+
+        } catch (error) {
+            console.error(error);
+            alert('Failed to send message.');
+        } finally {
+            setIsSending(false);
+        }
+    };
 
 
     if (isLoading) {
@@ -70,64 +128,6 @@ const ClubProfile = () => {
             </div>
         );
     }
-    // Modal State
-    const [showContactModal, setShowContactModal] = useState(false);
-    const [contactMessage, setContactMessage] = useState('');
-    const [isSending, setIsSending] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
-
-    // Handle Sending Message
-    const handleSendMessage = async () => {
-        if (!contactMessage.trim() || !user) return;
-        setIsSending(true);
-
-        try {
-            // 1. Check if a conversation exists
-            const { data: existingConv } = await supabase
-                .from('conversations')
-                .select('id')
-                .or(`and(user1_id.eq.${user.id},user2_id.eq.${club.id}),and(user1_id.eq.${club.id},user2_id.eq.${user.id})`)
-                .maybeSingle();
-
-            let conversationId = existingConv?.id;
-
-            // 2. Create conversation if it doesn't exist
-            if (!conversationId) {
-                const { data: newConv, error: convError } = await supabase
-                    .from('conversations')
-                    .insert({ user1_id: user.id, user2_id: club.id })
-                    .select()
-                    .single();
-
-                if (convError) throw convError;
-                conversationId = newConv.id;
-            }
-
-            // 3. Insert the message
-            await supabase.from('messages').insert({
-                conversation_id: conversationId,
-                sender_id: user.id,
-                text: contactMessage,
-            });
-
-            // 4. Update conversation metadata
-            await supabase.from('conversations').update({
-                last_message: contactMessage,
-                last_message_at: new Date().toISOString()
-            }).eq('id', conversationId);
-
-            setShowContactModal(false);
-            setContactMessage('');
-            setSuccessMessage('Message sent successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
-
-        } catch (error) {
-            console.error(error);
-            alert('Failed to send message.');
-        } finally {
-            setIsSending(false);
-        }
-    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
@@ -146,6 +146,12 @@ const ClubProfile = () => {
                     </button>
                 </div>
             </div>
+            {/* Success Message */}
+            {successMessage && (
+                <div className="max-w-6xl mx-auto mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-2 text-green-400 text-sm animate-fadeIn">
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> {successMessage}
+                </div>
+            )}
 
             <div className="max-w-6xl mx-auto p-4 sm:p-6">
 
