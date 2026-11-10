@@ -519,72 +519,55 @@ const Transfers = () => {
                                     <CheckCircle2 className="w-4 h-4" /> Sign Player
                                 </button>
                             )}
-                        </>
-
-                        <button onClick={() => navigate('/messages')} className="inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
-                            <MessageSquare className="w-4 h-4" /> Message
-                        </button>
-
-                        {selectedOffer.status !== 'accepted' && selectedOffer.status !== 'rejected' && (
-                            <>
-                                <button onClick={() => handleStatusChange(selectedOffer.id, 'rejected')} className="inline-flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
-                                    <XCircle className="w-4 h-4" /> Reject
-                                </button>
-                                <button onClick={() => handleStatusChange(selectedOffer.id, 'accepted')} className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
-                                    <Check className="w-4 h-4" /> Accept
-                                </button>
-                            </>
-                        )}
+                        </div>
                     </div>
                 </div>
-                    </div>
-                </div >
             )}
 
-{/* NEW OFFER MODAL */ }
-{
-    showNewOfferModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowNewOfferModal(false)}>
-            <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-                <div className="p-6 border-b border-gray-700 flex items-center justify-between">
-                    <h2 className="text-xl font-bold flex items-center gap-2"><Plus className="w-5 h-5 text-green-400" /> Create New Offer</h2>
-                    <button onClick={() => setShowNewOfferModal(false)} className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
-                </div>
-                <form onSubmit={handleCreateOffer} className="p-6 space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
-                        <input type="text" required value={newOfferData.playerName} onChange={(e) => setNewOfferData({ ...newOfferData, playerName: e.target.value })} placeholder="e.g., Lucas Ferreira" className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Fee (€)</label>
-                            <input type="number" required value={newOfferData.amount} onChange={(e) => setNewOfferData({ ...newOfferData, amount: e.target.value })} placeholder="0" className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
+            {/* NEW OFFER MODAL */}
+            {
+                showNewOfferModal && (
+                    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowNewOfferModal(false)}>
+                        <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+                            <div className="p-6 border-b border-gray-700 flex items-center justify-between">
+                                <h2 className="text-xl font-bold flex items-center gap-2"><Plus className="w-5 h-5 text-green-400" /> Create New Offer</h2>
+                                <button onClick={() => setShowNewOfferModal(false)} className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
+                            </div>
+                            <form onSubmit={handleCreateOffer} className="p-6 space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
+                                    <input type="text" required value={newOfferData.playerName} onChange={(e) => setNewOfferData({ ...newOfferData, playerName: e.target.value })} placeholder="e.g., Lucas Ferreira" className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Fee (€)</label>
+                                        <input type="number" required value={newOfferData.amount} onChange={(e) => setNewOfferData({ ...newOfferData, amount: e.target.value })} placeholder="0" className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">Duration</label>
+                                        <select value={newOfferData.duration} onChange={(e) => setNewOfferData({ ...newOfferData, duration: e.target.value })} className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500">
+                                            <option>1 year</option><option>2 years</option><option>3 years</option><option>4 years</option><option>5 years</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+                                    <textarea rows={3} value={newOfferData.notes} onChange={(e) => setNewOfferData({ ...newOfferData, notes: e.target.value })} placeholder="Additional terms or notes..." className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 resize-none" />
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button type="button" onClick={() => setShowNewOfferModal(false)} className="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-semibold transition-all">Cancel</button>
+                                    <button type="submit" disabled={isSubmitting} className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-50 py-3 rounded-xl font-semibold transition-all flex items-center justify-center">
+                                        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Offer'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Duration</label>
-                            <select value={newOfferData.duration} onChange={(e) => setNewOfferData({ ...newOfferData, duration: e.target.value })} className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500">
-                                <option>1 year</option><option>2 years</option><option>3 years</option><option>4 years</option><option>5 years</option>
-                            </select>
-                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
-                        <textarea rows={3} value={newOfferData.notes} onChange={(e) => setNewOfferData({ ...newOfferData, notes: e.target.value })} placeholder="Additional terms or notes..." className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 resize-none" />
-                    </div>
-                    <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={() => setShowNewOfferModal(false)} className="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-semibold transition-all">Cancel</button>
-                        <button type="submit" disabled={isSubmitting} className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-50 py-3 rounded-xl font-semibold transition-all flex items-center justify-center">
-                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Offer'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
-}
+                )
+            }
 
-<style dangerouslySetInnerHTML={{
-    __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
