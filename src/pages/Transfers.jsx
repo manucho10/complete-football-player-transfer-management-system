@@ -88,49 +88,44 @@ const Transfers = () => {
         { label: 'Accepted', value: offersByStatus.accepted.length, icon: <CheckCircle2 className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
         { label: 'Total Deal Value', value: `€${(totalValue / 1000000).toFixed(1)}M`, icon: <DollarSign className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
     ];
-
-    const handleStatusChange = async (offerId, newStatus) => {
+    const handleStatusChange = async (offerId, action) => {
         try {
-            // 1. Update the transfer status in the database
-            await updateTransferStatus(offerId, newStatus);
+            const offer = offers.find(o => o.id === offerId);
+            if (!offer) return;
 
-            // 2. If accepted, update the Player's squad AND the Profile's current club
-            if (newStatus === 'accepted' && selectedOffer) {
+            const updates = {};
+            const isTeam = user.id === offer.from_user_id;
+            const isPlayer = user.id === offer.player_user_id;
 
-                // A. Update the players table
-                const { error: playerError } = await supabase
-                    .from('players')
-                    .update({
-                        team_id: selectedOffer.from_user_id,
-                        club: selectedOffer.from_name,
-                        availability: 'Under Contract'
-                    })
-                    .eq('id', selectedOffer.player_id);
+            if (action === 'reject') {
+                updates.status = 'rejected';
+            } else if (action === 'accept') {
+                if (isTeam) updates.team_accepted = true;
+                if (isPlayer) updates.player_accepted = true;
 
-                if (playerError) throw playerError;
-
-                // B. Update the profiles table (This fixes the Settings page!)
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .update({
-                        current_club: selectedOffer.from_name
-                    })
-                    .eq('id', selectedOffer.player_user_id);
-
-                if (profileError) throw profileError;
-
-                alert("Offer accepted! Player added to squad and profile updated.");
+                // If the other party has already accepted, complete the deal
+                if ((isTeam && offer.player_accepted) || (isPlayer && offer.team_accepted)) {
+                    updates.status = 'accepted';
+                }
             }
 
-            // 3. Update the UI
-            setOffers((prev) => prev.map((o) => (o.id === offerId ? { ...o, status: newStatus } : o)));
+            // Update DB
+            await supabase.from('transfers').update(updates).eq('id', offerId);
+
+            // Refresh local state
+            const updatedOffers = await fetchTransfers(user.id);
+            setOffers(updatedOffers);
             setSelectedOffer(null);
 
         } catch (error) {
             console.error('Failed to update status:', error);
-            alert(`Failed to update: ${error.message || 'Unknown error'}`);
+            alert(`Failed to update: ${error.message}`);
         }
     };
+
+
+
+
     const handleCreateOffer = async (e) => {
         e.preventDefault();
         if (!newOfferData.playerName || !newOfferData.amount) return;
@@ -450,102 +445,146 @@ const Transfers = () => {
                             )}
 
                             {/* Actions */}
-                            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-700">
-                                <>
-                                    {/* ⭐ AGENT NEGOTIATION BUTTON ⭐ */}
-                                    {user.role === 'agent' && selectedOffer.status !== 'accepted' && selectedOffer.status !== 'rejected' && (
-                                        <div className="pt-4 border-t border-gray-700">
-                                            <button
-                                                onClick={() => navigate(`/negotiate/${selectedOffer.id}`)}
-                                                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Handshake className="w-5 h-5" /> Negotiate on Behalf of Client
-                                            </button>
+                            <div className="flex flex-col gap-3 pt-4 border-t border-gray-700">
+
+                                {/* Negotiation Status */}
+                                {selectedOffer.status === 'negotiating' && (
+                                    <div className="flex gap-2 mb-2">
+                                        <div className={`flex-1 text-center p-2 rounded-lg text-xs font-bold ${selectedOffer.team_accepted ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'}`}>
+                                            Team: {selectedOffer.team_accepted ? 'Accepted' : 'Pending'}
                                         </div>
-                                    )}
-
-                                    {/* ⭐ PDF DOWNLOAD BUTTON ⭐ */}
-                                    {selectedOffer.status === 'accepted' && (
-                                        <button
-                                            onClick={() => generateTransferContract(selectedOffer)}
-                                            className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
-                                        >
-                                            <Download className="w-4 h-4" /> Download PDF
-                                        </button>
-                                    )}
-                                    {/* ⭐ ONLY SHOW FOR THE BUYING TEAM ⭐ */}
-                                    {['team', 'agent'].includes(user.role) && (
-                                        <button
-                                            onClick={handleCompleteTransfer}
-                                            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
-                                        >
-                                            <CheckCircle2 className="w-4 h-4" /> Sign Player
-                                        </button>
-                                    )}
-                                </>
-
-                                <button onClick={() => navigate('/messages')} className="inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
-                                    <MessageSquare className="w-4 h-4" /> Message
-                                </button>
-
-                                {selectedOffer.status !== 'accepted' && selectedOffer.status !== 'rejected' && (
-                                    <>
-                                        <button onClick={() => handleStatusChange(selectedOffer.id, 'rejected')} className="inline-flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
-                                            <XCircle className="w-4 h-4" /> Reject
-                                        </button>
-                                        <button onClick={() => handleStatusChange(selectedOffer.id, 'accepted')} className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
-                                            <Check className="w-4 h-4" /> Accept
-                                        </button>
-                                    </>
+                                        <div className={`flex-1 text-center p-2 rounded-lg text-xs font-bold ${selectedOffer.player_accepted ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'}`}>
+                                            Player: {selectedOffer.player_accepted ? 'Accepted' : 'Pending'}
+                                        </div>
+                                    </div>
                                 )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* NEW OFFER MODAL */}
-            {showNewOfferModal && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowNewOfferModal(false)}>
-                    <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-                        <div className="p-6 border-b border-gray-700 flex items-center justify-between">
-                            <h2 className="text-xl font-bold flex items-center gap-2"><Plus className="w-5 h-5 text-green-400" /> Create New Offer</h2>
-                            <button onClick={() => setShowNewOfferModal(false)} className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
-                        </div>
-                        <form onSubmit={handleCreateOffer} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
-                                <input type="text" required value={newOfferData.playerName} onChange={(e) => setNewOfferData({ ...newOfferData, playerName: e.target.value })} placeholder="e.g., Lucas Ferreira" className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Fee (€)</label>
-                                    <input type="number" required value={newOfferData.amount} onChange={(e) => setNewOfferData({ ...newOfferData, amount: e.target.value })} placeholder="0" className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <button
+                                        onClick={() => navigate('/messages')}
+                                        className="inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                    >
+                                        <MessageSquare className="w-4 h-4" /> Message
+                                    </button>
+
+                                    {user.role === 'agent' && selectedOffer.status !== 'accepted' && selectedOffer.status !== 'rejected' && (
+                                        <button
+                                            onClick={() => navigate(`/negotiate/${selectedOffer.id}`)}
+                                            className="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                        >
+                                            <Handshake className="w-5 h-5" /> Negotiate
+                                        </button>
+                                    )}
+
+                                    {/* Accept / Reject Buttons */}
+                                    {selectedOffer.status !== 'accepted' && selectedOffer.status !== 'rejected' && (
+                                        <>
+                                            <button
+                                                onClick={() => handleStatusChange(selectedOffer.id, 'reject')}
+                                                className="inline-flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                            >
+                                                <XCircle className="w-4 h-4" /> Reject
+                                            </button>
+
+                                            {/* Show Accept only if they haven't accepted yet */}
+                                            {((user.id === selectedOffer.from_user_id && !selectedOffer.team_accepted) ||
+                                                (user.id === selectedOffer.player_user_id && !selectedOffer.player_accepted)) && (
+                                                    <button
+                                                        onClick={() => handleStatusChange(selectedOffer.id, 'accept')}
+                                                        className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                                    >
+                                                        <Check className="w-4 h-4" /> Accept Terms
+                                                    </button>
+                                                )}
+                                        </>
+                                    )}
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Duration</label>
-                                    <select value={newOfferData.duration} onChange={(e) => setNewOfferData({ ...newOfferData, duration: e.target.value })} className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500">
-                                        <option>1 year</option><option>2 years</option><option>3 years</option><option>4 years</option><option>5 years</option>
-                                    </select>
-                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
-                                <textarea rows={3} value={newOfferData.notes} onChange={(e) => setNewOfferData({ ...newOfferData, notes: e.target.value })} placeholder="Additional terms or notes..." className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 resize-none" />
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => setShowNewOfferModal(false)} className="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-semibold transition-all">Cancel</button>
-                                <button type="submit" disabled={isSubmitting} className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-50 py-3 rounded-xl font-semibold transition-all flex items-center justify-center">
-                                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Offer'}
+
+                            {/* ⭐ PDF DOWNLOAD BUTTON ⭐ */}
+                            {selectedOffer.status === 'accepted' && (
+                                <button
+                                    onClick={() => generateTransferContract(selectedOffer)}
+                                    className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                >
+                                    <Download className="w-4 h-4" /> Download PDF
                                 </button>
-                            </div>
-                        </form>
+                            )}
+                            {/* ⭐ ONLY SHOW FOR THE BUYING TEAM ⭐ */}
+                            {['team', 'agent'].includes(user.role) && (
+                                <button
+                                    onClick={handleCompleteTransfer}
+                                    className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-all flex-1"
+                                >
+                                    <CheckCircle2 className="w-4 h-4" /> Sign Player
+                                </button>
+                            )}
+                        </>
+
+                        <button onClick={() => navigate('/messages')} className="inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
+                            <MessageSquare className="w-4 h-4" /> Message
+                        </button>
+
+                        {selectedOffer.status !== 'accepted' && selectedOffer.status !== 'rejected' && (
+                            <>
+                                <button onClick={() => handleStatusChange(selectedOffer.id, 'rejected')} className="inline-flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
+                                    <XCircle className="w-4 h-4" /> Reject
+                                </button>
+                                <button onClick={() => handleStatusChange(selectedOffer.id, 'accepted')} className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 py-3 px-4 rounded-xl font-semibold transition-all flex-1">
+                                    <Check className="w-4 h-4" /> Accept
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
+                    </div>
+                </div >
             )}
 
-            <style dangerouslySetInnerHTML={{
-                __html: `
+{/* NEW OFFER MODAL */ }
+{
+    showNewOfferModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowNewOfferModal(false)}>
+            <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+                <div className="p-6 border-b border-gray-700 flex items-center justify-between">
+                    <h2 className="text-xl font-bold flex items-center gap-2"><Plus className="w-5 h-5 text-green-400" /> Create New Offer</h2>
+                    <button onClick={() => setShowNewOfferModal(false)} className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
+                </div>
+                <form onSubmit={handleCreateOffer} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
+                        <input type="text" required value={newOfferData.playerName} onChange={(e) => setNewOfferData({ ...newOfferData, playerName: e.target.value })} placeholder="e.g., Lucas Ferreira" className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Fee (€)</label>
+                            <input type="number" required value={newOfferData.amount} onChange={(e) => setNewOfferData({ ...newOfferData, amount: e.target.value })} placeholder="0" className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Duration</label>
+                            <select value={newOfferData.duration} onChange={(e) => setNewOfferData({ ...newOfferData, duration: e.target.value })} className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500">
+                                <option>1 year</option><option>2 years</option><option>3 years</option><option>4 years</option><option>5 years</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+                        <textarea rows={3} value={newOfferData.notes} onChange={(e) => setNewOfferData({ ...newOfferData, notes: e.target.value })} placeholder="Additional terms or notes..." className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 resize-none" />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={() => setShowNewOfferModal(false)} className="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-semibold transition-all">Cancel</button>
+                        <button type="submit" disabled={isSubmitting} className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-50 py-3 rounded-xl font-semibold transition-all flex items-center justify-center">
+                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Offer'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    )
+}
+
+<style dangerouslySetInnerHTML={{
+    __html: `
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
@@ -554,7 +593,7 @@ const Transfers = () => {
           animation: fadeIn 0.2s ease-out;
         }
       `}} />
-        </div>
+        </div >
     );
 };
 
