@@ -63,10 +63,17 @@ const AgentDashboard = () => {
         );
     }
 
+    // Calculate the formatted commission safely
+    const formattedCommission = data?.stats?.commission
+        ? data.stats.commission >= 1000000
+            ? `€${(data.stats.commission / 1000000).toFixed(1)}M` // e.g. €2.5M
+            : `€${(data.stats.commission / 1000).toFixed(0)}K`     // e.g. €250K
+        : '€0';
+
     const stats = [
         { label: 'Active Clients', value: data?.stats.activeClients || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
         { label: 'Open Negotiations', value: data?.stats.openNegotiations || 0, change: 'Live', up: true, icon: <Briefcase className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-        { label: 'Commission MTD', value: `€${(data?.stats.commission / 1000).toFixed(0) || 0}K`, change: 'Est.', up: true, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
+        { label: 'Commission MTD', value: formattedCommission, change: 'Live', up: true, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' }, // ⭐ Changed
         { label: 'Deals Closed', value: data?.stats.closedDeals || 0, change: 'Live', up: true, icon: <Award className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
     ];
 
