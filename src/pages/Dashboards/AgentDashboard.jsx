@@ -69,7 +69,13 @@ const AgentDashboard = () => {
     const stats = [
         { label: 'Active Clients', value: data?.stats?.activeClients || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
         { label: 'Open Negotiations', value: data?.stats?.openNegotiations || 0, change: 'Live', up: true, icon: <Briefcase className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-        { label: 'Commission MTD', value: formattedCommission, change: 'Live', up: true, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
+        {
+            label: 'Commission MTD',
+            value: `€${data?.stats?.commission || 0}`, // ⭐ Raw number for testing
+            change: 'Live', up: true,
+            icon: <DollarSign className="w-5 h-5" />,
+            color: 'text-green-400 bg-green-500/10'
+        },
         { label: 'Deals Closed', value: data?.stats?.closedDeals || 0, change: 'Live', up: true, icon: <Award className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
     ];
 
