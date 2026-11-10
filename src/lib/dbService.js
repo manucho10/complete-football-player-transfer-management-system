@@ -295,11 +295,9 @@ export const fetchAgentDashboardData = async (userId) => {
     const openNegotiations = transfers?.filter(t => ['pending', 'negotiating'].includes(t.status)) || [];
     const closedDeals = transfers?.filter(t => t.status === 'accepted') || [];
 
-    // 3. Calculate Commission (5% of closed deals)
     const totalCommission = closedDeals.reduce((sum, deal) => {
         return sum + (Number(deal.agent_commission) || 0);
     }, 0);
-
 
     // 4. Recent Notifications
     const { data: activity } = await supabase
