@@ -13,32 +13,29 @@ import { fetchAgentDashboardData } from '../../lib/dbService';
 const AgentDashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch Real Data
-    useEffect(() => {
+    const loadData = async () => {
         if (!user) return;
 
-        const loadData = async () => {
-            setIsLoading(true);
-            try {
-                const result = await fetchAgentDashboardData(user.id);
-                setData(result);
-            } catch (error) {
-                console.error("Failed to load dashboard:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        setIsLoading(true);
+        try {
+            const result = await fetchAgentDashboardData(user.id);
+            setData(result);
+        } catch (error) {
+            console.error('Failed to load dashboard:', error);
+            setData(null);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    useEffect(() => {
         loadData();
-
-        // ⭐ Add this: Refetch when the window gets focus
         window.addEventListener('focus', loadData);
-        return () => window.removeEventListener('focus', loadData);
 
+        return () => window.removeEventListener('focus', loadData);
     }, [user]);
 
     const navItems = [
@@ -52,7 +49,7 @@ const AgentDashboard = () => {
 
     const role = roleConfig.agent;
 
-    if (isLoading) {
+    if (isLoading && !data) {
         return (
             <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={[]}>
                 <div className="flex flex-col items-center justify-center h-[60vh]">
@@ -63,27 +60,26 @@ const AgentDashboard = () => {
         );
     }
 
-    // Calculate the formatted commission safely
     const formattedCommission = data?.stats?.commission
         ? data.stats.commission >= 1000000
-            ? `€${(data.stats.commission / 1000000).toFixed(1)}M` // e.g. €2.5M
-            : `€${(data.stats.commission / 1000).toFixed(0)}K`     // e.g. €250K
+            ? `€${(data.stats.commission / 1000000).toFixed(1)}M`
+            : `€${(data.stats.commission / 1000).toFixed(0)}K`
         : '€0';
 
     const stats = [
-        { label: 'Active Clients', value: data?.stats.activeClients || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
-        { label: 'Open Negotiations', value: data?.stats.openNegotiations || 0, change: 'Live', up: true, icon: <Briefcase className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-        { label: 'Commission MTD', value: formattedCommission, change: 'Live', up: true, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' }, // ⭐ Changed
-        { label: 'Deals Closed', value: data?.stats.closedDeals || 0, change: 'Live', up: true, icon: <Award className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
+        { label: 'Active Clients', value: data?.stats?.activeClients || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
+        { label: 'Open Negotiations', value: data?.stats?.openNegotiations || 0, change: 'Live', up: true, icon: <Briefcase className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
+        { label: 'Commission MTD', value: formattedCommission, change: 'Live', up: true, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
+        { label: 'Deals Closed', value: data?.stats?.closedDeals || 0, change: 'Live', up: true, icon: <Award className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
     ];
 
-    const recentActivity = data?.recentActivity.map((a) => ({
+    const recentActivity = data?.recentActivity?.map((a) => ({
         text: a.title,
         time: new Date(a.created_at).toLocaleDateString(),
     })) || [];
 
     const quickActions = [
-        { label: 'Add Client', icon: <Plus className="w-5 h-5" />, path: '/players' }, // ⭐ Added path
+        { label: 'Add Client', icon: <Plus className="w-5 h-5" />, path: '/players' },
         { label: 'Negotiations', icon: <Briefcase className="w-5 h-5" />, path: '/transfers' },
         { label: 'Search Players', icon: <Search className="w-5 h-5" />, path: '/players' },
         { label: 'AI Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
@@ -92,18 +88,15 @@ const AgentDashboard = () => {
     return (
         <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={recentActivity}>
             <div className="space-y-6">
-
-                {/* Welcome Banner */}
                 <div className={`bg-gradient-to-r ${role.color} rounded-2xl p-6 sm:p-8`}>
                     <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
                     <p className="text-white/80">
-                        {data?.stats.openNegotiations > 0
+                        {data?.stats?.openNegotiations > 0
                             ? `You have ${data.stats.openNegotiations} open negotiations. Keep closing those deals!`
-                            : "Your roster is looking good. Browse the market to find new talent."}
+                            : 'Your roster is looking good. Browse the market to find new talent.'}
                     </p>
                 </div>
 
-                {/* Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((s, i) => (
                         <div key={i} className="bg-gray-800/50 rounded-xl p-5 border border-gray-700">
@@ -119,14 +112,13 @@ const AgentDashboard = () => {
                     ))}
                 </div>
 
-                {/* Quick Actions */}
                 <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
                     <h3 className="font-semibold mb-4">Quick Actions</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {quickActions.map((a, i) => (
                             <button
                                 key={i}
-                                onClick={() => a.path ? navigate(a.path) : null}
+                                onClick={() => (a.path ? navigate(a.path) : null)}
                                 className="flex flex-col items-center gap-2 p-4 bg-gray-700/30 hover:bg-gray-700/60 rounded-xl transition-all"
                             >
                                 <div className={role.text}>{a.icon}</div>
@@ -136,16 +128,13 @@ const AgentDashboard = () => {
                     </div>
                 </div>
 
-                {/* Two Columns */}
                 <div className="grid lg:grid-cols-2 gap-6">
-
-                    {/* Client Roster */}
                     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
                         <h3 className="font-semibold mb-4 flex items-center gap-2">
                             <Users className="w-5 h-5 text-purple-400" /> Top Clients
                         </h3>
 
-                        {data?.clients.length === 0 ? (
+                        {!data?.clients || data.clients.length === 0 ? (
                             <div className="text-center py-8">
                                 <Users className="w-10 h-10 text-gray-600 mx-auto mb-2" />
                                 <p className="text-sm text-gray-400 mb-4">You don't represent any players yet.</p>
@@ -155,7 +144,7 @@ const AgentDashboard = () => {
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {data?.clients.slice(0, 5).map((client, i) => (
+                                {data.clients.slice(0, 5).map((client, i) => (
                                     <button
                                         key={i}
                                         onClick={() => navigate(`/players/${client.id}`)}
@@ -182,7 +171,6 @@ const AgentDashboard = () => {
                         )}
                     </div>
 
-                    {/* Recent Activity */}
                     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
                         <h3 className="font-semibold mb-4 flex items-center gap-2">
                             <Clock className="w-5 h-5 text-gray-400" /> Recent Activity

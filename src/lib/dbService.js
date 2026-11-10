@@ -278,8 +278,10 @@ export const fetchScoutDashboardData = async (userId) => {
 // ==========================================
 // src/lib/dbService.js
 
+// src/lib/dbService.js
+
 export const fetchAgentDashboardData = async (userId) => {
-    // 1. Fetch Clients (Players managed by this agent)
+    // 1. Fetch Clients
     const { data: clients } = await supabase
         .from('players')
         .select('*')
@@ -290,13 +292,19 @@ export const fetchAgentDashboardData = async (userId) => {
     const { data: transfers } = await supabase
         .from('transfers')
         .select('*')
-        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId}`);
+        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId},agent_id.eq.${userId}`);
 
     const openNegotiations = transfers?.filter(t => ['pending', 'negotiating'].includes(t.status)) || [];
     const closedDeals = transfers?.filter(t => t.status === 'accepted') || [];
 
+    // ⭐ 3. Calculate Commission (Check both agent_commission and fallback to 5%)
     const totalCommission = closedDeals.reduce((sum, deal) => {
-        return sum + (Number(deal.agent_commission) || 0);
+        // If the database has the commission, use it. Otherwise, calculate 5% on the fly.
+        const dealCommission = deal.agent_commission
+            ? Number(deal.agent_commission)
+            : (Number(deal.amount) * 0.05);
+
+        return sum + dealCommission;
     }, 0);
 
     // 4. Recent Notifications
@@ -311,7 +319,7 @@ export const fetchAgentDashboardData = async (userId) => {
         stats: {
             activeClients: clients?.length || 0,
             openNegotiations: openNegotiations.length,
-            commission: totalCommission,
+            commission: totalCommission, // This will now be the exact number
             closedDeals: closedDeals.length,
         },
         clients: clients || [],
