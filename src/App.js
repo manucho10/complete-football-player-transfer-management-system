@@ -28,7 +28,7 @@ import ClubProfile from './pages/ClubProfile';
 import MyRoster from './pages/MyRoster';
 import NegotiateTransfer from './pages/NegotiateTransfer';
 import NewScoutReport from './pages/NewScoutReport';
-
+import TeamReports from './pages/TeamReports';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -204,6 +204,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <NewScoutReport />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/team-reports"
+            element={
+              <ProtectedRoute>
+                <TeamReports />
               </ProtectedRoute>
             }
           />

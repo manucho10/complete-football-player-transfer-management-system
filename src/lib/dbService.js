@@ -600,17 +600,38 @@ export const createScoutReport = async (reportData) => {
     return data;
 };
 
+// src/lib/dbService.js
+
 export const fetchTeamScoutReports = async (teamId) => {
-    // Fetch reports where the scout's team_id matches the logged-in Team
-    const { data, error } = await supabase
+    // 1. Get the IDs of all scouts hired by this Team
+    const { data: scouts } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('team_id', teamId)
+        .eq('role', 'scout');
+
+    if (!scouts || scouts.length === 0) return [];
+
+    const scoutIds = scouts.map(s => s.id);
+
+    // 2. Fetch all reports created by those scouts
+    const { data: reports, error } = await supabase
         .from('scout_reports')
-        .select(`
-      *,
-      scout:profiles!scout_reports_scout_id_fkey(full_name)
-    `)
-        .in('scout_id', supabase.from('profiles').select('id').eq('team_id', teamId))
+        .select('*')
+        .in('scout_id', scoutIds)
         .order('created_at', { ascending: false });
 
-    if (error) return [];
-    return data;
+    if (error) {
+        console.error("Error fetching team reports:", error);
+        return [];
+    }
+
+    // 3. Map the scout's name to the report
+    return reports.map(report => {
+        const scout = scouts.find(s => s.id === report.scout_id);
+        return {
+            ...report,
+            scout_name: scout?.full_name || 'Unknown Scout'
+        };
+    });
 };
