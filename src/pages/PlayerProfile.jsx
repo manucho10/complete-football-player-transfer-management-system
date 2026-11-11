@@ -5,7 +5,7 @@ import {
     ArrowLeft, Star, MapPin, Calendar, Globe, Building2, TrendingUp,
     Eye, Target, Award, BarChart3, Video, Play, Heart, MessageSquare,
     Share2, X, AlertCircle, CheckCircle2, Trophy, Zap, Shield, Activity,
-    FileText, Loader2, Clock, Plus,
+    FileText, Loader2, Clock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { fetchPlayerById, fetchPlayerVideos } from '../lib/dbService';
@@ -27,12 +27,8 @@ const PlayerProfile = () => {
     // Data State
     const [player, setPlayer] = useState(null);
     const [videos, setVideos] = useState([]);
-    const [activeVideo, setActiveVideo] = useState(null);
+    const [activeVideo, setActiveVideo] = useState(null); // For the fullscreen video player
 
-    // ================================================================
-    // ================================================================
-    // FETCH PLAYER & VIDEOS
-    // ================================================================
     // ================================================================
     // FETCH PLAYER & VIDEOS
     // ================================================================
@@ -40,12 +36,10 @@ const PlayerProfile = () => {
         const loadData = async () => {
             setIsLoading(true);
             try {
-                // 1. Fetch the raw player data from the database
                 const data = await fetchPlayerById(id);
 
                 if (data) {
-                    // 2. If the player has a team_id, they are signed!
-                    // We need to fetch the Team's real name to override the old club text.
+                    // If they are signed, OVERWRITE the club name with the Team's name
                     if (data.team_id) {
                         const { data: teamData } = await supabase
                             .from('profiles')
@@ -54,22 +48,19 @@ const PlayerProfile = () => {
                             .single();
 
                         if (teamData && teamData.full_name) {
-                            data.club = teamData.full_name; // Override the old club name
+                            data.club = teamData.full_name;
                         }
-                    }
-                    // 3. If they have no team_id, they are a Free Agent
-                    else {
+                    } else {
                         data.club = 'Free Agent';
                     }
 
-                    // 4. Save the updated player object to React state
                     setPlayer(data);
 
-                    // 5. Fetch their highlight videos
+                    // ⭐ Fetch videos
                     const videoData = await fetchPlayerVideos(data.id);
                     setVideos(videoData);
 
-                    // 6. Track the profile view for analytics (if it's not the player themselves)
+                    // Track view (only if not the owner)
                     if (user && user.id !== data.user_id) {
                         await supabase.from('analytics_events').insert({
                             player_id: data.id,
@@ -79,7 +70,7 @@ const PlayerProfile = () => {
                         });
                     }
 
-                    // 7. Check if this player is already on the current user's watchlist
+                    // Check watchlist status
                     if (user && ['scout', 'team'].includes(user.role)) {
                         const { data: watchData } = await supabase
                             .from('watchlists')
@@ -100,7 +91,8 @@ const PlayerProfile = () => {
         };
 
         if (id) loadData();
-    }, [id, user]); // Re-runs whenever the URL id or logged-in user changes
+    }, [id, user]);
+
     // ================================================================
     // HANDLERS
     // ================================================================
@@ -200,15 +192,6 @@ const PlayerProfile = () => {
         dribbling: player.dribbling || 0, defending: player.defending || 0, physical: player.physical || 0,
     };
 
-    const statBars = [
-        { key: 'pace', label: 'Pace', icon: <Zap className="w-4 h-4" />, color: 'from-yellow-500 to-orange-500' },
-        { key: 'shooting', label: 'Shooting', icon: <Target className="w-4 h-4" />, color: 'from-red-500 to-orange-500' },
-        { key: 'passing', label: 'Passing', icon: <Activity className="w-4 h-4" />, color: 'from-blue-500 to-cyan-500' },
-        { key: 'dribbling', label: 'Dribbling', icon: <TrendingUp className="w-4 h-4" />, color: 'from-purple-500 to-pink-500' },
-        { key: 'defending', label: 'Defending', icon: <Shield className="w-4 h-4" />, color: 'from-green-500 to-emerald-500' },
-        { key: 'physical', label: 'Physical', icon: <BarChart3 className="w-4 h-4" />, color: 'from-gray-500 to-gray-400' },
-    ];
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
             {/* Top Bar */}
@@ -230,23 +213,6 @@ const PlayerProfile = () => {
                         <button onClick={handleContact} className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
                             <MessageSquare className="w-4 h-4" /> <span className="hidden sm:inline">Contact</span>
                         </button>
-                        {/* ⭐ Add Client Button (Only for Agents) */}
-                        {user?.role === 'agent' && (
-                            <button
-                                onClick={async () => {
-                                    if (!window.confirm(`Do you want to add ${player.name} to your roster?`)) return;
-                                    const { error } = await supabase
-                                        .from('players')
-                                        .update({ agent_id: user.id })
-                                        .eq('id', player.id);
-                                    if (error) alert("Failed to add client.");
-                                    else alert(`${player.name} is now on your roster!`);
-                                }}
-                                className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                            >
-                                <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Sign Client</span>
-                            </button>
-                        )}
                     </div>
                 </div>
             </div>
@@ -260,7 +226,6 @@ const PlayerProfile = () => {
 
                 {/* HERO BANNER */}
                 <div className="relative bg-gradient-to-r from-green-600/20 via-blue-600/20 to-purple-600/20 rounded-2xl p-6 sm:p-8 mb-6 border border-gray-700 overflow-hidden">
-                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-green-500 rounded-full opacity-10 blur-3xl"></div>
                     <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6">
                         <div className="relative flex-shrink-0">
                             <div className="w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-600 to-gray-700 rounded-2xl flex items-center justify-center text-4xl font-bold border-4 border-gray-700">
@@ -312,17 +277,6 @@ const PlayerProfile = () => {
                                     <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><FileText className="w-5 h-5 text-green-400" /> About</h2>
                                     <p className="text-sm text-gray-300 leading-relaxed">{player.bio || 'No bio available.'}</p>
                                 </div>
-                                <div className="bg-gray-800/50 rounded-xl border border-gray-700 p-6">
-                                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-green-400" /> Season Stats</h2>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        {[{ label: 'Matches', value: stats.matches, color: 'text-blue-400' }, { label: 'Goals', value: stats.goals, color: 'text-green-400' }, { label: 'Assists', value: stats.assists, color: 'text-yellow-400' }, { label: 'Minutes', value: stats.minutes, color: 'text-purple-400' }].map((stat, i) => (
-                                            <div key={i} className="bg-gray-700/30 rounded-lg p-4 text-center">
-                                                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                                                <p className="text-xs text-gray-400 mt-1">{stat.label}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                         )}
 
@@ -340,6 +294,7 @@ const PlayerProfile = () => {
                             </div>
                         )}
 
+                        {/* ⭐ VIDEO GALLERY ⭐ */}
                         {activeTab === 'videos' && (
                             <div className="bg-gray-800/50 rounded-xl border border-gray-700 p-6 animate-fadeIn">
                                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
