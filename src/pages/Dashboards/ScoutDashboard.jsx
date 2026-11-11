@@ -113,7 +113,7 @@ const ScoutDashboard = () => {
 
     const quickActions = [
         { label: 'Search Players', icon: <Search className="w-5 h-5" />, path: '/players' },
-        { label: 'New Report', icon: <FileText className="w-5 h-5" /> },
+        { label: 'New Report', icon: <FileText className="w-5 h-5" />, path: '/new-report' },
         { label: 'View Watchlist', icon: <Star className="w-5 h-5" />, path: '/watchlist' },
         { label: 'Match Schedule', icon: <Calendar className="w-5 h-5" /> },
     ];

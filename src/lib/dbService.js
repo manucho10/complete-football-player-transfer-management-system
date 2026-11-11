@@ -576,3 +576,41 @@ export const submitCounterOffer = async (transferId, newAmount, newSalary, commi
     if (error) throw error;
     return data;
 };
+// ==========================================
+// SCOUT REPORTS
+// ==========================================
+
+export const fetchScoutReports = async (userId) => {
+    const { data, error } = await supabase
+        .from('scout_reports')
+        .select('*')
+        .eq('scout_id', userId)
+        .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+};
+
+export const createScoutReport = async (reportData) => {
+    const { data, error } = await supabase
+        .from('scout_reports')
+        .insert(reportData)
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+};
+
+export const fetchTeamScoutReports = async (teamId) => {
+    // Fetch reports where the scout's team_id matches the logged-in Team
+    const { data, error } = await supabase
+        .from('scout_reports')
+        .select(`
+      *,
+      scout:profiles!scout_reports_scout_id_fkey(full_name)
+    `)
+        .in('scout_id', supabase.from('profiles').select('id').eq('team_id', teamId))
+        .order('created_at', { ascending: false });
+
+    if (error) return [];
+    return data;
+};

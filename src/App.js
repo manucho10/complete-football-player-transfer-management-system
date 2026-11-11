@@ -27,6 +27,7 @@ import BrowseClubs from './pages/BrowseClubs';
 import ClubProfile from './pages/ClubProfile';
 import MyRoster from './pages/MyRoster';
 import NegotiateTransfer from './pages/NegotiateTransfer';
+import NewScoutReport from './pages/NewScoutReport';
 
 // Placeholder pages
 
@@ -191,10 +192,21 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/negotiate/:id" element=
+          <Route
+            path="/negotiate/:id" element=
             {<ProtectedRoute>
               <NegotiateTransfer />
-            </ProtectedRoute>} />
+            </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/new-report"
+            element={
+              <ProtectedRoute>
+                <NewScoutReport />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ============ ROLE-RESTRICTED ROUTES ============ */}
 
