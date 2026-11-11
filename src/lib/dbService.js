@@ -456,47 +456,50 @@ export const fetchHiredScouts = async (teamId) => {
 
 // src/lib/dbService.js
 
+
+
+// src/lib/dbService.js
+
 export const fetchTeamScoutActivity = async (teamId) => {
     try {
         // 1. Get the list of Scout IDs that belong to this Team
-        const { data: scouts, error: scoutError } = await supabase
+        const { data: scouts } = await supabase
             .from('profiles')
             .select('id, full_name')
             .eq('team_id', teamId)
             .eq('role', 'scout');
 
-        if (scoutError || !scouts || scouts.length === 0) {
-            console.log("No scouts found for this team in the profiles table.");
-            return [];
-        }
+        if (!scouts || scouts.length === 0) return [];
 
         const scoutIds = scouts.map(s => s.id);
 
-        // 2. Get the latest analytics events for those specific scout IDs
-        const { data: events, error: eventError } = await supabase
+        // 2. Fetch recent Analytics Events (Views/Watchlists)
+        const { data: events } = await supabase
             .from('analytics_events')
             .select('*')
-            .in('viewer_id', scoutIds) // 👈 This checks if the viewer is one of your scouts
+            .in('viewer_id', scoutIds)
             .order('created_at', { ascending: false })
-            .limit(10);
+            .limit(5);
 
-        if (eventError || !events || events.length === 0) {
-            console.log("No events found for these scouts in analytics_events.");
-            return [];
-        }
+        // 3. Fetch recent Scout Reports
+        const { data: reports } = await supabase
+            .from('scout_reports')
+            .select('*')
+            .in('scout_id', scoutIds)
+            .order('created_at', { ascending: false })
+            .limit(5);
 
-        // 3. Fetch the player names for those events
-        const playerIds = [...new Set(events.map(e => e.player_id))];
-        const { data: players } = await supabase
+        // 4. Get player names for the events
+        const eventPlayerIds = [...new Set((events || []).map(e => e.player_id))];
+        const { data: eventPlayers } = await supabase
             .from('players')
             .select('id, name, position, club')
-            .in('id', playerIds);
+            .in('id', eventPlayerIds);
 
-        // 4. Combine the data
-        return events.map(event => {
+        // 5. Format the events
+        const formattedEvents = (events || []).map(event => {
             const scout = scouts.find(s => s.id === event.viewer_id);
-            const player = players?.find(p => p.id === event.player_id);
-
+            const player = eventPlayers?.find(p => p.id === event.player_id);
             return {
                 id: event.id,
                 scoutName: scout?.full_name || 'Unknown Scout',
@@ -505,14 +508,39 @@ export const fetchTeamScoutActivity = async (teamId) => {
                 playerPosition: player?.position || 'N/A',
                 playerClub: player?.club || 'N/A',
                 time: new Date(event.created_at).toLocaleDateString(),
+                timestamp: new Date(event.created_at).getTime(),
+                type: 'event'
             };
         });
+
+        // 6. Format the reports
+        const formattedReports = (reports || []).map(report => {
+            const scout = scouts.find(s => s.id === report.scout_id);
+            return {
+                id: report.id,
+                scoutName: scout?.full_name || 'Unknown Scout',
+                action: 'submitted a scouting report for',
+                playerName: report.player_name,
+                playerPosition: `Rating: ${report.rating}/10`,
+                playerClub: '',
+                time: new Date(report.created_at).toLocaleDateString(),
+                timestamp: new Date(report.created_at).getTime(),
+                type: 'report'
+            };
+        });
+
+        // 7. Combine them and sort by newest first
+        const allActivity = [...formattedEvents, ...formattedReports].sort((a, b) => b.timestamp - a.timestamp);
+
+        return allActivity.slice(0, 10); // Return the top 10 most recent actions
 
     } catch (error) {
         console.error("Error fetching scout activity:", error);
         return [];
     }
 };
+
+
 // src/lib/dbService.js
 
 export const fetchClubOverview = async (teamId) => {
