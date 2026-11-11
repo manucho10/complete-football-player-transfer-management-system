@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Eye, Star, FileText, Target, Search, BarChart3, Calendar,
-    Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, Sparkles,
+    Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, Sparkles, TrendingUp,
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout'; // Ensure correct capitalization
 import { roleConfig } from '../../config/roleConfig';
