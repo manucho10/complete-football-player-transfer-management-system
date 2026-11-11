@@ -55,6 +55,7 @@ const ScoutDashboard = () => {
 
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
+        { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
         { id: 'discover', label: 'Discover Players', icon: <Search className="w-5 h-5" />, path: '/players' },
         { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
         { id: 'watchlist', label: 'My Watchlist', icon: <Star className="w-5 h-5" />, path: '/watchlist' },
