@@ -29,6 +29,7 @@ import MyRoster from './pages/MyRoster';
 import NegotiateTransfer from './pages/NegotiateTransfer';
 import NewScoutReport from './pages/NewScoutReport';
 import TeamReports from './pages/TeamReports';
+import MatchSchedule from './pages/MatchSchedule';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -215,6 +216,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/match-schedule"
+            element={
+              <ProtectedRoute>
+                <MatchSchedule />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ============ ROLE-RESTRICTED ROUTES ============ */}
 
@@ -233,7 +242,7 @@ function App() {
           /> */}
 
           {/* ============ 404 FALLBACK ============ */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          { /*<Route path="*" element={<Navigate to="/" replace />} />*/}
         </Routes>
       </BrowserRouter>
     </AuthProvider>
