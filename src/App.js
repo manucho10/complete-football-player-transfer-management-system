@@ -242,7 +242,7 @@ function App() {
           /> */}
 
           {/* ============ 404 FALLBACK ============ */}
-          { /*<Route path="*" element={<Navigate to="/" replace />} />*/}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
