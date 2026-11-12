@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import {
     TrendingUp, User, Briefcase, Search, Shield, Users, Award,
     Globe, ChevronRight, CheckCircle2, Sparkles, Video, FileText,
-    ArrowRight, Star, Play, Zap
+    ArrowRight, Star, Play, Zap, LayoutDashboard
 } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
+import Navbar from '../components/layout/navbar';
 import { useAuth } from '../context/AuthContext';
 
 const Landing = () => {
