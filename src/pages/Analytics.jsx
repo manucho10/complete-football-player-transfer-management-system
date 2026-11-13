@@ -13,6 +13,8 @@ import {
 } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/SupabaseClient';
+import DashboardLayout from '../components/layout/Dashboardlayout';
+import { roleConfig } from '../config/roleConfig';
 
 const Analytics = () => {
     const navigate = useNavigate();
@@ -28,9 +30,14 @@ const Analytics = () => {
     const [performanceRadar, setPerformanceRadar] = useState([]);
     const [topClubs, setTopClubs] = useState([]);
 
-    // ================================================================
-    // FETCH REAL DATA FROM SUPABASE
-    // ================================================================
+    // Navigation Items for Layout
+    const navItems = [
+        { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" />, path: '/dashboard' },
+        { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
+        { id: 'players', label: 'Players', icon: <Users className="w-5 h-5" />, path: '/players' },
+        { id: 'transfers', label: 'Transfers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
+    ];
+
     useEffect(() => {
         if (!user) return;
 
@@ -43,7 +50,6 @@ const Analytics = () => {
                 let interestsCount = 0;
                 let totalDealValue = 0;
 
-                // 1. Fetch Player Data (if user is a player)
                 if (user.role === 'player') {
                     const { data } = await supabase
                         .from('players')
@@ -53,42 +59,32 @@ const Analytics = () => {
                     playerData = data;
                 }
 
-                // 2. Fetch Analytics Events (Views & Interests)
                 let eventsQuery = supabase.from('analytics_events').select('*');
                 if (playerData?.id) {
                     eventsQuery = eventsQuery.eq('player_id', playerData.id);
                 } else {
-                    // If not a player, get events where they were the viewer
                     eventsQuery = eventsQuery.eq('viewer_id', user.id);
                 }
                 const { data: events } = await eventsQuery;
 
-                // 3. Fetch Transfers
                 const { data: transfers } = await supabase
                     .from('transfers')
                     .select('*')
                     .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id},player_user_id.eq.${user.id}`);
 
-                // ==========================================
-                // CALCULATE REAL METRICS
-                // ==========================================
                 if (playerData) {
                     viewsCount = events?.filter(e => e.event_type === 'view').length || 0;
                     interestsCount = events?.filter(e => e.event_type === 'interest').length || 0;
                     offersCount = transfers?.filter(t => t.player_user_id === user.id).length || 0;
-
-                    totalDealValue = transfers
-                        ?.filter(t => t.player_user_id === user.id && t.status === 'accepted')
-                        .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+                    totalDealValue = transfers?.filter(t => t.player_user_id === user.id && t.status === 'accepted').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
                     setKpis([
-                        { label: 'Profile Views', value: viewsCount.toLocaleString(), change: 'Live', icon: <Eye className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-                        { label: 'Club Interests', value: interestsCount.toString(), change: 'Live', icon: <Star className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
-                        { label: 'Offers Received', value: offersCount.toString(), change: 'Live', icon: <FileText className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
-                        { label: 'Deal Value', value: `€${(totalDealValue / 1000000).toFixed(1)}M`, change: 'Live', icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
+                        { label: 'Profile Views', value: viewsCount.toLocaleString(), change: 'Live', icon: <Eye className="w-5 h-5" />, color: 'text-blue-600 bg-blue-50' },
+                        { label: 'Club Interests', value: interestsCount.toString(), change: 'Live', icon: <Star className="w-5 h-5" />, color: 'text-yellow-600 bg-yellow-50' },
+                        { label: 'Offers Received', value: offersCount.toString(), change: 'Live', icon: <FileText className="w-5 h-5" />, color: 'text-green-600 bg-green-50' },
+                        { label: 'Deal Value', value: `€${(totalDealValue / 1000000).toFixed(1)}M`, change: 'Live', icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-600 bg-purple-50' },
                     ]);
 
-                    // Calculate Radar Stats
                     setPerformanceRadar([
                         { skill: 'Pace', value: playerData.pace || 0 },
                         { skill: 'Shooting', value: playerData.shooting || 0 },
@@ -98,19 +94,15 @@ const Analytics = () => {
                         { skill: 'Physical', value: playerData.physical || 0 },
                     ]);
                 } else {
-                    // Scout/Team/Agent Metrics
                     viewsCount = events?.filter(e => e.event_type === 'view').length || 0;
                     offersCount = transfers?.filter(t => t.status === 'accepted').length || 0;
-
-                    totalDealValue = transfers
-                        ?.filter(t => t.status === 'accepted')
-                        .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+                    totalDealValue = transfers?.filter(t => t.status === 'accepted').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
                     setKpis([
-                        { label: 'Players Scouted', value: viewsCount.toString(), change: 'Live', icon: <Eye className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-                        { label: 'Active Negotiations', value: transfers?.filter(t => t.status === 'pending' || t.status === 'negotiating').length.toString() || '0', change: 'Live', icon: <FileText className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
-                        { label: 'Deals Closed', value: offersCount.toString(), change: 'Live', icon: <CheckCircle2 className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
-                        { label: 'Total Deal Value', value: `€${(totalDealValue / 1000000).toFixed(1)}M`, change: 'Live', icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
+                        { label: 'Players Scouted', value: viewsCount.toString(), change: 'Live', icon: <Eye className="w-5 h-5" />, color: 'text-blue-600 bg-blue-50' },
+                        { label: 'Active Negotiations', value: transfers?.filter(t => t.status === 'pending' || t.status === 'negotiating').length.toString() || '0', change: 'Live', icon: <FileText className="w-5 h-5" />, color: 'text-yellow-600 bg-yellow-50' },
+                        { label: 'Deals Closed', value: offersCount.toString(), change: 'Live', icon: <CheckCircle2 className="w-5 h-5" />, color: 'text-green-600 bg-green-50' },
+                        { label: 'Total Deal Value', value: `€${(totalDealValue / 1000000).toFixed(1)}M`, change: 'Live', icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-600 bg-purple-50' },
                     ]);
 
                     setPerformanceRadar([
@@ -123,26 +115,22 @@ const Analytics = () => {
                     ]);
                 }
 
-                // Format Time-Series Data (Simulated trend based on real total)
                 const baseViews = Math.max(viewsCount, 10);
-                const timelineData = [
+                setActivityData([
                     { date: 'Week 1', views: Math.floor(baseViews * 0.1), interests: Math.floor(baseViews * 0.02) },
                     { date: 'Week 2', views: Math.floor(baseViews * 0.25), interests: Math.floor(baseViews * 0.05) },
                     { date: 'Week 3', views: Math.floor(baseViews * 0.4), interests: Math.floor(baseViews * 0.1) },
                     { date: 'Week 4', views: Math.floor(baseViews * 0.6), interests: Math.floor(baseViews * 0.15) },
                     { date: 'Week 5', views: Math.floor(baseViews * 0.8), interests: Math.floor(baseViews * 0.18) },
                     { date: 'Current', views: baseViews, interests: interestsCount },
-                ];
-                setActivityData(timelineData);
+                ]);
 
-                // Breakdown Data
                 setSourceBreakdown([
                     { name: 'Direct Profile', value: viewsCount > 0 ? 60 : 0, color: '#3b82f6' },
                     { name: 'Search', value: viewsCount > 0 ? 30 : 0, color: '#10b981' },
                     { name: 'Recommendations', value: viewsCount > 0 ? 10 : 0, color: '#f59e0b' },
                 ]);
 
-                // Top Clubs (Mocked for now, can be connected to actual view logs later)
                 if (playerData) {
                     setTopClubs([
                         { name: 'FC Barcelona', views: Math.floor(viewsCount * 0.4), interest: 'High' },
@@ -179,8 +167,8 @@ const Analytics = () => {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-2xl">
-                    <p className="text-xs text-gray-400 mb-1">{label}</p>
+                <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                    <p className="text-xs text-gray-500 mb-1">{label}</p>
                     {payload.map((p, i) => (
                         <p key={i} className="text-sm font-semibold" style={{ color: p.color }}>
                             {p.name}: {p.value?.toLocaleString()}
@@ -193,62 +181,52 @@ const Analytics = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-            {/* Top Bar */}
-            <div className="bg-gray-800/50 backdrop-blur-lg border-b border-gray-700 sticky top-0 z-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        <span className="hidden sm:inline">Dashboard</span>
-                    </button>
-                    <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-                        <BarChart3 className="w-5 h-5 text-green-400" />
-                        Analytics
-                    </h1>
-                </div>
-            </div>
+        <DashboardLayout roleConfig={roleConfig[user.role]} navItems={navItems}>
+            <div className="space-y-6 max-w-7xl mx-auto">
 
-            <div className="max-w-7xl mx-auto p-4 sm:p-6">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-2">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+                        <p className="text-sm text-gray-500 mt-1">Track your performance and transfer activity.</p>
+                    </div>
+                </div>
+
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <Loader2 className="w-12 h-12 animate-spin text-green-400 mb-4" />
-                        <p className="text-gray-400">Calculating your real analytics...</p>
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
+                        <Loader2 className="w-10 h-10 animate-spin text-green-600 mb-4" />
+                        <p className="text-gray-500">Calculating your analytics...</p>
                     </div>
                 ) : (
                     <>
                         {/* KPI CARDS */}
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             {kpis.map((kpi, i) => (
-                                <div key={i} className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-5 hover:border-gray-600 transition-all">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className={`p-2 rounded-lg ${kpi.color}`}>{kpi.icon}</div>
-                                        <div className="flex items-center gap-1 text-xs font-semibold text-green-400">
-                                            <ArrowUpRight className="w-3 h-3" />
-                                            {kpi.change}
+                                <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className={`p-2.5 rounded-xl ${kpi.color}`}>{kpi.icon}</div>
+                                        <div className="flex items-center gap-1 text-xs font-semibold text-green-600">
+                                            <ArrowUpRight className="w-3 h-3" /> {kpi.change}
                                         </div>
                                     </div>
-                                    <p className="text-2xl font-bold">{kpi.value}</p>
-                                    <p className="text-xs text-gray-400 mt-1">{kpi.label}</p>
+                                    <p className="text-3xl font-bold text-gray-900">{kpi.value}</p>
+                                    <p className="text-sm text-gray-500 mt-1 font-medium">{kpi.label}</p>
                                 </div>
                             ))}
                         </div>
 
                         {/* CHART TABS */}
-                        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-gray-700">
+                        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-gray-200">
                             {chartTabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveChart(tab.id)}
                                     className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeChart === tab.id
-                                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                        : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'
+                                        ? 'bg-green-50 text-green-700 border border-green-200'
+                                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
                                         }`}
                                 >
-                                    {tab.icon}
-                                    {tab.label}
+                                    {tab.icon} {tab.label}
                                 </button>
                             ))}
                         </div>
@@ -256,13 +234,13 @@ const Analytics = () => {
                         {/* CHARTS */}
                         {activeChart === 'overview' && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
-                                <div className="lg:col-span-2 bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-6">
+                                <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
-                                            <h2 className="text-lg font-bold">Activity Overview</h2>
-                                            <p className="text-xs text-gray-400">Views and interests over time</p>
+                                            <h2 className="text-lg font-bold text-gray-900">Activity Overview</h2>
+                                            <p className="text-xs text-gray-500">Views and interests over time</p>
                                         </div>
-                                        <Activity className="w-5 h-5 text-green-400" />
+                                        <Activity className="w-5 h-5 text-green-600" />
                                     </div>
                                     <div style={{ width: '100%', height: 320 }}>
                                         <ResponsiveContainer>
@@ -273,28 +251,28 @@ const Analytics = () => {
                                                         <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                                     </linearGradient>
                                                 </defs>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                                <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
-                                                <YAxis stroke="#9ca3af" fontSize={12} />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                                                <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                                                <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
                                                 <Tooltip content={<CustomTooltip />} />
-                                                <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2} fill="url(#colorViews)" name="Views" />
+                                                <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={3} fill="url(#colorViews)" name="Views" />
                                             </AreaChart>
                                         </ResponsiveContainer>
                                     </div>
                                 </div>
 
-                                <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-6">
+                                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
-                                            <h2 className="text-lg font-bold">Traffic Sources</h2>
-                                            <p className="text-xs text-gray-400">Where traffic comes from</p>
+                                            <h2 className="text-lg font-bold text-gray-900">Traffic Sources</h2>
+                                            <p className="text-xs text-gray-500">Where traffic comes from</p>
                                         </div>
-                                        <PieIcon className="w-5 h-5 text-blue-400" />
+                                        <PieIcon className="w-5 h-5 text-blue-600" />
                                     </div>
                                     <div style={{ width: '100%', height: 240 }}>
                                         <ResponsiveContainer>
                                             <PieChart>
-                                                <Pie data={sourceBreakdown} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
+                                                <Pie data={sourceBreakdown} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value" stroke="none">
                                                     {sourceBreakdown.map((entry, i) => (
                                                         <Cell key={i} fill={entry.color} />
                                                     ))}
@@ -308,9 +286,9 @@ const Analytics = () => {
                                             <div key={i} className="flex items-center justify-between text-sm">
                                                 <div className="flex items-center gap-2">
                                                     <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: s.color }}></span>
-                                                    <span className="text-gray-300">{s.name}</span>
+                                                    <span className="text-gray-600">{s.name}</span>
                                                 </div>
-                                                <span className="font-semibold">{s.value}%</span>
+                                                <span className="font-semibold text-gray-900">{s.value}%</span>
                                             </div>
                                         ))}
                                     </div>
@@ -319,24 +297,24 @@ const Analytics = () => {
                         )}
 
                         {activeChart === 'trends' && (
-                            <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-6 animate-fadeIn">
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm animate-fadeIn">
                                 <div className="flex items-center justify-between mb-6">
                                     <div>
-                                        <h2 className="text-lg font-bold">Activity Trends</h2>
-                                        <p className="text-xs text-gray-400">Week-by-week performance</p>
+                                        <h2 className="text-lg font-bold text-gray-900">Activity Trends</h2>
+                                        <p className="text-xs text-gray-500">Week-by-week performance</p>
                                     </div>
-                                    <LineIcon className="w-5 h-5 text-green-400" />
+                                    <LineIcon className="w-5 h-5 text-green-600" />
                                 </div>
                                 <div style={{ width: '100%', height: 400 }}>
                                     <ResponsiveContainer>
                                         <LineChart data={activityData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                            <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
-                                            <YAxis stroke="#9ca3af" fontSize={12} />
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                                            <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                                            <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
                                             <Tooltip content={<CustomTooltip />} />
                                             <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-                                            <Line type="monotone" dataKey="views" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 4 }} name="Views" />
-                                            <Line type="monotone" dataKey="interests" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 4 }} name="Interests" />
+                                            <Line type="monotone" dataKey="views" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 4 }} activeDot={{ r: 6 }} name="Views" />
+                                            <Line type="monotone" dataKey="interests" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 4 }} activeDot={{ r: 6 }} name="Interests" />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -345,46 +323,46 @@ const Analytics = () => {
 
                         {activeChart === 'breakdown' && (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
-                                <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-6">
+                                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
-                                            <h2 className="text-lg font-bold">Weekly Comparison</h2>
+                                            <h2 className="text-lg font-bold text-gray-900">Weekly Comparison</h2>
                                         </div>
-                                        <BarChart3 className="w-5 h-5 text-purple-400" />
+                                        <BarChart3 className="w-5 h-5 text-purple-600" />
                                     </div>
                                     <div style={{ width: '100%', height: 300 }}>
                                         <ResponsiveContainer>
                                             <BarChart data={activityData}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                                <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
-                                                <YAxis stroke="#9ca3af" fontSize={12} />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                                                <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                                                <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
                                                 <Tooltip content={<CustomTooltip />} />
-                                                <Bar dataKey="views" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="Views" />
+                                                <Bar dataKey="views" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Views" barSize={40} />
                                             </BarChart>
                                         </ResponsiveContainer>
                                     </div>
                                 </div>
 
-                                <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-6">
+                                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
-                                            <h2 className="text-lg font-bold">{user.role === 'team' ? 'Top Target Players' : 'Top Interested Clubs'}</h2>
+                                            <h2 className="text-lg font-bold text-gray-900">{user.role === 'team' ? 'Top Target Players' : 'Top Interested Clubs'}</h2>
                                         </div>
-                                        <TrendingUp className="w-5 h-5 text-green-400" />
+                                        <TrendingUp className="w-5 h-5 text-green-600" />
                                     </div>
                                     <div className="space-y-3">
                                         {topClubs.map((item, i) => (
-                                            <div key={i} className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg">
-                                                <div className="w-8 h-8 bg-gradient-to-r from-gray-600 to-gray-700 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                            <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                <div className="w-8 h-8 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
                                                     #{i + 1}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold truncate">{item.name}</p>
-                                                    <p className="text-xs text-gray-400">{item.views} views</p>
+                                                    <p className="text-sm font-semibold text-gray-900 truncate">{item.name}</p>
+                                                    <p className="text-xs text-gray-500">{item.views} views</p>
                                                 </div>
-                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded uppercase ${item.interest === 'High' ? 'bg-green-500/20 text-green-400'
-                                                    : item.interest === 'Medium' ? 'bg-yellow-500/20 text-yellow-400'
-                                                        : 'bg-gray-500/20 text-gray-400'
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${item.interest === 'High' ? 'bg-green-100 text-green-700'
+                                                    : item.interest === 'Medium' ? 'bg-yellow-100 text-yellow-700'
+                                                        : 'bg-gray-100 text-gray-600'
                                                     }`}>
                                                     {item.interest}
                                                 </span>
@@ -397,19 +375,19 @@ const Analytics = () => {
 
                         {activeChart === 'performance' && (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
-                                <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-6">
+                                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
-                                            <h2 className="text-lg font-bold">Performance Radar</h2>
+                                            <h2 className="text-lg font-bold text-gray-900">Performance Radar</h2>
                                         </div>
-                                        <Target className="w-5 h-5 text-green-400" />
+                                        <Target className="w-5 h-5 text-green-600" />
                                     </div>
                                     <div style={{ width: '100%', height: 350 }}>
                                         <ResponsiveContainer>
                                             <RadarChart data={performanceRadar}>
-                                                <PolarGrid stroke="#374151" />
-                                                <PolarAngleAxis dataKey="skill" stroke="#9ca3af" fontSize={12} />
-                                                <PolarRadiusAxis stroke="#6b7280" fontSize={10} />
+                                                <PolarGrid stroke="#e5e7eb" />
+                                                <PolarAngleAxis dataKey="skill" stroke="#6b7280" fontSize={12} />
+                                                <PolarRadiusAxis stroke="#e5e7eb" fontSize={10} />
                                                 <Radar name="Performance" dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.4} strokeWidth={2} />
                                                 <Tooltip content={<CustomTooltip />} />
                                             </RadarChart>
@@ -417,22 +395,22 @@ const Analytics = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-6">
+                                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                                     <div className="flex items-center justify-between mb-6">
                                         <div>
-                                            <h2 className="text-lg font-bold">Detailed Breakdown</h2>
+                                            <h2 className="text-lg font-bold text-gray-900">Detailed Breakdown</h2>
                                         </div>
-                                        <BarChart3 className="w-5 h-5 text-blue-400" />
+                                        <BarChart3 className="w-5 h-5 text-blue-600" />
                                     </div>
-                                    <div className="space-y-4">
+                                    <div className="space-y-5">
                                         {performanceRadar.map((item, i) => (
                                             <div key={i}>
-                                                <div className="flex items-center justify-between mb-1.5">
-                                                    <span className="text-sm font-medium">{item.skill}</span>
-                                                    <span className="text-sm font-bold text-green-400">{item.value}</span>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">{item.skill}</span>
+                                                    <span className="text-sm font-bold text-green-600">{item.value}</span>
                                                 </div>
-                                                <div className="h-2.5 bg-gray-700 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-gradient-to-r from-green-500 to-blue-500 rounded-full transition-all duration-500" style={{ width: `${item.value}%` }}></div>
+                                                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{ width: `${item.value}%` }}></div>
                                                 </div>
                                             </div>
                                         ))}
@@ -454,7 +432,7 @@ const Analytics = () => {
           animation: fadeIn 0.3s ease-out;
         }
       `}} />
-        </div>
+        </DashboardLayout>
     );
 };
 

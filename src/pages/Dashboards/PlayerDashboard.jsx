@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Eye, Star, FileText, DollarSign, BarChart3, Video, User,
-    Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight, Loader2, TrendingUp, Sparkles,
+    Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight,
+    Loader2, TrendingUp, Sparkles
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
 import { useAuth } from '../../context/AuthContext';
 import { fetchPlayerDashboardData } from '../../lib/dbService';
-import UploadHighlightModal from '../../components/dashboard/UploadHighlightModal'; // ⭐ Imported Modal
+import UploadHighlightModal from '../../components/dashboard/UploadHighlightModal';
 
 const PlayerDashboard = () => {
     const navigate = useNavigate();
@@ -17,14 +18,10 @@ const PlayerDashboard = () => {
 
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-
-    // ⭐ State to control the upload modal
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
-    // Fetch Real Data
     useEffect(() => {
         if (!user) return;
-
         const loadData = async () => {
             setIsLoading(true);
             try {
@@ -36,39 +33,35 @@ const PlayerDashboard = () => {
                 setIsLoading(false);
             }
         };
-
         loadData();
     }, [user]);
 
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
-        { id: 'discover', label: 'Discover Clubs', icon: <Building2 className="w-5 h-5" />, path: '/browse-clubs' },
         { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
+        { id: 'discover', label: 'Discover Clubs', icon: <Building2 className="w-5 h-5" />, path: '/browse-clubs' },
         { id: 'offers', label: 'My Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
         { id: 'profile', label: 'My Profile', icon: <User className="w-5 h-5" />, path: '/profile' },
     ];
 
-    const role = roleConfig.player;
-
-    // Loading State
     if (isLoading) {
         return (
-            <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={[]}>
+            <DashboardLayout roleConfig={roleConfig.player} navItems={navItems} recentActivity={[]}>
                 <div className="flex flex-col items-center justify-center h-[60vh]">
-                    <Loader2 className="w-12 h-12 animate-spin text-green-400 mb-4" />
-                    <p className="text-gray-400">Loading your dashboard...</p>
+                    <Loader2 className="w-10 h-10 animate-spin text-green-600 mb-4" />
+                    <p className="text-gray-500">Loading your dashboard...</p>
                 </div>
             </DashboardLayout>
         );
     }
 
     const stats = [
-        { label: 'Profile Views', value: data?.stats.views || 0, change: 'Live', up: true, icon: <Eye className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-        { label: 'Club Interests', value: data?.stats.interests || 0, change: 'Live', up: true, icon: <Star className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
-        { label: 'Active Offers', value: data?.stats.offers || 0, change: 'Live', up: true, icon: <FileText className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
-        { label: 'Market Value', value: data?.stats.marketValue || '€0', change: 'Current', up: true, icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
+        { label: 'Profile Views', value: data?.stats.views || 0, change: '+12%', icon: <Eye className="w-5 h-5" />, color: 'text-blue-600 bg-blue-50' },
+        { label: 'Club Interests', value: data?.stats.interests || 0, change: '+5', icon: <Star className="w-5 h-5" />, color: 'text-yellow-600 bg-yellow-50' },
+        { label: 'Active Offers', value: data?.stats.offers || 0, change: '+1', icon: <FileText className="w-5 h-5" />, color: 'text-green-600 bg-green-50' },
+        { label: 'Market Value', value: data?.stats.marketValue || '€0', change: 'Current', icon: <DollarSign className="w-5 h-5" />, color: 'text-purple-600 bg-purple-50' },
     ];
 
     const performance = [
@@ -84,55 +77,53 @@ const PlayerDashboard = () => {
         type: a.type === 'offer' ? 'offer' : a.type === 'message' ? 'message' : 'view'
     })) || [];
 
-    // ⭐ Updated Quick Actions with onClick for Upload
     const quickActions = [
-        {
-            label: 'Upload Highlight',
-            icon: <Video className="w-5 h-5" />,
-            onClick: () => setIsUploadModalOpen(true)
-        },
+        { label: 'Upload Highlight', icon: <Video className="w-5 h-5" />, onClick: () => setIsUploadModalOpen(true) },
         { label: 'Update Profile', icon: <User className="w-5 h-5" />, path: '/profile' },
         { label: 'View Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
-
         { label: 'Browse Clubs', icon: <Building2 className="w-5 h-5" />, path: '/browse-clubs' },
     ];
 
     return (
-        <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={recentActivity}>
-            <div className="space-y-6">
-                {/* Welcome Banner */}
-                <div className={`bg-gradient-to-r ${role.color} rounded-2xl p-6 sm:p-8`}>
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
-                    <p className="text-white/80 mb-2">
-                        Current Club: <span className="font-bold text-white">{data?.currentClub || 'Free Agent'}</span>
-                    </p>
-                    <p className="text-white/80">
-                        {data?.stats.offers > 0
-                            ? `You have ${data.stats.offers} active offers. Keep an eye on your messages!`
-                            : "Your profile is live. Make sure your stats are up to date to attract more scouts."}
-                    </p>
+        <DashboardLayout roleConfig={roleConfig.player} navItems={navItems} recentActivity={recentActivity}>
+            <div className="space-y-6 max-w-7xl mx-auto">
+
+                {/* Page Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.name?.split(' ')[0]}</h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Current Club: <span className="font-semibold text-gray-900">{data?.currentClub || 'Free Agent'}</span>
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-medium border border-green-200">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span> Profile Active
+                        </span>
+                    </div>
                 </div>
 
-                {/* Stats */}
+                {/* Stats Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((s, i) => (
-                        <div key={i} className="bg-gray-800/50 rounded-xl p-5 border border-gray-700">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className={`p-2 rounded-lg ${s.color}`}>{s.icon}</div>
-                                <div className="flex items-center gap-1 text-xs font-semibold text-green-400">
-                                    <ArrowUpRight className="w-3 h-3" />{s.change}
+                        <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className={`p-2.5 rounded-xl ${s.color}`}>
+                                    {s.icon}
                                 </div>
                             </div>
-                            <p className="text-2xl font-bold">{s.value}</p>
-                            <p className="text-xs text-gray-400 mt-1">{s.label}</p>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{s.value}</p>
+                                <p className="text-sm text-gray-500 mt-1 font-medium">{s.label}</p>
+                            </div>
                         </div>
                     ))}
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                    <h3 className="font-semibold mb-4">Quick Actions</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         {quickActions.map((a, i) => (
                             <button
                                 key={i}
@@ -140,10 +131,10 @@ const PlayerDashboard = () => {
                                     if (a.onClick) a.onClick();
                                     else if (a.path) navigate(a.path);
                                 }}
-                                className="flex flex-col items-center gap-2 p-4 bg-gray-700/30 hover:bg-gray-700/60 rounded-xl transition-all"
+                                className="flex flex-col items-center justify-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-all group"
                             >
-                                <div className={role.text}>{a.icon}</div>
-                                <span className="text-xs font-medium text-center">{a.label}</span>
+                                <div className="text-gray-400 group-hover:text-green-600 transition-colors">{a.icon}</div>
+                                <span className="text-sm font-medium text-gray-700 text-center">{a.label}</span>
                             </button>
                         ))}
                     </div>
@@ -151,35 +142,48 @@ const PlayerDashboard = () => {
 
                 {/* Two Columns */}
                 <div className="grid lg:grid-cols-2 gap-6">
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-blue-400" /> Season Performance
-                        </h3>
+
+                    {/* Performance */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <BarChart3 className="w-5 h-5 text-blue-600" /> Season Performance
+                            </h3>
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             {performance.map((p, i) => (
-                                <div key={i} className="bg-gray-700/30 rounded-lg p-4">
-                                    <p className="text-2xl font-bold text-blue-400">{p.value}</p>
-                                    <p className="text-xs text-gray-400 mt-1">{p.label}</p>
+                                <div key={i} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                    <p className="text-2xl font-bold text-gray-900">{p.value}</p>
+                                    <p className="text-xs font-medium text-gray-500 mt-1">{p.label}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-gray-400" /> Recent Activity
-                        </h3>
+                    {/* Recent Activity */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-gray-400" /> Recent Activity
+                            </h3>
+                        </div>
+
                         {recentActivity.length === 0 ? (
-                            <p className="text-sm text-gray-500 text-center py-4">No recent activity.</p>
+                            <div className="text-center py-8">
+                                <p className="text-sm text-gray-500">No recent activity.</p>
+                            </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {recentActivity.map((a, i) => (
-                                    <div key={i} className="flex items-start gap-3 p-3 bg-gray-700/30 rounded-lg">
-                                        <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0">
+                                    <div key={i} className="flex items-start gap-4">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${a.type === 'offer' ? 'bg-green-50 text-green-600' :
+                                            a.type === 'message' ? 'bg-purple-50 text-purple-600' :
+                                                'bg-blue-50 text-blue-600'
+                                            }`}>
                                             {a.type === 'offer' ? <FileText className="w-4 h-4" /> : a.type === 'message' ? <MessageSquare className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm">{a.text}</p>
+                                        <div className="flex-1 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                                            <p className="text-sm font-medium text-gray-900">{a.text}</p>
                                             <p className="text-xs text-gray-500 mt-1">{a.time}</p>
                                         </div>
                                     </div>
@@ -190,16 +194,13 @@ const PlayerDashboard = () => {
                 </div>
             </div>
 
-            {/* ⭐ Video Upload Modal ⭐ */}
+            {/* Video Upload Modal */}
             {data?.playerStats?.id && (
                 <UploadHighlightModal
                     isOpen={isUploadModalOpen}
                     onClose={() => setIsUploadModalOpen(false)}
                     playerId={data.playerStats.id}
-                    onSuccess={() => {
-                        // You can add a toast notification here if you want
-                        console.log("Video uploaded successfully!");
-                    }}
+                    onSuccess={() => console.log("Video uploaded")}
                 />
             )}
         </DashboardLayout>

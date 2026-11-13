@@ -1,8 +1,7 @@
 // src/pages/AITalentFinder.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Sparkles, Loader2, Star } from 'lucide-react';
-import { supabase } from '../lib/SupabaseClient';
+import { ArrowLeft, Search, Sparkles, Loader2, Star, User, ChevronRight } from 'lucide-react';
 
 const AITalentFinder = () => {
     const navigate = useNavigate();
@@ -20,7 +19,6 @@ const AITalentFinder = () => {
         setResults([]);
 
         try {
-            // Call the new Edge Function
             const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL}/functions/v1/search-players-ai`, {
                 method: 'POST',
                 headers: {
@@ -46,38 +44,53 @@ const AITalentFinder = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-            <div className="bg-gray-800/50 backdrop-blur-lg border-b border-gray-700 sticky top-0 z-20">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
-                    <button onClick={() => navigate('/dashboard')} className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors">
-                        <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Dashboard</span>
+        <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+
+            {/* Top Navigation */}
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
                     </button>
-                    <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-yellow-400" /> AI Talent Finder
-                    </h1>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs font-bold uppercase tracking-wider">
+                        <Sparkles className="w-3.5 h-3.5" /> AI Powered
+                    </div>
                 </div>
             </div>
 
-            <div className="max-w-3xl mx-auto p-4 sm:p-6 mt-10">
-                <div className="text-center mb-10">
-                    <h2 className="text-3xl font-bold mb-3">Describe your ideal player</h2>
-                    <p className="text-gray-400">Our AI will read your description and find the closest matches in the database.</p>
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+                {/* Header */}
+                <div className="text-center mb-12">
+                    <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <Sparkles className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                        Describe your ideal player.
+                    </h1>
+                    <p className="text-lg text-gray-500 max-w-xl mx-auto">
+                        Our AI reads your description and instantly scans the database to find the perfect tactical fit for your team.
+                    </p>
                 </div>
 
-                <form onSubmit={handleSearch} className="relative mb-12">
-                    <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+                {/* Search Bar */}
+                <form onSubmit={handleSearch} className="relative mb-12 max-w-3xl mx-auto">
+                    <div className="relative flex items-center">
+                        <Search className="absolute left-5 w-6 h-6 text-gray-400" />
                         <input
                             type="text"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="e.g., A fast left-winger with high stamina who loves to press..."
-                            className="w-full bg-gray-800 border-2 border-gray-700 rounded-2xl pl-14 pr-32 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 transition-colors"
+                            className="w-full bg-white border-2 border-gray-200 rounded-2xl pl-14 pr-40 py-5 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all shadow-sm"
                         />
                         <button
                             type="submit"
                             disabled={isLoading || !query.trim()}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 disabled:opacity-50 text-black font-bold py-2 px-6 rounded-xl transition-all flex items-center gap-2"
+                            className="absolute right-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center gap-2"
                         >
                             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Search'}
                         </button>
@@ -85,40 +98,79 @@ const AITalentFinder = () => {
                 </form>
 
                 {/* Results Area */}
-                {/* Results Area */}
+                {isLoading && (
+                    <div className="text-center py-16">
+                        <Loader2 className="w-10 h-10 animate-spin text-green-600 mx-auto mb-4" />
+                        <p className="text-gray-500 font-medium">Analyzing player statistics and styles...</p>
+                    </div>
+                )}
+
+                {!isLoading && hasSearched && results.length === 0 && (
+                    <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-sm max-w-3xl mx-auto">
+                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Search className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">No matches found</h3>
+                        <p className="text-gray-500">Try adjusting your description to be more specific or broader.</p>
+                    </div>
+                )}
+
                 {!isLoading && results.length > 0 && (
-                    <div className="space-y-4 animate-fadeIn">
-                        <h3 className="text-xl font-bold mb-4">Best Matches</h3>
+                    <div className="space-y-4 max-w-3xl mx-auto animate-fadeIn">
+                        <div className="flex items-center justify-between mb-2 px-2">
+                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+                                Top AI Matches
+                            </h3>
+                            <span className="text-sm font-medium text-gray-400">
+                                {results.length} results
+                            </span>
+                        </div>
+
                         {results.map((player) => (
-                            <div key={player.id} className="bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-700 p-4 flex items-center justify-between hover:border-yellow-500/50 transition-colors cursor-pointer" onClick={() => navigate(`/players/${player.id}`)}>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-xl font-bold">
-                                        {player.name.charAt(0)}
+                            <div
+                                key={player.id}
+                                onClick={() => navigate(`/players/${player.id}`)}
+                                className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 hover:border-green-300 hover:shadow-md transition-all cursor-pointer group flex items-center justify-between"
+                            >
+                                <div className="flex items-center gap-5">
+                                    {/* Avatar */}
+                                    <div className="w-14 h-14 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center shrink-0">
+                                        <User className="w-6 h-6 text-gray-400" />
                                     </div>
+
+                                    {/* Info */}
                                     <div>
-                                        <h4 className="font-bold text-lg">{player.name}</h4>
-                                        <p className="text-sm text-gray-400">{player.position} • {player.club || 'Free Agent'}</p>
+                                        <h4 className="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">
+                                            {player.name}
+                                        </h4>
+                                        <p className="text-sm text-gray-500 mt-0.5">
+                                            {player.position} • {player.club || 'Free Agent'}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <div className="flex items-center gap-1 text-green-400 font-semibold mb-1 justify-end">
-                                        <Star className="w-4 h-4 fill-current" /> {player.rating || 'N/A'}
+
+                                <div className="flex items-center gap-6">
+                                    {/* Rating */}
+                                    <div className="flex items-center gap-1 text-yellow-600 bg-yellow-50 px-2.5 py-1 rounded-lg border border-yellow-100">
+                                        <Star className="w-4 h-4 fill-current" />
+                                        <span className="font-bold text-sm">{player.rating || 'N/A'}</span>
                                     </div>
-                                    <div className="inline-flex items-center gap-1 bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-xs font-bold">
-                                        {Math.round(player.similarity * 100)}% Match
+
+                                    {/* Match Percentage */}
+                                    <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
+                                        <span className="text-xs font-semibold text-green-700">Match</span>
+                                        <span className="text-lg font-bold text-green-600">
+                                            {Math.round(player.similarity * 100)}%
+                                        </span>
                                     </div>
+
+                                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors" />
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
 
-
-                {!isLoading && hasSearched && results.length === 0 && (
-                    <div className="text-center py-10 bg-gray-800/50 rounded-2xl border border-gray-700">
-                        <p className="text-gray-400">No players matched that description. Try being more specific!</p>
-                    </div>
-                )}
             </div>
         </div>
     );

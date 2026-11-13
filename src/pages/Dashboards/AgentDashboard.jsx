@@ -53,30 +53,24 @@ const AgentDashboard = () => {
         return (
             <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={[]}>
                 <div className="flex flex-col items-center justify-center h-[60vh]">
-                    <Loader2 className="w-12 h-12 animate-spin text-purple-400 mb-4" />
-                    <p className="text-gray-400">Loading your agency dashboard...</p>
+                    <Loader2 className="w-10 h-10 animate-spin text-purple-600 mb-4" />
+                    <p className="text-gray-500">Loading your agency dashboard...</p>
                 </div>
             </DashboardLayout>
         );
     }
 
-    const formattedCommission = data?.stats?.commission
-        ? data.stats.commission >= 1000000
-            ? `€${(data.stats.commission / 1000000).toFixed(1)}M`
-            : `€${(data.stats.commission / 1000).toFixed(0)}K`
-        : '€0';
-
     const stats = [
-        { label: 'Active Clients', value: data?.stats?.activeClients || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-purple-400 bg-purple-500/10' },
-        { label: 'Open Negotiations', value: data?.stats?.openNegotiations || 0, change: 'Live', up: true, icon: <Briefcase className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
+        { label: 'Active Clients', value: data?.stats?.activeClients || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-purple-600 bg-purple-50' },
+        { label: 'Open Negotiations', value: data?.stats?.openNegotiations || 0, change: 'Live', up: true, icon: <Briefcase className="w-5 h-5" />, color: 'text-blue-600 bg-blue-50' },
         {
             label: 'Commission MTD',
-            value: `€${data?.stats?.commission || 0}`, // ⭐ Raw number for testing
+            value: `€${data?.stats?.commission || 0}`,
             change: 'Live', up: true,
             icon: <DollarSign className="w-5 h-5" />,
-            color: 'text-green-400 bg-green-500/10'
+            color: 'text-green-600 bg-green-50'
         },
-        { label: 'Deals Closed', value: data?.stats?.closedDeals || 0, change: 'Live', up: true, icon: <Award className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
+        { label: 'Deals Closed', value: data?.stats?.closedDeals || 0, change: 'Live', up: true, icon: <Award className="w-5 h-5" />, color: 'text-yellow-600 bg-yellow-50' },
     ];
 
     const recentActivity = data?.recentActivity?.map((a) => ({
@@ -93,58 +87,73 @@ const AgentDashboard = () => {
 
     return (
         <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={recentActivity}>
-            <div className="space-y-6">
-                <div className={`bg-gradient-to-r ${role.color} rounded-2xl p-6 sm:p-8`}>
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
-                    <p className="text-white/80">
-                        {data?.stats?.openNegotiations > 0
-                            ? `You have ${data.stats.openNegotiations} open negotiations. Keep closing those deals!`
-                            : 'Your roster is looking good. Browse the market to find new talent.'}
-                    </p>
+            <div className="space-y-6 max-w-7xl mx-auto">
+
+                {/* Welcome Banner */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-50"></div>
+                    <div className="relative z-10">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
+                        <p className="text-gray-600 font-medium">
+                            {data?.stats?.openNegotiations > 0
+                                ? `You have ${data.stats.openNegotiations} open negotiations. Keep closing those deals!`
+                                : 'Your roster is looking good. Browse the market to find new talent.'}
+                        </p>
+                    </div>
                 </div>
 
+                {/* Stats Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((s, i) => (
-                        <div key={i} className="bg-gray-800/50 rounded-xl p-5 border border-gray-700">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className={`p-2 rounded-lg ${s.color}`}>{s.icon}</div>
-                                <div className="flex items-center gap-1 text-xs font-semibold text-green-400">
+                        <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className={`p-2.5 rounded-xl ${s.color}`}>{s.icon}</div>
+                                <div className="flex items-center gap-1 text-xs font-semibold text-green-600">
                                     <ArrowUpRight className="w-3 h-3" />{s.change}
                                 </div>
                             </div>
-                            <p className="text-2xl font-bold">{s.value}</p>
-                            <p className="text-xs text-gray-400 mt-1">{s.label}</p>
+                            <p className="text-3xl font-bold text-gray-900">{s.value}</p>
+                            <p className="text-sm text-gray-500 mt-1 font-medium">{s.label}</p>
                         </div>
                     ))}
                 </div>
 
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                    <h3 className="font-semibold mb-4">Quick Actions</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* Quick Actions */}
+                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         {quickActions.map((a, i) => (
                             <button
                                 key={i}
                                 onClick={() => (a.path ? navigate(a.path) : null)}
-                                className="flex flex-col items-center gap-2 p-4 bg-gray-700/30 hover:bg-gray-700/60 rounded-xl transition-all"
+                                className="flex flex-col items-center justify-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-all group"
                             >
-                                <div className={role.text}>{a.icon}</div>
-                                <span className="text-xs font-medium text-center">{a.label}</span>
+                                <div className="text-gray-400 group-hover:text-purple-600 transition-colors">{a.icon}</div>
+                                <span className="text-sm font-medium text-gray-700 text-center">{a.label}</span>
                             </button>
                         ))}
                     </div>
                 </div>
 
+                {/* Two Columns */}
                 <div className="grid lg:grid-cols-2 gap-6">
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <Users className="w-5 h-5 text-purple-400" /> Top Clients
-                        </h3>
+
+                    {/* Top Clients */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <Users className="w-5 h-5 text-purple-600" /> Top Clients
+                            </h3>
+                            <button onClick={() => navigate('/my-roster')} className="text-sm font-medium text-purple-600 hover:text-purple-700">
+                                View All
+                            </button>
+                        </div>
 
                         {!data?.clients || data.clients.length === 0 ? (
-                            <div className="text-center py-8">
-                                <Users className="w-10 h-10 text-gray-600 mx-auto mb-2" />
-                                <p className="text-sm text-gray-400 mb-4">You don't represent any players yet.</p>
-                                <button onClick={() => navigate('/players')} className="text-xs bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg font-semibold">
+                            <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100">
+                                <Users className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                                <p className="text-sm text-gray-500 mb-4">You don't represent any players yet.</p>
+                                <button onClick={() => navigate('/players')} className="text-sm bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
                                     Find Players
                                 </button>
                             </div>
@@ -154,20 +163,20 @@ const AgentDashboard = () => {
                                     <button
                                         key={i}
                                         onClick={() => navigate(`/players/${client.id}`)}
-                                        className="w-full text-left flex items-center justify-between p-3 bg-gray-700/30 hover:bg-gray-700/50 rounded-lg transition-colors"
+                                        className="w-full text-left flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl transition-colors"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-lg font-bold text-purple-400">
+                                            <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-lg font-bold">
                                                 {client.name.charAt(0)}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold">{client.name}</p>
-                                                <p className="text-xs text-gray-400">{client.position} • {client.club}</p>
+                                                <p className="text-sm font-semibold text-gray-900">{client.name}</p>
+                                                <p className="text-xs text-gray-500">{client.position} • {client.club}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-semibold text-green-400">{client.market_value || 'N/A'}</p>
-                                            <div className="flex items-center justify-end gap-1 text-yellow-400 text-xs">
+                                            <p className="text-sm font-semibold text-green-600">{client.market_value || 'N/A'}</p>
+                                            <div className="flex items-center justify-end gap-1 text-yellow-600 text-xs">
                                                 <Star className="w-3 h-3 fill-current" /> {client.rating}
                                             </div>
                                         </div>
@@ -177,22 +186,25 @@ const AgentDashboard = () => {
                         )}
                     </div>
 
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    {/* Recent Activity */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <Clock className="w-5 h-5 text-gray-400" /> Recent Activity
                         </h3>
 
                         {recentActivity.length === 0 ? (
-                            <p className="text-sm text-gray-500 text-center py-4">No recent activity.</p>
+                            <div className="text-center py-8">
+                                <p className="text-sm text-gray-500">No recent activity.</p>
+                            </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {recentActivity.map((a, i) => (
-                                    <div key={i} className="flex items-start gap-3 p-3 bg-gray-700/30 rounded-lg">
-                                        <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0">
+                                    <div key={i} className="flex items-start gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
                                             <CheckCircle2 className="w-4 h-4" />
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm">{a.text}</p>
+                                        <div className="flex-1 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                                            <p className="text-sm font-medium text-gray-900">{a.text}</p>
                                             <p className="text-xs text-gray-500 mt-1">{a.time}</p>
                                         </div>
                                     </div>

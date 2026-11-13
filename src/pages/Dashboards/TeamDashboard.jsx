@@ -132,18 +132,18 @@ const TeamDashboard = () => {
         return (
             <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={[]}>
                 <div className="flex flex-col items-center justify-center h-[60vh]">
-                    <Loader2 className="w-12 h-12 animate-spin text-red-400 mb-4" />
-                    <p className="text-gray-400">Loading club dashboard...</p>
+                    <Loader2 className="w-10 h-10 animate-spin text-red-600 mb-4" />
+                    <p className="text-gray-500">Loading club dashboard...</p>
                 </div>
             </DashboardLayout>
         );
     }
 
     const stats = [
-        { label: 'Squad Size', value: data?.stats.squadSize || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-red-400 bg-red-500/10' },
-        { label: 'Transfer Targets', value: data?.stats.totalAvailable || 0, change: 'Live', up: true, icon: <Target className="w-5 h-5" />, color: 'text-blue-400 bg-blue-500/10' },
-        { label: 'Budget Spent', value: `€${(data?.stats.budgetSpent / 1000000).toFixed(1) || 0}M`, change: 'Live', up: false, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-400 bg-green-500/10' },
-        { label: 'Active Offers', value: data?.stats.activeOffers || 0, change: 'Live', up: true, icon: <FileText className="w-5 h-5" />, color: 'text-yellow-400 bg-yellow-500/10' },
+        { label: 'Squad Size', value: data?.stats.squadSize || 0, change: 'Live', up: true, icon: <Users className="w-5 h-5" />, color: 'text-red-600 bg-red-50' },
+        { label: 'Transfer Targets', value: data?.stats.totalAvailable || 0, change: 'Live', up: true, icon: <Target className="w-5 h-5" />, color: 'text-blue-600 bg-blue-50' },
+        { label: 'Budget Spent', value: `€${(data?.stats.budgetSpent / 1000000).toFixed(1) || 0}M`, change: 'Live', up: false, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-600 bg-green-50' },
+        { label: 'Active Offers', value: data?.stats.activeOffers || 0, change: 'Live', up: true, icon: <FileText className="w-5 h-5" />, color: 'text-yellow-600 bg-yellow-50' },
     ];
 
     const recentActivity = data?.recentActivity.map((a) => ({
@@ -167,51 +167,54 @@ const TeamDashboard = () => {
 
     return (
         <DashboardLayout roleConfig={role} navItems={navItems} recentActivity={recentActivity}>
-            <div className="space-y-6">
+            <div className="space-y-6 max-w-7xl mx-auto">
                 {successMessage && (
-                    <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-2 text-green-400 text-sm animate-fadeIn">
-                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> {successMessage}
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 text-sm animate-fadeIn">
+                        <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> {successMessage}
                     </div>
                 )}
 
                 {/* Welcome Banner */}
-                <div className={`bg-gradient-to-r ${role.color} rounded-2xl p-6 sm:p-8`}>
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
-                    <p className="text-white/80">
-                        {data?.stats.activeOffers > 0
-                            ? `You have ${data.stats.activeOffers} pending offers to review.`
-                            : "The transfer window is open. Start scouting for new talent!"}
-                    </p>
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-red-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-50"></div>
+                    <div className="relative z-10">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome back, {user?.name?.split(' ')[0]}! 👋</h2>
+                        <p className="text-gray-600 font-medium">
+                            {data?.stats.activeOffers > 0
+                                ? `You have ${data.stats.activeOffers} pending offers to review.`
+                                : "The transfer window is open. Start scouting for new talent!"}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((s, i) => (
-                        <div key={i} className="bg-gray-800/50 rounded-xl p-5 border border-gray-700">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className={`p-2 rounded-lg ${s.color}`}>{s.icon}</div>
-                                <div className={`flex items-center gap-1 text-xs font-semibold ${s.up ? 'text-green-400' : 'text-red-400'}`}>
+                        <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className={`p-2.5 rounded-xl ${s.color}`}>{s.icon}</div>
+                                <div className={`flex items-center gap-1 text-xs font-semibold ${s.up ? 'text-green-600' : 'text-red-600'}`}>
                                     <ArrowUpRight className="w-3 h-3" />{s.change}
                                 </div>
                             </div>
-                            <p className="text-2xl font-bold">{s.value}</p>
-                            <p className="text-xs text-gray-400 mt-1">{s.label}</p>
+                            <p className="text-3xl font-bold text-gray-900">{s.value}</p>
+                            <p className="text-sm text-gray-500 mt-1 font-medium">{s.label}</p>
                         </div>
                     ))}
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                    <h3 className="font-semibold mb-4">Quick Actions</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         {quickActions.map((a, i) => (
                             <button
                                 key={i}
                                 onClick={() => a.path ? navigate(a.path) : null}
-                                className="flex flex-col items-center gap-2 p-4 bg-gray-700/30 hover:bg-gray-700/60 rounded-xl transition-all"
+                                className="flex flex-col items-center justify-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-all group"
                             >
-                                <div className={role.text}>{a.icon}</div>
-                                <span className="text-xs font-medium text-center">{a.label}</span>
+                                <div className="text-gray-400 group-hover:text-red-600 transition-colors">{a.icon}</div>
+                                <span className="text-sm font-medium text-gray-700 text-center">{a.label}</span>
                             </button>
                         ))}
                     </div>
@@ -220,31 +223,31 @@ const TeamDashboard = () => {
                 {/* Two Columns */}
                 <div className="grid lg:grid-cols-2 gap-6">
                     {/* Top Transfer Targets */}
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <Target className="w-5 h-5 text-red-400" /> Top Transfer Targets
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Target className="w-5 h-5 text-red-600" /> Top Transfer Targets
                         </h3>
                         {data?.topTargets.length === 0 ? (
-                            <div className="text-center py-8">
-                                <Target className="w-10 h-10 text-gray-600 mx-auto mb-2" />
-                                <p className="text-sm text-gray-400">No available players found.</p>
+                            <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100">
+                                <Target className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                                <p className="text-sm text-gray-500">No available players found.</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
                                 {data?.topTargets.map((target, i) => (
-                                    <div key={i} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
+                                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl transition-colors">
                                         <button onClick={() => navigate(`/players/${target.id}`)} className="text-left flex-1">
-                                            <p className="text-sm font-semibold hover:text-green-400 transition-colors">{target.name}</p>
-                                            <p className="text-xs text-gray-400">{target.position} • {target.club}</p>
+                                            <p className="text-sm font-semibold text-gray-900 hover:text-red-600 transition-colors">{target.name}</p>
+                                            <p className="text-xs text-gray-500">{target.position} • {target.club}</p>
                                         </button>
                                         <div className="flex items-center gap-3">
                                             <div className="text-right">
-                                                <span className="text-sm font-semibold text-green-400 block">{target.market_value || 'N/A'}</span>
-                                                <div className="flex items-center justify-end gap-1 text-yellow-400 text-xs">
+                                                <span className="text-sm font-semibold text-green-600 block">{target.market_value || 'N/A'}</span>
+                                                <div className="flex items-center justify-end gap-1 text-yellow-600 text-xs">
                                                     <Star className="w-3 h-3 fill-current" /> {target.rating || 'N/A'}
                                                 </div>
                                             </div>
-                                            <button onClick={() => setContactPlayer(target)} className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">
+                                            <button onClick={() => setContactPlayer(target)} className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors border border-red-100">
                                                 <MessageSquare className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -255,21 +258,23 @@ const TeamDashboard = () => {
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <Clock className="w-5 h-5 text-gray-400" /> Recent Activity
                         </h3>
                         {recentActivity.length === 0 ? (
-                            <p className="text-sm text-gray-500 text-center py-4">No recent activity.</p>
+                            <div className="text-center py-8">
+                                <p className="text-sm text-gray-500">No recent activity.</p>
+                            </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {recentActivity.map((a, i) => (
-                                    <div key={i} className="flex items-start gap-3 p-3 bg-gray-700/30 rounded-lg">
-                                        <div className="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0">
+                                    <div key={i} className="flex items-start gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0">
                                             <CheckCircle2 className="w-4 h-4" />
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm">{a.text}</p>
+                                        <div className="flex-1 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                                            <p className="text-sm font-medium text-gray-900">{a.text}</p>
                                             <p className="text-xs text-gray-500 mt-1">{a.time}</p>
                                         </div>
                                     </div>
@@ -280,27 +285,27 @@ const TeamDashboard = () => {
                 </div>
 
                 {/* My Scouting Network */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
-                        <UserPlus className="w-5 h-5 text-red-400" /> My Scouting Network
+                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <UserPlus className="w-5 h-5 text-red-600" /> My Scouting Network
                     </h3>
                     {hiredScouts.length === 0 ? (
-                        <div className="text-center py-4">
-                            <p className="text-sm text-gray-400 mb-3">You haven't hired any scouts yet.</p>
-                            <button onClick={() => navigate('/find-scouts')} className="text-xs bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-semibold">
+                        <div className="text-center py-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <p className="text-sm text-gray-500 mb-3">You haven't hired any scouts yet.</p>
+                            <button onClick={() => navigate('/find-scouts')} className="text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
                                 Hire Scouts
                             </button>
                         </div>
                     ) : (
                         <div className="flex gap-3 overflow-x-auto pb-2">
                             {hiredScouts.map(scout => (
-                                <div key={scout.id} className="bg-gray-700/30 rounded-lg p-3 min-w-[150px] flex-shrink-0 flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
+                                <div key={scout.id} className="bg-gray-50 border border-gray-100 rounded-xl p-3 min-w-[150px] flex-shrink-0 flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-sm font-bold">
                                         {scout.full_name?.charAt(0)}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold truncate">{scout.full_name}</p>
-                                        <p className="text-[10px] text-green-400">Active</p>
+                                        <p className="text-sm font-semibold text-gray-900 truncate">{scout.full_name}</p>
+                                        <p className="text-[10px] font-bold text-green-600 uppercase">Active</p>
                                     </div>
                                 </div>
                             ))}
@@ -309,66 +314,150 @@ const TeamDashboard = () => {
                 </div>
 
                 {/* Live Scout Activity */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-red-400" /> Live Scout Activity
+                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-red-600" /> Live Scout Activity
                     </h3>
                     {scoutActivity.length === 0 ? (
-                        <p className="text-sm text-gray-500 text-center py-4">
-                            No recent scouting activity. Hire scouts to start tracking players.
-                        </p>
+                        <div className="text-center py-8">
+                            <p className="text-sm text-gray-500">No recent scouting activity. Hire scouts to start tracking players.</p>
+                        </div>
                     ) : (
                         <div className="space-y-3">
                             {scoutActivity.map((activity) => (
-                                <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-700/30 rounded-lg">
-
-                                    {/* ⭐ Change Icon based on activity type */}
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${activity.type === 'report' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400'}`}>
+                                <div key={activity.id} className="flex items-start gap-4 p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activity.type === 'report' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}>
                                         {activity.type === 'report' ? <FileText className="w-4 h-4" /> : <Search className="w-4 h-4" />}
                                     </div>
-
                                     <div className="flex-1">
-                                        <p className="text-sm">
-                                            <span className="font-semibold text-white">{activity.scoutName}</span>
+                                        <p className="text-sm text-gray-900">
+                                            <span className="font-bold">{activity.scoutName}</span>
                                             {' '}{activity.action}{' '}
-                                            <span className="font-semibold text-green-400">{activity.playerName}</span>
+                                            <span className="font-semibold text-green-600">{activity.playerName}</span>
                                         </p>
-                                        <p className="text-xs text-gray-400 mt-1">
+                                        <p className="text-xs text-gray-500 mt-1">
                                             {activity.playerPosition} {activity.playerClub && `• ${activity.playerClub}`} • {activity.time}
                                         </p>
                                     </div>
-
-                                    {/* Link to view the report if it is one */}
                                     {activity.type === 'report' && (
                                         <button
                                             onClick={() => navigate('/team-reports')}
-                                            className="text-xs text-blue-400 hover:text-blue-300 font-semibold whitespace-nowrap"
+                                            className="text-xs text-blue-600 hover:text-blue-700 font-semibold whitespace-nowrap"
                                         >
                                             View Report →
                                         </button>
                                     )}
-
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
 
+                {/* Club Overview Section */}
+                <div className="grid lg:grid-cols-2 gap-6">
+
+                    {/* Fixtures */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-red-600" /> Upcoming Fixtures
+                        </h3>
+                        <div className="space-y-3">
+                            {clubOverview?.fixtures.map(fix => (
+                                <div key={fix.id} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-900">{fix.home ? 'vs' : '@'} {fix.opponent}</p>
+                                        <p className="text-xs text-gray-500">{fix.competition}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-semibold text-red-600">{fix.date}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* League Table */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-blue-600" /> League Position
+                        </h3>
+                        <div className="space-y-2">
+                            {clubOverview?.leagueTable.map(row => (
+                                <div key={row.pos} className={`flex items-center justify-between p-3 rounded-xl border ${row.team === 'My Team' ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-100'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs font-bold text-gray-400 w-4">{row.pos}</span>
+                                        <span className={`text-sm font-semibold ${row.team === 'My Team' ? 'text-red-700' : 'text-gray-900'}`}>{row.team}</span>
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-900">{row.pts} pts</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* New Signings */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <UserPlus className="w-5 h-5 text-green-600" /> New Signings
+                        </h3>
+                        {clubOverview?.newSignings.length === 0 ? (
+                            <p className="text-sm text-gray-500 text-center py-4">No recent signings.</p>
+                        ) : (
+                            <div className="space-y-3">
+                                {clubOverview?.newSignings.map(player => (
+                                    <div key={player.id} className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                                        <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-bold">
+                                            {player.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-900">{player.name}</p>
+                                            <p className="text-xs text-gray-500">{player.position}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Expiring Contracts */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-yellow-600" /> Expiring Contracts
+                        </h3>
+                        {clubOverview?.expiringContracts.length === 0 ? (
+                            <p className="text-sm text-gray-500 text-center py-4">No expiring contracts found.</p>
+                        ) : (
+                            <div className="space-y-3">
+                                {clubOverview?.expiringContracts.map(player => (
+                                    <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-900">{player.name}</p>
+                                            <p className="text-xs text-gray-500">{player.position}</p>
+                                        </div>
+                                        <span className="text-xs font-bold bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
+                                            {new Date(player.contract_end_date).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 {/* Squad Depth */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
-                        <Users className="w-5 h-5 text-red-400" /> Squad Depth
+                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Users className="w-5 h-5 text-red-600" /> Squad Depth
                     </h3>
                     <div className="grid sm:grid-cols-2 gap-6">
                         {squadStatus.map((pos, i) => (
                             <div key={i}>
-                                <div className="flex justify-between text-sm mb-1.5">
-                                    <span>{pos.position}</span>
-                                    <span className={pos.count >= pos.needed ? 'text-green-400' : 'text-yellow-400'}>
+                                <div className="flex justify-between text-sm mb-2">
+                                    <span className="font-medium text-gray-700">{pos.position}</span>
+                                    <span className={`font-bold ${pos.count >= pos.needed ? 'text-green-600' : 'text-yellow-600'}`}>
                                         {pos.count}/{pos.needed}
                                     </span>
                                 </div>
-                                <div className="h-2.5 bg-gray-700 rounded-full overflow-hidden">
+                                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
                                     <div
                                         className={`h-full rounded-full transition-all duration-500 ${pos.count >= pos.needed ? 'bg-green-500' : 'bg-yellow-500'}`}
                                         style={{ width: `${Math.min((pos.count / pos.needed) * 100, 100)}%` }}
@@ -381,42 +470,42 @@ const TeamDashboard = () => {
 
                 {/* Contact Modal */}
                 {contactPlayer && (
-                    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setContactPlayer(null)}>
-                        <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setContactPlayer(null)}>
+                        <div className="bg-white rounded-2xl border border-gray-200 max-w-lg w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-red-500/20 text-red-400 rounded-lg flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-red-50 text-red-600 rounded-lg flex items-center justify-center">
                                         <MessageSquare className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-bold">Contact {contactPlayer.name}</h2>
-                                        <p className="text-xs text-gray-400">Send a message about this player</p>
+                                        <h2 className="text-lg font-bold text-gray-900">Contact {contactPlayer.name}</h2>
+                                        <p className="text-xs text-gray-500">Send a message about this player</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setContactPlayer(null)} className="p-2 hover:bg-gray-700/50 rounded-lg">
-                                    <X className="w-4 h-4" />
+                                <button onClick={() => setContactPlayer(null)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
                                     <textarea
                                         rows={5}
                                         value={contactMessage}
                                         onChange={(e) => setContactMessage(e.target.value)}
                                         placeholder={`Hi, we're interested in discussing a potential move for ${contactPlayer.name}...`}
-                                        className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-red-500 resize-none"
+                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                                     />
                                 </div>
                             </div>
                             <div className="flex gap-3 mt-6">
-                                <button onClick={() => setContactPlayer(null)} className="flex-1 bg-gray-700 hover:bg-gray-600 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                                <button onClick={() => setContactPlayer(null)} className="flex-1 bg-white border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all">
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleSendMessage}
                                     disabled={!contactMessage.trim() || isSending}
-                                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:opacity-40 disabled:cursor-not-allowed py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                                    className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed py-2.5 rounded-xl text-sm font-semibold text-white transition-all flex items-center justify-center gap-2"
                                 >
                                     {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Message'}
                                 </button>
@@ -424,95 +513,6 @@ const TeamDashboard = () => {
                         </div>
                     </div>
                 )}
-                {/* ==================== CLUB OVERVIEW ==================== */}
-                <div className="grid lg:grid-cols-2 gap-6 mt-6">
-
-                    {/* Fixtures */}
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-red-400" /> Upcoming Fixtures
-                        </h3>
-                        <div className="space-y-3">
-                            {clubOverview?.fixtures.map(fix => (
-                                <div key={fix.id} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
-                                    <div>
-                                        <p className="text-sm font-semibold">{fix.home ? 'vs' : '@'} {fix.opponent}</p>
-                                        <p className="text-xs text-gray-400">{fix.competition}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-semibold text-red-400">{fix.date}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* League Table */}
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-blue-400" /> League Position
-                        </h3>
-                        <div className="space-y-2">
-                            {clubOverview?.leagueTable.map(row => (
-                                <div key={row.pos} className={`flex items-center justify-between p-2 rounded-lg ${row.team === 'My Team' ? 'bg-red-500/20 border border-red-500/30' : 'bg-gray-700/30'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-gray-400 w-4">{row.pos}</span>
-                                        <span className={`text-sm font-semibold ${row.team === 'My Team' ? 'text-red-400' : ''}`}>{row.team}</span>
-                                    </div>
-                                    <span className="text-sm font-bold">{row.pts} pts</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* New Signings */}
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <UserPlus className="w-5 h-5 text-green-400" /> New Signings
-                        </h3>
-                        {clubOverview?.newSignings.length === 0 ? (
-                            <p className="text-sm text-gray-500">No recent signings.</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {clubOverview?.newSignings.map(player => (
-                                    <div key={player.id} className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg">
-                                        <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs font-bold">
-                                            {player.name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold">{player.name}</p>
-                                            <p className="text-xs text-gray-400">{player.position}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Expiring Contracts */}
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <AlertCircle className="w-5 h-5 text-yellow-400" /> Expiring Contracts
-                        </h3>
-                        {clubOverview?.expiringContracts.length === 0 ? (
-                            <p className="text-sm text-gray-500">No expiring contracts found.</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {clubOverview?.expiringContracts.map(player => (
-                                    <div key={player.id} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg">
-                                        <div>
-                                            <p className="text-sm font-semibold">{player.name}</p>
-                                            <p className="text-xs text-gray-400">{player.position}</p>
-                                        </div>
-                                        <span className="text-xs font-semibold text-yellow-400">
-                                            {new Date(player.contract_end_date).toLocaleDateString()}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
 
                 <style dangerouslySetInnerHTML={{
                     __html: `

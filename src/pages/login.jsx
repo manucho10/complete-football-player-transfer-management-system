@@ -10,8 +10,8 @@ import {
     CheckCircle2,
     Loader2,
     ArrowLeft,
+    TrendingUp,
 } from 'lucide-react';
-import Navbar from '../components/layout/navbar';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -104,203 +104,238 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white relative overflow-hidden">
-            <Navbar />
+        <div className="min-h-screen bg-white flex">
+            {/* ==================== LEFT SIDE: BRANDING ==================== */}
+            <div className="hidden lg:flex lg:w-1/2 bg-[#0a2e1f] text-white flex-col justify-between p-12 relative overflow-hidden">
 
-            <div className="pt-16 min-h-screen flex items-center justify-center p-4 relative">
-                {/* Background decorations */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
-                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+                {/* ⭐ Smooth Glowing Orbs (Replaced the grid) */}
+                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-green-500/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4"></div>
+
+                {/* Top: Logo */}
+                <Link to="/" className="flex items-center gap-2 relative z-10">
+                    <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-2xl font-bold tracking-tight">TransferHub</span>
+                </Link>
+
+                {/* Middle: Value Proposition */}
+                <div className="relative z-10 max-w-md">
+                    <h1 className="text-4xl font-bold leading-tight mb-6">
+                        Welcome back to the <span className="text-green-400">Marketplace.</span>
+                    </h1>
+                    <p className="text-gray-300 text-lg mb-8">
+                        Sign in to manage your career, negotiate deals, and connect with top football talent around the globe.
+                    </p>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-sm text-gray-300">
+                            <CheckCircle2 className="w-5 h-5 text-green-400" />
+                            <span>AI-powered talent discovery</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-300">
+                            <CheckCircle2 className="w-5 h-5 text-green-400" />
+                            <span>Secure contract negotiations</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-300">
+                            <CheckCircle2 className="w-5 h-5 text-green-400" />
+                            <span>Real-time scouting reports</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="relative w-full max-w-md">
-                    <Link
-                        to="/"
-                        className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-sm mb-6 transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4" /> Back to Home
-                    </Link>
-
-                    <div className="bg-gray-800/50 backdrop-blur-lg rounded-2xl p-8 border border-gray-700 shadow-2xl">
-                        <div className="text-center mb-8">
-                            <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-                            <p className="text-gray-400 text-sm">
-                                Sign in to access your transfer dashboard
-                            </p>
-                        </div>
-
-                        {location.state?.from && (
-                            <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-center gap-2 text-blue-400 text-sm">
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                Please sign in to access{' '}
-                                <span className="font-semibold">{location.state.from.pathname}</span>
-                            </div>
-                        )}
-
-                        {successMessage && (
-                            <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2 text-green-400 text-sm">
-                                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                                {successMessage}
-                            </div>
-                        )}
-
-                        {errors.general && (
-                            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                {errors.general}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        placeholder="you@example.com"
-                                        autoComplete="email"
-                                        disabled={isLoading}
-                                        className={`w-full bg-gray-700/50 border rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60 ${errors.email
-                                            ? 'border-red-500 focus:border-red-500'
-                                            : 'border-gray-600 focus:border-blue-500'
-                                            }`}
-                                    />
-                                </div>
-                                {errors.email && (
-                                    <p className="mt-1 text-xs text-red-400 flex items-center gap-1">
-                                        <AlertCircle className="w-3 h-3" /> {errors.email}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                    <input
-                                        id="password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        placeholder="Enter your password"
-                                        autoComplete="current-password"
-                                        disabled={isLoading}
-                                        className={`w-full bg-gray-700/50 border rounded-lg pl-10 pr-12 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60 ${errors.password
-                                            ? 'border-red-500 focus:border-red-500'
-                                            : 'border-gray-600 focus:border-blue-500'
-                                            }`}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword((p) => !p)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
-                                    >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
-                                {errors.password && (
-                                    <p className="mt-1 text-xs text-red-400 flex items-center gap-1">
-                                        <AlertCircle className="w-3 h-3" /> {errors.password}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="flex items-center justify-between text-sm">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        name="rememberMe"
-                                        checked={formData.rememberMe}
-                                        onChange={handleChange}
-                                        disabled={isLoading}
-                                        className="w-4 h-4 bg-gray-700 border-gray-600 rounded accent-blue-500"
-                                    />
-                                    <span className="text-gray-300">Remember me</span>
-                                </label>
-                                <Link
-                                    to="/forgot-password"
-                                    className="text-blue-400 hover:text-blue-300 transition-colors"
-                                >
-                                    Forgot password?
-                                </Link>
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" /> Signing in...
-                                    </>
-                                ) : (
-                                    'Sign In'
-                                )}
-                            </button>
-                        </form>
-
-                        <div className="relative my-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-700"></div>
-                            </div>
-                            <div className="relative flex justify-center text-xs">
-                                <span className="px-3 bg-gray-800/50 text-gray-500">
-                                    Or try a demo role
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-2">
-                            {[
-                                { role: 'player', label: 'Player', color: 'from-blue-500 to-blue-600' },
-                                { role: 'agent', label: 'Agent', color: 'from-purple-500 to-purple-600' },
-                                { role: 'scout', label: 'Scout', color: 'from-green-500 to-green-600' },
-                                { role: 'team', label: 'Team', color: 'from-red-500 to-red-600' },
-                            ].map(({ role, label, color }) => (
-                                <button
-                                    key={role}
-                                    type="button"
-                                    onClick={() => handleDemoLogin(role)}
-                                    disabled={isLoading}
-                                    className={`bg-gradient-to-r ${color} hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold py-2 px-1 rounded-lg transition-all`}
-                                >
-                                    {label}
-                                </button>
-                            ))}
-                        </div>
-
-                        <p className="mt-6 text-center text-sm text-gray-400">
-                            Don't have an account?{' '}
-                            <Link
-                                to="/register"
-                                className="text-green-400 hover:text-green-300 font-semibold transition-colors"
-                            >
-                                Create one
-                            </Link>
-                        </p>
-                    </div>
-
-                    <p className="text-center text-xs text-gray-500 mt-6">
-                        By signing in, you agree to our{' '}
-                        <span className="text-gray-400 underline">Terms</span>{' '}
-                        and{' '}
-                        <span className="text-gray-400 underline">Privacy Policy</span>
-                    </p>
+                {/* Bottom: Footer */}
+                <div className="relative z-10 text-sm text-gray-400">
+                    © 2024 TransferHub. All rights reserved.
                 </div>
             </div>
-        </div>
+
+            {/* ==================== RIGHT SIDE: LOGIN FORM ==================== */}
+            <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24 bg-gray-50 relative">
+
+                {/* ⭐ ADDED: Desktop Back to Home button */}
+                <div className="hidden lg:block absolute top-8 left-8">
+                    <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
+                        <ArrowLeft className="w-4 h-4" /> Back to Home
+                    </Link>
+                </div>
+
+                <div className="mx-auto w-full max-w-sm lg:max-w-md">
+
+                    {/* Mobile Logo / Back Button */}
+                    <div className="lg:hidden mb-8 flex items-center justify-between">
+                        <Link to="/" className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                <TrendingUp className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-xl font-bold text-gray-900">TransferHub</span>
+                        </Link>
+                        <Link to="/" className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
+                            <ArrowLeft className="w-4 h-4" /> Back
+                        </Link>
+                    </div>
+                </div>
+
+
+
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign in to your account</h2>
+                    <p className="text-sm text-gray-600 mb-8">
+                        Don't have an account?{' '}
+                        <Link to="/register" className="font-semibold text-green-600 hover:text-green-500">
+                            Create one now
+                        </Link>
+                    </p>
+                </div>
+
+                {/* Redirect Notice */}
+                {location.state?.from && (
+                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3 text-blue-700 text-sm">
+                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                        Please sign in to access <span className="font-semibold">{location.state.from.pathname}</span>
+                    </div>
+                )}
+
+                {/* Messages */}
+                {successMessage && (
+                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 text-sm">
+                        <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> {successMessage}
+                    </div>
+                )}
+                {errors.general && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 text-sm">
+                        <AlertCircle className="w-5 h-5 flex-shrink-0" /> {errors.general}
+                    </div>
+                )}
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Email */}
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Email Address
+                        </label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                id="email"
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                placeholder="you@example.com"
+                                disabled={isLoading}
+                                className={`w-full bg-white border rounded-xl pl-10 pr-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all disabled:opacity-60 ${errors.email ? 'border-red-300' : 'border-gray-300'
+                                    }`}
+                            />
+                        </div>
+                        {errors.email && (
+                            <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3" /> {errors.email}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Password */}
+                    <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                                Password
+                            </label>
+                            <Link to="/forgot-password" className="text-sm font-medium text-green-600 hover:text-green-500">
+                                Forgot password?
+                            </Link>
+                        </div>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                placeholder="••••••••"
+                                disabled={isLoading}
+                                className={`w-full bg-white border rounded-xl pl-10 pr-12 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all disabled:opacity-60 ${errors.password ? 'border-red-300' : 'border-gray-300'
+                                    }`}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                        {errors.password && (
+                            <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3" /> {errors.password}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Remember Me */}
+                    <div className="flex items-center">
+                        <input
+                            id="remember-me"
+                            name="rememberMe"
+                            type="checkbox"
+                            checked={formData.rememberMe}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded cursor-pointer"
+                        />
+                        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 cursor-pointer">
+                            Remember me for 30 days
+                        </label>
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                        {isLoading ? (
+                            <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Signing in...</>
+                        ) : (
+                            'Sign in'
+                        )}
+                    </button>
+                </form>
+
+                {/* Demo Roles */}
+                <div className="mt-8">
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-300" />
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-gray-50 text-gray-500">Or try a demo role</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 grid grid-cols-4 gap-2">
+                        {[
+                            { role: 'player', label: 'Player', bg: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' },
+                            { role: 'agent', label: 'Agent', bg: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100' },
+                            { role: 'scout', label: 'Scout', bg: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' },
+                            { role: 'team', label: 'Team', bg: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' },
+                        ].map(({ role, label, bg }) => (
+                            <button
+                                key={role}
+                                type="button"
+                                onClick={() => handleDemoLogin(role)}
+                                disabled={isLoading}
+                                className={`border rounded-lg py-2 text-xs font-semibold transition-colors disabled:opacity-50 ${bg}`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+            </div>
+        </div >
     );
 };
 
