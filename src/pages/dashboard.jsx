@@ -7,6 +7,7 @@ import PlayerDashboard from './Dashboards/PlayerDashboard';
 import AgentDashboard from './Dashboards/AgentDashboard';
 import ScoutDashboard from './Dashboards/ScoutDashboard';
 import TeamDashboard from './Dashboards/TeamDashboard';
+import AcademyDashboard from './Dashboards/AcademyDashboard';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -42,6 +43,8 @@ const Dashboard = () => {
         case 'player':
         default:
             return <PlayerDashboard user={user} />;
+        case 'academy':
+            return <AcademyDashboard user={user} />;
     }
 };
 

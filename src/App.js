@@ -30,6 +30,8 @@ import NegotiateTransfer from './pages/NegotiateTransfer';
 import NewScoutReport from './pages/NewScoutReport';
 import TeamReports from './pages/TeamReports';
 import MatchSchedule from './pages/MatchSchedule';
+import AcademyDashboard from './pages/Dashboards/AcademyDashboard';
+import AddAcademyPlayer from './pages/AddAcademyPlayer';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -221,6 +223,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <MatchSchedule />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-academy"
+            element={
+              <ProtectedRoute>
+                <AcademyDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add-player"
+            element={
+              <ProtectedRoute>
+                <AddAcademyPlayer />
               </ProtectedRoute>
             }
           />

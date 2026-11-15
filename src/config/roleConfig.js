@@ -34,4 +34,13 @@ export const roleConfig = {
         border: 'border-red-500/30',
         text: 'text-red-400',
     },
+    academy:
+    {
+        icon: <GraduationCap className="w-5 h-5" />,
+        label: 'Academy',
+        color: 'from-orange-500 to-orange-600',
+        bg: 'bg-orange-50',
+        border: 'border-orange-200',
+        text: 'text-orange-700'
+    },
 };

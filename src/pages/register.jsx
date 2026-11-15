@@ -21,6 +21,7 @@ const Register = () => {
         scoutClub: '', scoutLicense: '',
         teamName: '', league: '', transferBudget: '',
         phone: '', agreeTerms: false,
+        academyName: '', academyLocation: '',
     });
 
     const [showPassword, setShowPassword] = useState(false);
@@ -40,6 +41,7 @@ const Register = () => {
         { id: 'agent', icon: <Briefcase className="w-6 h-6" />, title: 'Agent', description: 'Manage your roster and negotiate.' },
         { id: 'scout', icon: <Search className="w-6 h-6" />, title: 'Scout', description: 'Discover talent and file reports.' },
         { id: 'team', icon: <Shield className="w-6 h-6" />, title: 'Team / Club', description: 'Recruit players and manage your squad.' },
+        { id: 'academy', icon: <GraduationCap className="w-6 h-6" />, title: 'Academy / Coach', description: 'Manage youth teams and grassroots talent.' }
     ];
 
     const handleChange = (e) => {
@@ -106,6 +108,10 @@ const Register = () => {
             if (!formData.teamName.trim()) newErrors.teamName = 'Team name is required';
             if (!formData.league.trim()) newErrors.league = 'League is required';
         }
+        if (formData.role === 'academy') {
+            if (!formData.academyName.trim()) newErrors.academyName = 'Academy name is required';
+            if (!formData.academyLocation.trim()) newErrors.academyLocation = 'Location is required';
+        }
         if (!formData.agreeTerms) newErrors.agreeTerms = 'You must agree to the terms';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -118,19 +124,27 @@ const Register = () => {
 
     const handleBack = () => { if (step > 1) setStep(step - 1); };
 
+    // Final submit — uses useAuth().register()
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrors({});
         if (!validateStep3()) return;
+
         setIsLoading(true);
         setSuccessMessage('');
+
+        // ⭐ Pass the complete formData to the AuthContext
         const result = await register(formData);
+
         if (result.success) {
             setSuccessMessage('Account created successfully! Redirecting...');
-            setTimeout(() => navigate('/dashboard'), 1200);
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1200);
         } else {
             setErrors({ general: result.error || 'Registration failed. Please try again.' });
         }
+
         setIsLoading(false);
     };
 
@@ -171,7 +185,7 @@ const Register = () => {
                 </div>
 
                 <div className="relative z-10 text-sm text-gray-400">
-                    © 2024 TransferHub. All rights reserved.
+                    © 2026 TransferHub. All rights reserved.
                 </div>
             </div>
 
@@ -237,8 +251,8 @@ const Register = () => {
                                         key={role.id}
                                         onClick={() => handleRoleSelect(role.id)}
                                         className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${formData.role === role.id
-                                                ? 'border-green-500 bg-green-50'
-                                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                                            ? 'border-green-500 bg-green-50'
+                                            : 'border-gray-200 hover:border-gray-300 bg-white'
                                             }`}
                                     >
                                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${formData.role === role.id ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'
@@ -410,7 +424,19 @@ const Register = () => {
                                         </div>
                                     </>
                                 )}
-
+                                {/* Academy Fields */}
+                                {formData.role === 'academy' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Academy Name</label>
+                                            <input type="text" name="academyName" value={formData.academyName} onChange={handleChange} placeholder="e.g., Nairobi Youth Academy" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.academyName ? 'border-red-300' : 'border-gray-300'}`} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Location / Region</label>
+                                            <input type="text" name="academyLocation" value={formData.academyLocation} onChange={handleChange} placeholder="e.g., Nairobi, Kenya" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.academyLocation ? 'border-red-300' : 'border-gray-300'}`} />
+                                        </div>
+                                    </>
+                                )}
                                 {/* Terms */}
                                 <div className="pt-2">
                                     <label className="flex items-start gap-2 cursor-pointer">
