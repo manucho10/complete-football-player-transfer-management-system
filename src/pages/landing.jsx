@@ -95,7 +95,7 @@ const Landing = () => {
             </div>
 
             {/* ==================== ROLE CARDS ==================== */}
-            <div className="py-24 bg-gray-50">
+            <div id="Features" className="py-24 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">One Platform. Five Roles.</h2>
@@ -118,7 +118,7 @@ const Landing = () => {
             </div>
 
             {/* ==================== FEATURES ==================== */}
-            <div className="py-24 bg-white">
+            <div id="pricing" className="py-24 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">Built for Professional Results</h2>
@@ -190,7 +190,7 @@ const Landing = () => {
             </div>
 
             {/* ==================== FINAL CTA ==================== */}
-            <div className="bg-[#0a2e1f] py-24">
+            <div id="about" className="bg-[#0a2e1f] py-24">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">Ready to make your next big move?</h2>
                     <p className="text-lg text-gray-300 mb-10">Join thousands of players, academies, scouts, and clubs already using TransferHub.</p>

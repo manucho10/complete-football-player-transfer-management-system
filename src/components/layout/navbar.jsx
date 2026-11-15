@@ -50,11 +50,22 @@ const Navbar = () => {
 
     const publicLinks = [
         { label: 'Home', path: '/' },
-        { label: 'Features', path: '/#features' },
-        { label: 'Pricing', path: '/#pricing' },
-        { label: 'About', path: '/#about' },
+        { label: 'Features', path: '#features' },
+        { label: 'Pricing', path: '#pricing' },
+        { label: 'About', path: '#about' },
     ];
 
+    const handleScroll = (e, path) => {
+        if (path.startsWith('#')) {
+            e.preventDefault();
+            const element = document.getElementById(path.substring(1));
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        } else {
+            navigate(path);
+        }
+    };
     const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
     const isActive = (path) => location.pathname === path;
 
@@ -78,15 +89,14 @@ const Navbar = () => {
                     </Link>
 
                     {/* DESKTOP LINKS */}
+                    {/* DESKTOP LINKS */}
                     <div className="hidden md:flex items-center gap-1">
                         {publicLinks.map((link) => (
                             <a
                                 key={link.path}
                                 href={link.path}
-                                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isActive(link.path)
-                                    ? 'text-green-400 bg-green-500/10'
-                                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
-                                    }`}
+                                onClick={(e) => handleScroll(e, link.path)}
+                                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-gray-300 hover:text-white hover:bg-gray-700/50"
                             >
                                 {link.label}
                             </a>
@@ -234,15 +244,16 @@ const Navbar = () => {
                             <a
                                 key={link.path}
                                 href={link.path}
-                                onClick={() => setMobileOpen(false)}
-                                className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.path)
-                                    ? 'text-green-400 bg-green-500/10'
-                                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
-                                    }`}
+                                onClick={(e) => {
+                                    setMobileOpen(false);
+                                    handleScroll(e, link.path);
+                                }}
+                                className="block px-4 py-3 rounded-lg text-sm font-medium transition-colors text-gray-300 hover:text-white hover:bg-gray-700/50"
                             >
                                 {link.label}
                             </a>
                         ))}
+
 
                         <div className="border-t border-gray-700 my-2"></div>
 
