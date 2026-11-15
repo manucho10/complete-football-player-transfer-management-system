@@ -1,10 +1,10 @@
 // src/pages/Landing.jsx
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     TrendingUp, User, Briefcase, Search, Shield, GraduationCap,
     ChevronRight, CheckCircle2, Sparkles, Video, FileText,
-    ArrowRight, Play, X, Mail, Phone, MapPin
+    ArrowRight, Play, LayoutDashboard
 } from 'lucide-react';
 import Navbar from '../components/layout/navbar';
 import { useAuth } from '../context/AuthContext';
@@ -12,9 +12,6 @@ import { useAuth } from '../context/AuthContext';
 const Landing = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
-
-    // ⭐ State for the Footer Modals
-    const [footerModal, setFooterModal] = useState(null); // 'privacy', 'terms', 'contact', or null
 
     const roles = [
         { icon: <User className="w-6 h-6" />, title: 'Player', color: 'from-blue-500 to-blue-600', desc: 'Build your digital CV, upload highlights, and get discovered by top clubs.' },
@@ -28,7 +25,184 @@ const Landing = () => {
         <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
             <Navbar />
 
-            {/* ... (Keep your existing Hero, Stats, Roles, Features, Pricing, About sections exactly as they are) ... */}
+            {/* ==================== 1. HOME (HERO SECTION) ==================== */}
+            <div id="home" className="bg-[#0a2e1f] text-white pt-32 pb-24">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-8 animate-fadeIn">
+                        <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span className="text-xs font-semibold tracking-wide uppercase text-green-300">
+                            The #1 Football Transfer Platform
+                        </span>
+                    </div>
+
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
+                        Your Trusted Partner in <span className="text-green-400">Football Transfers</span>
+                    </h1>
+                    <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto">
+                        Connect with global clubs, discover top talent, manage your academy, and negotiate deals securely on one unified platform.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        {isAuthenticated ? (
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg"
+                            >
+                                Go to Dashboard <ArrowRight className="w-5 h-5" />
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => navigate('/register')}
+                                    className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg"
+                                >
+                                    Get Started
+                                </button>
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="inline-flex items-center justify-center gap-2 bg-transparent hover:bg-white/10 border border-white/30 text-white font-semibold py-3 px-8 rounded-xl transition-all"
+                                >
+                                    Sign In
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* ==================== STATS BAR ==================== */}
+            <div className="border-b border-gray-200 bg-white py-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                        <div>
+                            <p className="text-3xl font-bold text-gray-900">2,500+</p>
+                            <p className="text-sm text-gray-500 uppercase tracking-wide mt-1">Active Players</p>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-bold text-gray-900">300+</p>
+                            <p className="text-sm text-gray-500 uppercase tracking-wide mt-1">Agents</p>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-bold text-gray-900">50+</p>
+                            <p className="text-sm text-gray-500 uppercase tracking-wide mt-1">Clubs & Academies</p>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-bold text-gray-900">€150M+</p>
+                            <p className="text-sm text-gray-500 uppercase tracking-wide mt-1">Transfers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ==================== 2. ROLES SECTION ==================== */}
+            <div id="roles" className="py-24 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">One Platform. Five Roles.</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">Whether you are kicking the ball, scouting the next Messi, managing a club, or running a youth academy, TransferHub has the tools you need.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                        {roles.map((role, idx) => (
+                            <div key={idx} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all flex flex-col">
+                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${role.color} flex items-center justify-center mb-5 text-white shadow-sm`}>
+                                    {role.icon}
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">{role.title}</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed flex-1">{role.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* ==================== 3. FEATURES SECTION ==================== */}
+            <div id="features" className="py-24 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything You Need to Succeed</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">From grassroots discovery to professional contract signing, TransferHub provides the ultimate toolkit for the football ecosystem.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6 text-yellow-600 border border-yellow-200">
+                                <Sparkles className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">AI Talent Finder</h3>
+                            <p className="text-sm text-gray-600 leading-relaxed">Search for players using plain English. Our semantic AI understands your tactical needs and finds the perfect match instantly.</p>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-6 text-orange-600 border border-orange-200">
+                                <GraduationCap className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Grassroots Discovery</h3>
+                            <p className="text-sm text-gray-600 leading-relaxed">Local academies can register their youth squads, upload raw match footage, and allow scouts to request live trials.</p>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6 text-green-600 border border-green-200">
+                                <FileText className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Automated Contracts</h3>
+                            <p className="text-sm text-gray-600 leading-relaxed">Once a transfer is agreed upon by both the club and the player, the system automatically generates a downloadable PDF contract.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ==================== 4. PRICING SECTION ==================== */}
+            <div id="pricing" className="py-24 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">Whether you are a weekend amateur or a top-tier club, we have a plan that fits your needs.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                        {/* Free Plan */}
+                        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm flex flex-col">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Free</h3>
+                            <p className="text-sm text-gray-500 mb-6">For Grassroots Players & Academies</p>
+                            <div className="text-4xl font-extrabold text-gray-900 mb-6">€0<span className="text-base font-medium text-gray-500">/mo</span></div>
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Basic Player Profile</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Register 1 Academy Team</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Receive Trial Requests</li>
+                            </ul>
+                            <button onClick={() => navigate('/register')} className="w-full py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors">Start for Free</button>
+                        </div>
+
+                        {/* Pro Plan */}
+                        <div className="bg-[#0a2e1f] rounded-2xl p-8 border border-green-500 shadow-xl relative transform md:-translate-y-4">
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Most Popular</div>
+                            <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
+                            <p className="text-sm text-gray-300 mb-6">For Scouts & Professional Agents</p>
+                            <div className="text-4xl font-extrabold text-white mb-6">€29<span className="text-base font-medium text-gray-400">/mo</span></div>
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle2 className="w-4 h-4 text-green-400" /> AI Talent Finder (Unlimited)</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle2 className="w-4 h-4 text-green-400" /> Unlimited Watchlists & Reports</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle2 className="w-4 h-4 text-green-400" /> Request Live Trials</li>
+                            </ul>
+                            <button onClick={() => navigate('/register')} className="w-full py-2.5 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-colors">Upgrade to Pro</button>
+                        </div>
+
+                        {/* Club Plan */}
+                        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm flex flex-col">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Club</h3>
+                            <p className="text-sm text-gray-500 mb-6">For Professional Teams</p>
+                            <div className="text-4xl font-extrabold text-gray-900 mb-6">€99<span className="text-base font-medium text-gray-500">/mo</span></div>
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Everything in Pro</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Automated PDF Contracts</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Hire & Manage Scouts</li>
+                            </ul>
+                            <button onClick={() => navigate('/register')} className="w-full py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors">Contact Sales</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* ==================== 5. ABOUT SECTION ==================== */}
             <div id="about" className="bg-[#0a2e1f] py-24">
@@ -46,94 +220,21 @@ const Landing = () => {
                 </div>
             </div>
 
-            {/* ==================== FOOTER ==================== */}
+            {/* Footer */}
             <footer className="bg-white border-t border-gray-200 py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
                         <TrendingUp className="w-6 h-6 text-green-600" />
                         <span className="text-xl font-bold text-gray-900">TransferHub</span>
                     </div>
-
-                    {/* ⭐ CLICKABLE FOOTER LINKS ⭐ */}
                     <div className="flex gap-6 text-sm font-medium text-gray-500">
-                        <button onClick={() => setFooterModal('privacy')} className="hover:text-green-600 transition-colors">Privacy Policy</button>
-                        <button onClick={() => setFooterModal('terms')} className="hover:text-green-600 transition-colors">Terms of Service</button>
-                        <button onClick={() => setFooterModal('contact')} className="hover:text-green-600 transition-colors">Contact</button>
+                        <a href="#" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
+                        <a href="#" className="hover:text-gray-900 transition-colors">Terms of Service</a>
+                        <a href="#" className="hover:text-gray-900 transition-colors">Contact</a>
                     </div>
-
-                    <p className="text-sm text-gray-400">© 2024 TransferHub. All rights reserved.</p>
+                    <p className="text-sm text-gray-400">© 2026 TransferHub. All rights reserved.</p>
                 </div>
             </footer>
-
-            {/* ==================== FOOTER MODALS ==================== */}
-            {footerModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setFooterModal(null)}>
-                    <div className="bg-white rounded-2xl border border-gray-200 max-w-2xl w-full max-h-[80vh] overflow-y-auto p-8 shadow-xl" onClick={(e) => e.stopPropagation()}>
-
-                        {/* Close Button */}
-                        <button onClick={() => setFooterModal(null)} className="float-right p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
-                            <X className="w-5 h-5" />
-                        </button>
-
-                        {/* Privacy Policy */}
-                        {footerModal === 'privacy' && (
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-4">Privacy Policy</h2>
-                                <div className="space-y-4 text-sm text-gray-600 leading-relaxed">
-                                    <p><strong>1. Information We Collect:</strong> We collect your name, email, and role upon registration. If you are a player, we may collect videos, stats, and medical data.</p>
-                                    <p><strong>2. How We Use It:</strong> Your data is used to match players with clubs, facilitate trials, and generate contracts.</p>
-                                    <p><strong>3. Data Security:</strong> We use industry-standard encryption to protect your data. We never sell your data to third parties.</p>
-                                    <p><strong>4. Your Rights:</strong> You can request to delete your account and all associated data at any time from the Settings page.</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Terms of Service */}
-                        {footerModal === 'terms' && (
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-4">Terms of Service</h2>
-                                <div className="space-y-4 text-sm text-gray-600 leading-relaxed">
-                                    <p><strong>1. User Responsibilities:</strong> You must provide accurate information. Players must be at least 16 years old (or have a guardian's consent).</p>
-                                    <p><strong>2. Platform Use:</strong> TransferHub is a marketplace. We do not guarantee transfers or contracts. All negotiations must be conducted lawfully.</p>
-                                    <p><strong>3. Prohibited Actions:</strong> Harassment, fake profiles, and illegal transfer tapping are strictly prohibited.</p>
-                                    <p><strong>4. Termination:</strong> We reserve the right to suspend accounts that violate these terms.</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Contact */}
-                        {footerModal === 'contact' && (
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Us</h2>
-                                <p className="text-sm text-gray-600 mb-6">Have a question or need support? Reach out to our team.</p>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                                        <Mail className="w-5 h-5 text-green-600" />
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900">Email Support</p>
-                                            <p className="text-sm text-gray-500">support@transferhub.com</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                                        <Phone className="w-5 h-5 text-green-600" />
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900">Phone</p>
-                                            <p className="text-sm text-gray-500">+254 (0) 700 000 000</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                                        <MapPin className="w-5 h-5 text-green-600" />
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900">Office</p>
-                                            <p className="text-sm text-gray-500">Nairobi, Kenya</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
