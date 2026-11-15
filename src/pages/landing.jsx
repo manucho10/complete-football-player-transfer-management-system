@@ -24,21 +24,37 @@ const Landing = () => {
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
             <Navbar />
-
             {/* ==================== 1. HOME (HERO SECTION) ==================== */}
-            <div id="home" className="bg-[#0a2e1f] text-white pt-32 pb-24">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-8 animate-fadeIn">
+            <div id="home" className="relative text-white pt-40 pb-32 overflow-hidden flex items-center min-h-[90vh]">
+
+                {/* 1. Background Image Layer (Using the stadium image) */}
+                {/* Note: Replace 'stadium.jpg' with the actual filename you save the image as in your project */}
+                <img
+                    src="/stadium.jpg"
+                    alt="Football stadium at night"
+                    className="absolute inset-0 w-full h-full object-cover object-center animate-zoom"
+                />
+
+                {/* 2. Gradient Overlay Layer (Crucial for text readability) */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e1f]/80 via-[#0a2e1f]/60 to-[#0a2e1f]/95"></div>
+
+                {/* 3. Optional: Subtle green glow to match your brand */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl"></div>
+
+                {/* 4. Content Layer */}
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-8 animate-fadeIn shadow-lg">
                         <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
                         <span className="text-xs font-semibold tracking-wide uppercase text-green-300">
                             The #1 Football Transfer Platform
                         </span>
                     </div>
 
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 max-w-5xl mx-auto leading-tight drop-shadow-lg">
                         Your Trusted Partner in <span className="text-green-400">Football Transfers</span>
                     </h1>
-                    <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto">
+                    <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto drop-shadow-md">
                         Connect with global clubs, discover top talent, manage your academy, and negotiate deals securely on one unified platform.
                     </p>
 
@@ -46,7 +62,7 @@ const Landing = () => {
                         {isAuthenticated ? (
                             <button
                                 onClick={() => navigate('/dashboard')}
-                                className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg"
+                                className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg hover:shadow-green-500/25 hover:-translate-y-0.5"
                             >
                                 Go to Dashboard <ArrowRight className="w-5 h-5" />
                             </button>
@@ -54,13 +70,13 @@ const Landing = () => {
                             <>
                                 <button
                                     onClick={() => navigate('/register')}
-                                    className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg"
+                                    className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg hover:shadow-green-500/25 hover:-translate-y-0.5"
                                 >
                                     Get Started
                                 </button>
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="inline-flex items-center justify-center gap-2 bg-transparent hover:bg-white/10 border border-white/30 text-white font-semibold py-3 px-8 rounded-xl transition-all"
+                                    className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-semibold py-3 px-8 rounded-xl transition-all hover:-translate-y-0.5"
                                 >
                                     Sign In
                                 </button>
@@ -69,6 +85,7 @@ const Landing = () => {
                     </div>
                 </div>
             </div>
+
 
             {/* ==================== STATS BAR ==================== */}
             <div className="border-b border-gray-200 bg-white py-10">
