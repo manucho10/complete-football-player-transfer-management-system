@@ -33,6 +33,7 @@ import MatchSchedule from './pages/MatchSchedule';
 import AcademyDashboard from './pages/Dashboards/AcademyDashboard';
 import AddAcademyPlayer from './pages/AddAcademyPlayer';
 import AcademyRoster from './pages/AcademyRoster';
+import GrassrootsHub from './pages/GrassrootsHub';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -248,6 +249,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AcademyRoster />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/grassroots"
+            element={
+              <ProtectedRoute>
+                <GrassrootsHub />
               </ProtectedRoute>
             }
           />

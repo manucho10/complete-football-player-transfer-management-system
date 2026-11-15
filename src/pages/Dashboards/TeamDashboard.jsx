@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Users, Target, DollarSign, FileText, Search, BarChart3,
     Plus, Calendar, AlertCircle, Clock, CheckCircle2,
-    MessageSquare, ArrowUpRight, Loader2, Star, X, TrendingUp, UserPlus, Activity, Sparkles,
+    MessageSquare, ArrowUpRight, Loader2, Star, X, TrendingUp, UserPlus, Activity, Sparkles, GraduationCap,
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
@@ -118,6 +118,7 @@ const TeamDashboard = () => {
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
         { id: 'squad', label: 'Squad', icon: <Users className="w-5 h-5" />, path: '/squad' },
+        { id: 'grassroots', label: 'Grassroots Hub', icon: <GraduationCap className="w-5 h-5" />, path: '/grassroots' },
         { id: 'reports', label: 'Scout Reports', icon: <FileText className="w-5 h-5" />, path: '/team-reports' },
         { id: 'scouts', label: 'My Scouts', icon: <UserPlus className="w-5 h-5" />, path: '/my-scouts' },
         { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
