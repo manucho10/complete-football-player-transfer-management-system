@@ -5,7 +5,7 @@ import {
     Mail, Lock, Eye, EyeOff, User, Briefcase, Search, Shield,
     ArrowLeft, ArrowRight, AlertCircle, CheckCircle2, Loader2,
     Check, Phone, Calendar, Globe, Award, Building2, FileText, Target,
-    TrendingUp
+    TrendingUp, GraduationCap,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 

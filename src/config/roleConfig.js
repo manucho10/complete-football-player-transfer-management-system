@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Briefcase, Search, Shield } from 'lucide-react';
+import { User, Briefcase, Search, Shield, GraduationCap } from 'lucide-react';
 
 export const roleConfig = {
     player: {
