@@ -28,6 +28,9 @@ const PlayerProfile = () => {
     const [player, setPlayer] = useState(null);
     const [videos, setVideos] = useState([]);
     const [activeVideo, setActiveVideo] = useState(null);
+    const [showTrialModal, setShowTrialModal] = useState(false);
+    const [trialData, setTrialData] = useState({ location: '', date: '', message: '' });
+    const [isSendingTrial, setIsSendingTrial] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -171,6 +174,33 @@ const PlayerProfile = () => {
             </div>
         );
     }
+    const handleRequestTrial = async (e) => {
+        e.preventDefault();
+        if (!user) return;
+        setIsSendingTrial(true);
+
+        try {
+            const { error } = await supabase.from('trial_requests').insert({
+                player_id: player.id,
+                requested_by: user.id,
+                scout_name: user.name,
+                scout_club: user.teamName || user.scoutClub || user.role,
+                location: trialData.location,
+                proposed_date: trialData.date,
+                message: trialData.message
+            });
+
+            if (error) throw error;
+
+            setShowTrialModal(false);
+            setSuccessMessage('Trial request sent successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (error) {
+            alert(error.message || 'Failed to send trial request.');
+        } finally {
+            setIsSendingTrial(false);
+        }
+    };
 
     const stats = {
         matches: player.matches || 0, goals: player.goals || 0, assists: player.assists || 0,
@@ -207,8 +237,15 @@ const PlayerProfile = () => {
 
             <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
                 {successMessage && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 text-sm animate-fadeIn">
-                        <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> {successMessage}
+                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex-1 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 text-sm animate-fadeIn">
+                            <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> {successMessage}
+                        </div>
+                        {['scout', 'team'].includes(user?.role) && (
+                            <button onClick={() => setShowTrialModal(true)} className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-sm">
+                                <Calendar className="w-4 h-4" /> <span className="hidden sm:inline">Request Trial</span>
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -265,8 +302,8 @@ const PlayerProfile = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all border ${activeTab === tab.id
-                                    ? 'bg-green-50 text-green-700 border-green-200 shadow-sm'
-                                    : 'bg-white text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900'
+                                ? 'bg-green-50 text-green-700 border-green-200 shadow-sm'
+                                : 'bg-white text-gray-600 border-transparent hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                         >
                             {tab.icon} {tab.label}
@@ -447,6 +484,35 @@ const PlayerProfile = () => {
           overflow: hidden;
         }
       `}} />
+            {showTrialModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowTrialModal(false)}>
+                    <div className="bg-white rounded-2xl border border-gray-200 max-w-md w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-orange-500" /> Request a Trial
+                        </h2>
+                        <form onSubmit={handleRequestTrial} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Location</label>
+                                <input type="text" required value={trialData.location} onChange={(e) => setTrialData({ ...trialData, location: e.target.value })} placeholder="e.g. Nairobi Stadium" className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Proposed Date</label>
+                                <input type="date" required value={trialData.date} onChange={(e) => setTrialData({ ...trialData, date: e.target.value })} className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Message (Optional)</label>
+                                <textarea rows={3} value={trialData.message} onChange={(e) => setTrialData({ ...trialData, message: e.target.value })} placeholder="Any specific requirements..." className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 resize-none" />
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button type="button" onClick={() => setShowTrialModal(false)} className="flex-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-xl font-bold">Cancel</button>
+                                <button type="submit" disabled={isSendingTrial} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-bold flex items-center justify-center">
+                                    {isSendingTrial ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Request'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -20,6 +20,7 @@ const AcademyDashboard = () => {
     });
     const [recentActivity, setRecentActivity] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [trialRequests, setTrialRequests] = useState([]);
 
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
@@ -82,6 +83,18 @@ const AcademyDashboard = () => {
                     topRatedPlayer: topPlayer ? `${topPlayer.name} (${topPlayer.rating})` : 'N/A',
                     scoutsInterested: scoutsInterested
                 });
+                // Fetch Trial Requests for this academy's players
+                const { data: trials } = await supabase
+                    .from('trial_requests')
+                    .select(`
+        *,
+        player:players(name)
+    `)
+                    .in('player_id', playersData.map(p => p.id))
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false });
+
+                setTrialRequests(trials || []);
 
                 // 5. Fetch Recent Activity (Notifications)
                 const { data: activity } = await supabase
@@ -102,6 +115,10 @@ const AcademyDashboard = () => {
 
         loadAcademyData();
     }, [user]);
+    const handleTrialAction = async (id, status) => {
+        await supabase.from('trial_requests').update({ status }).eq('id', id);
+        setTrialRequests(prev => prev.filter(r => r.id !== id));
+    };
 
     if (isLoading) {
         return (
@@ -172,6 +189,28 @@ const AcademyDashboard = () => {
                         </button>
                     </div>
                 </div>
+                {trialRequests.length > 0 && (
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-orange-600" /> Pending Trial Requests
+                        </h3>
+                        <div className="space-y-4">
+                            {trialRequests.map(req => (
+                                <div key={req.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl gap-4">
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900">{req.scout_name} wants to watch {req.player?.name}</p>
+                                        <p className="text-xs text-gray-600 mt-1">📍 {req.location} • 📅 {new Date(req.proposed_date).toLocaleDateString()}</p>
+                                        {req.message && <p className="text-xs text-gray-500 mt-2 italic">"{req.message}"</p>}
+                                    </div>
+                                    <div className="flex gap-2 shrink-0">
+                                        <button onClick={() => handleTrialAction(req.id, 'rejected')} className="px-4 py-2 bg-white border border-red-200 text-red-600 text-xs font-bold rounded-lg hover:bg-red-50">Reject</button>
+                                        <button onClick={() => handleTrialAction(req.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700">Accept</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Recent Roster (Real Data) */}
                 <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
