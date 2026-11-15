@@ -16,7 +16,7 @@ import {
     Clock,
     Settings as SettingsIcon,
     Award,
-    Loader2,
+    Loader2, Calendar,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -63,6 +63,9 @@ const Notifications = () => {
         interest: { icon: <Eye className="w-5 h-5" />, label: 'Interest', color: 'text-yellow-700', bg: 'bg-yellow-50', border: 'border-yellow-200' },
         contract: { icon: <Award className="w-5 h-5" />, label: 'Contract', color: 'text-green-700', bg: 'bg-green-50', border: 'border-green-200' },
         system: { icon: <SettingsIcon className="w-5 h-5" />, label: 'System', color: 'text-gray-700', bg: 'bg-gray-100', border: 'border-gray-200' },
+        // ⭐ ADD THIS NEW TRIAL CONFIG ⭐
+        trial: { icon: <Calendar className="w-5 h-5" />, label: 'Trial', color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200' }
+
     };
 
     const priorityConfig = {
@@ -79,6 +82,7 @@ const Notifications = () => {
         { id: 'offer', label: 'Offers', count: notifications.filter((n) => n.type === 'offer').length },
         { id: 'message', label: 'Messages', count: notifications.filter((n) => n.type === 'message').length },
         { id: 'interest', label: 'Interest', count: notifications.filter((n) => n.type === 'interest').length },
+        { id: 'trial', label: 'Trial', count: notifications.filter((n) => n.type === 'trial').length },
         { id: 'system', label: 'System', count: notifications.filter((n) => n.type === 'system' || n.type === 'contract').length },
     ];
 
@@ -224,8 +228,8 @@ const Notifications = () => {
                                 key={tab.id}
                                 onClick={() => { setActiveFilter(tab.id); setShowFilters(false); }}
                                 className={`flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${activeFilter === tab.id
-                                        ? 'bg-green-50 text-green-700 border-green-200 shadow-sm'
-                                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-green-50 text-green-700 border-green-200 shadow-sm'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900'
                                     }`}
                             >
                                 {tab.label}
