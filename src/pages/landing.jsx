@@ -228,13 +228,111 @@ const Landing = () => {
                         <span className="text-xl font-bold text-gray-900">TransferHub</span>
                     </div>
                     <div className="flex gap-6 text-sm font-medium text-gray-500">
-                        <a href="#" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-gray-900 transition-colors">Terms of Service</a>
-                        <a href="#" className="hover:text-gray-900 transition-colors">Contact</a>
+                        <a href="#privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
+                        <a href="#terms" className="hover:text-gray-900 transition-colors">Terms of Service</a>
+                        <a href="#contact" className="hover:text-gray-900 transition-colors">Contact</a>
                     </div>
                     <p className="text-sm text-gray-400">© 2026 TransferHub. All rights reserved.</p>
                 </div>
             </footer>
+            {/* ==================== 6. PRIVACY POLICY ==================== */}
+            <div id="privacy" className="py-24 bg-white scroll-mt-20">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-100 text-green-600 mb-6">
+                            <Shield className="w-7 h-7" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Privacy Policy</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">
+                            Your data, your control. Here's how we handle your information.
+                        </p>
+                    </div>
+
+                    <div className="space-y-6 text-gray-600 leading-relaxed">
+                        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">1. Information We Collect</h3>
+                            <p className="text-sm">We collect profile data, match footage, performance stats, and contact details you provide when registering as a player, agent, scout, team, or academy.</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">2. How We Use Your Data</h3>
+                            <p className="text-sm">Your data powers talent discovery, transfer negotiations, and platform features. We never sell your personal information to third parties.</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">3. Your Rights</h3>
+                            <p className="text-sm">You can request access, correction, or deletion of your data at any time by contacting our data protection team.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ==================== 7. TERMS OF SERVICE ==================== */}
+            <div id="terms" className="py-24 bg-gray-50 scroll-mt-20">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-100 text-green-600 mb-6">
+                            <FileText className="w-7 h-7" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Terms of Service</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">
+                            The rules of the game. Please read carefully before using TransferHub.
+                        </p>
+                    </div>
+
+                    <div className="space-y-6 text-gray-600 leading-relaxed">
+                        <div className="bg-white rounded-2xl p-6 border border-gray-200">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">1. Account Responsibilities</h3>
+                            <p className="text-sm">You are responsible for maintaining the confidentiality of your account and for all activities under it. Provide accurate information at all times.</p>
+                        </div>
+                        <div className="bg-white rounded-2xl p-6 border border-gray-200">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">2. Acceptable Use</h3>
+                            <p className="text-sm">You agree not to misuse the platform, upload false information, or engage in fraudulent transfer negotiations. Violations may result in account termination.</p>
+                        </div>
+                        <div className="bg-white rounded-2xl p-6 border border-gray-200">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">3. Contracts & Agreements</h3>
+                            <p className="text-sm">Automated contracts generated on TransferHub are legally binding once signed by both parties. Consult legal counsel for complex deals.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ==================== 8. CONTACT ==================== */}
+            <div id="contact" className="py-24 bg-white scroll-mt-20">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-100 text-green-600 mb-6">
+                            <User className="w-7 h-7" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">
+                            Questions, feedback, or partnership inquiries? We'd love to hear from you.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <a href="mailto:support@transferhub.com" className="bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:shadow-md hover:border-green-300 transition-all text-center">
+                            <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-4">
+                                <FileText className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-bold text-gray-900 mb-1">Email Us</h3>
+                            <p className="text-sm text-gray-600">support@transferhub.com</p>
+                        </a>
+                        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:shadow-md transition-all text-center">
+                            <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-4">
+                                <User className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-bold text-gray-900 mb-1">Call Us</h3>
+                            <p className="text-sm text-gray-600">+254 700 000 000</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:shadow-md transition-all text-center">
+                            <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-4">
+                                <TrendingUp className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-bold text-gray-900 mb-1">Visit Us</h3>
+                            <p className="text-sm text-gray-600">Nairobi, Kenya</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
