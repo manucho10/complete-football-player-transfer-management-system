@@ -17,6 +17,9 @@ export const fetchPlayers = async (filters = {}) => {
     if (filters.nationality) query = query.ilike('nationality', `%${filters.nationality}%`);
     if (filters.club) query = query.ilike('club', `%${filters.club}%`);
     if (filters.minRating) query = query.gte('rating', Number(filters.minRating));
+    if (filters.isGrassroots) {
+        query = query.eq('is_grassroots', true);
+    }
 
     // 3. Order by newest first (so your newly registered test players appear at the top!)
     query = query.order('created_at', { ascending: false });

@@ -28,7 +28,7 @@ const Players = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const [filters, setFilters] = useState({
-        position: '', nationality: '', minAge: '', maxAge: '', minRating: '', club: '', availability: '',
+        position: '', nationality: '', minAge: '', maxAge: '', minRating: '', club: '', availability: '', isGrassroots: false
     });
 
     useEffect(() => {
@@ -55,24 +55,50 @@ const Players = () => {
         loadWatchlist();
     }, [user]);
 
+    // ================================================================
+    // FILTER + SORT
+    // ================================================================
     const filteredPlayers = useMemo(() => {
         let result = players.filter((p) => {
-            const matchesSearch = !searchQuery ||
+            // 1. Search Query Check
+            const matchesSearch =
+                !searchQuery ||
                 (p.name && p.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
                 (p.club && p.club.toLowerCase().includes(searchQuery.toLowerCase())) ||
                 (p.nationality && p.nationality.toLowerCase().includes(searchQuery.toLowerCase()));
 
+            // 2. Standard Filters
             const matchesPosition = !filters.position || p.position === filters.position;
-            const matchesNationality = !filters.nationality || (p.nationality && p.nationality.toLowerCase().includes(filters.nationality.toLowerCase()));
-            const matchesClub = !filters.club || (p.club && p.club.toLowerCase().includes(filters.club.toLowerCase()));
+            const matchesNationality =
+                !filters.nationality ||
+                (p.nationality && p.nationality.toLowerCase().includes(filters.nationality.toLowerCase()));
+            const matchesClub =
+                !filters.club || (p.club && p.club.toLowerCase().includes(filters.club.toLowerCase()));
             const matchesAvailability = !filters.availability || p.availability === filters.availability;
             const matchesMinAge = !filters.minAge || p.age >= Number(filters.minAge);
             const matchesMaxAge = !filters.maxAge || p.age <= Number(filters.maxAge);
             const matchesMinRating = !filters.minRating || p.rating >= Number(filters.minRating);
 
-            return matchesSearch && matchesPosition && matchesNationality && matchesClub && matchesAvailability && matchesMinAge && matchesMaxAge && matchesMinRating;
+            // ⭐ 3. NEW: Grassroots Filter Check
+            // If the toggle is ON, only show players where is_grassroots is true.
+            // If the toggle is OFF, show everyone.
+            const matchesGrassroots = !filters.isGrassroots || p.is_grassroots === true;
+
+            // 4. Return true only if ALL checks pass
+            return (
+                matchesSearch &&
+                matchesPosition &&
+                matchesNationality &&
+                matchesClub &&
+                matchesAvailability &&
+                matchesMinAge &&
+                matchesMaxAge &&
+                matchesMinRating &&
+                matchesGrassroots // ⭐ Added to the return statement
+            );
         });
 
+        // 5. Sorting Logic
         result.sort((a, b) => {
             if (sortBy === 'rating') return b.rating - a.rating;
             if (sortBy === 'age-asc') return a.age - b.age;
@@ -177,8 +203,8 @@ const Players = () => {
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className={`inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all border shadow-sm ${showFilters || activeFilterCount > 0
-                                ? 'bg-green-50 text-green-700 border-green-200'
-                                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                            ? 'bg-green-50 text-green-700 border-green-200'
+                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                             }`}
                     >
                         <SlidersHorizontal className="w-4 h-4" />
@@ -263,6 +289,22 @@ const Players = () => {
                                 <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Min Rating</label>
                                 <input type="number" name="minRating" value={filters.minRating} onChange={handleFilterChange} placeholder="8.0" min="0" max="10" step="0.1" className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500" />
                             </div>
+                            {/* Add this inside the filter grid */}
+                            <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-900">Grassroots Talent</label>
+                                    <p className="text-xs text-gray-500">Only show undiscovered/amateur players</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setFilters(prev => ({ ...prev, isGrassroots: !prev.isGrassroots }))}
+                                    className={`relative w-11 h-6 rounded-full transition-all flex-shrink-0 ${filters.isGrassroots ? 'bg-green-600' : 'bg-gray-300'
+                                        }`}
+                                >
+                                    <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-all ${filters.isGrassroots ? 'translate-x-[22px]' : 'translate-x-0.5'
+                                        }`}></span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -309,32 +351,59 @@ const Players = () => {
                         {filteredPlayers.map((player) => (
                             <div key={player.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden group flex flex-col">
 
+                                {/* Header */}
                                 <div className="relative p-4 bg-gray-50 border-b border-gray-100">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase border ${player.availability === 'Available'
+                                    {/* ⭐ BADGES (Grassroots + Availability) ⭐ */}
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex flex-wrap gap-2">
+                                            {/* Grassroots Badge */}
+                                            {player.is_grassroots && (
+                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-yellow-50 text-yellow-700 border border-yellow-200 shadow-sm flex items-center gap-1">
+                                                    🌱 Grassroots
+                                                </span>
+                                            )}
+
+                                            {/* Availability Badge */}
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase border shadow-sm ${player.availability === 'Available'
                                                 ? 'bg-green-50 text-green-700 border-green-200'
                                                 : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                            }`}>
-                                            {player.availability}
-                                        </span>
-                                        <button onClick={() => toggleWatchlist(player.id)} className="p-1.5 bg-white border border-gray-200 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Add to watchlist">
-                                            <Heart className={`w-4 h-4 ${watchlist.includes(player.id) ? 'fill-red-500 text-red-500 border-red-500' : 'text-gray-400'}`} />
+                                                }`}>
+                                                {player.availability}
+                                            </span>
+                                        </div>
+
+                                        {/* Watchlist Heart */}
+                                        <button
+                                            onClick={() => toggleWatchlist(player.id)}
+                                            className="p-1.5 bg-white border border-gray-200 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+                                            aria-label="Add to watchlist"
+                                        >
+                                            <Heart
+                                                className={`w-4 h-4 ${watchlist.includes(player.id)
+                                                    ? 'fill-red-500 text-red-500 border-red-500'
+                                                    : 'text-gray-400'
+                                                    }`}
+                                            />
                                         </button>
                                     </div>
 
+                                    {/* Avatar */}
                                     <div className="w-16 h-16 bg-[#0a2e1f] text-green-400 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3 shadow-sm">
                                         {player.name.split(' ').map((n) => n[0]).slice(0, 2).join('')}
                                     </div>
 
+                                    {/* Name & Position */}
                                     <h3 className="font-bold text-gray-900 text-center truncate">{player.name}</h3>
                                     <p className="text-xs font-medium text-gray-500 text-center mb-2">{player.position}</p>
 
+                                    {/* Rating */}
                                     <div className="flex items-center justify-center gap-1 text-yellow-600 text-sm font-bold">
                                         <Star className="w-4 h-4 fill-current" />
                                         {player.rating || 'N/A'}
                                     </div>
                                 </div>
 
+                                {/* Body */}
                                 <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
@@ -376,19 +445,27 @@ const Players = () => {
                                     </div>
                                 </div>
 
+                                {/* Actions */}
                                 <div className="p-3 border-t border-gray-100 bg-gray-50/50 flex gap-2">
-                                    <button onClick={() => navigate(`/players/${player.id}`)} className="flex-1 inline-flex items-center justify-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-bold py-2 rounded-xl transition-colors shadow-sm">
+                                    <button
+                                        onClick={() => navigate(`/players/${player.id}`)}
+                                        className="flex-1 inline-flex items-center justify-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-bold py-2 rounded-xl transition-colors shadow-sm"
+                                    >
                                         <Eye className="w-3.5 h-3.5" /> View
                                     </button>
                                     <button
                                         onClick={() => toggleCompare(player.id)}
                                         disabled={compareList.length >= 3 && !compareList.includes(player.id)}
                                         className={`flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-bold py-2 rounded-xl transition-colors border shadow-sm ${compareList.includes(player.id)
-                                                ? 'bg-green-50 text-green-700 border-green-200'
-                                                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed'
+                                            ? 'bg-green-50 text-green-700 border-green-200'
+                                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed'
                                             }`}
                                     >
-                                        {compareList.includes(player.id) ? <><Check className="w-3.5 h-3.5" /> Added</> : <><Plus className="w-3.5 h-3.5" /> Compare</>}
+                                        {compareList.includes(player.id) ? (
+                                            <><Check className="w-3.5 h-3.5" /> Added</>
+                                        ) : (
+                                            <><Plus className="w-3.5 h-3.5" /> Compare</>
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -475,8 +552,8 @@ const Players = () => {
                                 <button
                                     onClick={() => toggleWatchlist(selectedPlayer.id)}
                                     className={`flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all border shadow-sm ${watchlist.includes(selectedPlayer.id)
-                                            ? 'bg-red-50 text-red-600 border-red-200'
-                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                        ? 'bg-red-50 text-red-600 border-red-200'
+                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <Heart className={`w-4 h-4 ${watchlist.includes(selectedPlayer.id) ? 'fill-current' : ''}`} />
