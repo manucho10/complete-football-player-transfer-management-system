@@ -32,6 +32,7 @@ import TeamReports from './pages/TeamReports';
 import MatchSchedule from './pages/MatchSchedule';
 import AcademyDashboard from './pages/Dashboards/AcademyDashboard';
 import AddAcademyPlayer from './pages/AddAcademyPlayer';
+import AcademyRoster from './pages/AcademyRoster';
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -239,6 +240,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AddAcademyPlayer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academy-roster"
+            element={
+              <ProtectedRoute>
+                <AcademyRoster />
               </ProtectedRoute>
             }
           />
