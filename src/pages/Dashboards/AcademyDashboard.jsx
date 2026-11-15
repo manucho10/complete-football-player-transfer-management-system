@@ -1,7 +1,7 @@
 // src/pages/dashboards/AcademyDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Users, Plus, BarChart3, TrendingUp, Sparkles, MessageSquare, Loader2, Eye, Star } from 'lucide-react';
+import { GraduationCap, Users, Plus, BarChart3, TrendingUp, Sparkles, MessageSquare, Loader2, Eye, Star, Calendar } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
 import { useAuth } from '../../context/AuthContext';
