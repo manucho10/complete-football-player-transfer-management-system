@@ -179,7 +179,7 @@ const AcademyDashboard = () => {
                             <div className="text-gray-400 group-hover:text-orange-600"><Plus className="w-6 h-6" /></div>
                             <span className="text-sm font-bold text-gray-700">Add New Player</span>
                         </button>
-                        <button onClick={() => navigate('/my-academy')} className="flex flex-col items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-all group">
+                        <button onClick={() => navigate('/academy-roster')} className="flex flex-col items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-all group">
                             <div className="text-gray-400 group-hover:text-orange-600"><Users className="w-6 h-6" /></div>
                             <span className="text-sm font-bold text-gray-700">Manage Roster</span>
                         </button>
@@ -218,7 +218,7 @@ const AcademyDashboard = () => {
                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <Users className="w-5 h-5 text-orange-600" /> Your Academy Players
                         </h3>
-                        <button onClick={() => navigate('/my-academy')} className="text-sm font-bold text-orange-600 hover:text-orange-700">
+                        <button onClick={() => navigate('/academy-roster')} className="text-sm font-bold text-orange-600 hover:text-orange-700">
                             View All
                         </button>
                     </div>
