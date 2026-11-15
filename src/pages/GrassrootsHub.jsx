@@ -22,25 +22,44 @@ const GrassrootsHub = () => {
         const loadGrassrootsPlayers = async () => {
             setIsLoading(true);
 
-            let query = supabase
+            // 1. Fetch ONLY grassroots players (Simpler query, no joins)
+            const { data: playersData, error } = await supabase
                 .from('players')
-                .select(`
-                    *,
-                    academy:profiles!players_academy_id_fkey(full_name, academy_name, academy_location)
-                `)
+                .select('*')
                 .eq('is_grassroots', true)
                 .eq('profile_public', true)
                 .order('created_at', { ascending: false });
 
-            const { data, error } = await query;
+            if (error) {
+                console.error("Error fetching grassroots players:", error);
+                setIsLoading(false);
+                return;
+            }
 
-            if (!error) setPlayers(data || []);
+            // 2. Fetch academy profiles for these players
+            const academyIds = [...new Set(playersData.map(p => p.academy_id).filter(Boolean))];
+            let profilesData = [];
+
+            if (academyIds.length > 0) {
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('id, academy_name, academy_location')
+                    .in('id', academyIds);
+                profilesData = profiles || [];
+            }
+
+            // 3. Combine the data
+            const combinedData = playersData.map(player => ({
+                ...player,
+                academy: profilesData.find(prof => prof.id === player.academy_id) || null
+            }));
+
+            setPlayers(combinedData);
             setIsLoading(false);
         };
 
         loadGrassrootsPlayers();
     }, []);
-
     const filteredPlayers = players.filter(p => {
         const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
         const matchesLocation = !locationFilter ||
