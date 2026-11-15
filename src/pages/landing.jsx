@@ -95,129 +95,114 @@ const Landing = () => {
             </div>
 
             {/* ==================== ROLE CARDS ==================== */}
-            <div id="Features" className="py-24 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">One Platform. Five Roles.</h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">Whether you are kicking the ball, scouting the next Messi, managing a club, or running a youth academy, TransferHub has the tools you need.</p>
-                    </div>
-
-                    {/* 5 Column Grid with responsive wrap */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                        {roles.map((role, idx) => (
-                            <div key={idx} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all flex flex-col">
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${role.color} flex items-center justify-center mb-5 text-white shadow-sm`}>
-                                    {role.icon}
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">{role.title}</h3>
-                                <p className="text-sm text-gray-600 leading-relaxed flex-1">{role.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* ==================== FEATURES ==================== */}
+            {/* ==================== PRICING ==================== */}
             <div id="pricing" className="py-24 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Built for Professional Results</h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">We combine cutting-edge technology with deep industry knowledge to streamline your transfer process.</p>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">Whether you are a weekend amateur or a top-tier club, we have a plan that fits your needs.</p>
                     </div>
 
-                    {/* Feature 1: AI Talent Finder */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-24">
-                        <div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <Sparkles className="w-6 h-6 text-yellow-500" /> AI Talent Finder
-                            </h3>
-                            <p className="text-gray-600 leading-relaxed mb-6">
-                                Stop manually filtering thousands of players. Describe the exact profile you need in plain English (e.g., "A fast left-winger with high stamina"), and our AI will instantly match you with the perfect candidates.
-                            </p>
-                            <ul className="space-y-3">
-                                <li className="flex items-start gap-3 text-gray-700 font-medium">
-                                    <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-                                    <span>Semantic search based on player stats and bios</span>
-                                </li>
-                                <li className="flex items-start gap-3 text-gray-700 font-medium">
-                                    <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-                                    <span>Instant match percentages</span>
-                                </li>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                        {/* Plan 1 */}
+                        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 flex flex-col">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Free</h3>
+                            <p className="text-sm text-gray-500 mb-6">For Grassroots Players & Academies</p>
+                            <div className="text-4xl font-extrabold text-gray-900 mb-6">€0<span className="text-base font-medium text-gray-500">/mo</span></div>
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Basic Player Profile</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Register 1 Academy Team</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Receive Trial Requests</li>
                             </ul>
+                            <button onClick={() => navigate('/register')} className="w-full py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-100 transition-colors">Start for Free</button>
                         </div>
-                        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 shadow-sm">
-                            <div className="bg-white rounded-xl p-4 shadow-sm mb-3 flex items-center gap-3 border border-gray-100">
-                                <Search className="w-5 h-5 text-gray-400" />
-                                <span className="text-gray-500 text-sm font-medium">"Fast striker who scores headers"</span>
-                            </div>
-                            <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500">
-                                <p className="font-bold text-gray-900">Lucas Ferreira</p>
-                                <p className="text-sm text-gray-500 font-medium">98% Match • 45 Goals • 1.82m</p>
-                            </div>
+
+                        {/* Plan 2 (Highlighted) */}
+                        <div className="bg-[#0a2e1f] rounded-2xl p-8 border border-green-500 shadow-xl relative transform md:-translate-y-4">
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Most Popular</div>
+                            <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
+                            <p className="text-sm text-gray-300 mb-6">For Scouts & Professional Agents</p>
+                            <div className="text-4xl font-extrabold text-white mb-6">€29<span className="text-base font-medium text-gray-400">/mo</span></div>
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle2 className="w-4 h-4 text-green-400" /> AI Talent Finder (Unlimited)</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle2 className="w-4 h-4 text-green-400" /> Unlimited Watchlists & Reports</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle2 className="w-4 h-4 text-green-400" /> Request Live Trials</li>
+                            </ul>
+                            <button onClick={() => navigate('/register')} className="w-full py-2.5 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-colors">Upgrade to Pro</button>
+                        </div>
+
+                        {/* Plan 3 */}
+                        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 flex flex-col">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Club</h3>
+                            <p className="text-sm text-gray-500 mb-6">For Professional Teams</p>
+                            <div className="text-4xl font-extrabold text-gray-900 mb-6">€99<span className="text-base font-medium text-gray-500">/mo</span></div>
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Everything in Pro</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Automated PDF Contracts</li>
+                                <li className="flex items-center gap-2 text-sm text-gray-600"><CheckCircle2 className="w-4 h-4 text-green-500" /> Hire & Manage Scouts</li>
+                            </ul>
+                            <button onClick={() => navigate('/register')} className="w-full py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-100 transition-colors">Contact Sales</button>
                         </div>
                     </div>
+                </div>
+            </div>
+            {/* ==================== FEATURES ==================== */}
+            {/* ==================== FEATURES ==================== */}
+            <div id="features" className="py-24 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything You Need to Succeed</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">From grassroots discovery to professional contract signing, TransferHub provides the ultimate toolkit for the football ecosystem.</p>
+                    </div>
 
-                    {/* Feature 2: Grassroots & Media */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                        <div className="order-2 md:order-1 bg-gray-50 rounded-2xl p-8 border border-gray-200 shadow-sm">
-                            <div className="flex flex-col gap-3">
-                                <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 border border-gray-100">
-                                    <GraduationCap className="w-6 h-6 text-orange-500" />
-                                    <div>
-                                        <p className="text-sm font-bold text-gray-900">Grassroots Academy</p>
-                                        <p className="text-xs text-gray-500">Discover undiscovered talent</p>
-                                    </div>
-                                </div>
-                                <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 border border-gray-100">
-                                    <FileText className="w-6 h-6 text-green-500" />
-                                    <div>
-                                        <p className="text-sm font-bold text-gray-900">PDF Contracts</p>
-                                        <p className="text-xs text-gray-500">Generated automatically</p>
-                                    </div>
-                                </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Feature 1 */}
+                        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center mb-6 text-yellow-600 border border-yellow-200">
+                                <Sparkles className="w-6 h-6" />
                             </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">AI Talent Finder</h3>
+                            <p className="text-sm text-gray-600 leading-relaxed">Search for players using plain English. Our semantic AI understands your tactical needs and finds the perfect match instantly.</p>
                         </div>
-                        <div className="order-1 md:order-2">
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <GraduationCap className="w-6 h-6 text-orange-500" /> Empowering Academies & Grassroots
-                            </h3>
-                            <p className="text-gray-600 leading-relaxed mb-6">
-                                Local coaches and academies can now act as verified middlemen for their young talent. Register your entire youth team, upload raw match footage, and let professional scouts discover your players.
-                            </p>
+
+                        {/* Feature 2 */}
+                        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-6 text-orange-600 border border-orange-200">
+                                <GraduationCap className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Grassroots Discovery</h3>
+                            <p className="text-sm text-gray-600 leading-relaxed">Local academies can register their youth squads, upload raw match footage, and allow scouts to request live trials.</p>
+                        </div>
+
+                        {/* Feature 3 */}
+                        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-6 text-green-600 border border-green-200">
+                                <FileText className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Automated Contracts</h3>
+                            <p className="text-sm text-gray-600 leading-relaxed">Once a transfer is agreed upon by both the club and the player, the system automatically generates a downloadable PDF contract.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
+
             {/* ==================== FINAL CTA ==================== */}
+            {/* ==================== ABOUT ==================== */}
             <div id="about" className="bg-[#0a2e1f] py-24">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">Ready to make your next big move?</h2>
-                    <p className="text-lg text-gray-300 mb-10">Join thousands of players, academies, scouts, and clubs already using TransferHub.</p>
+                    <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">Our Mission: Democratizing Football Talent</h2>
+                    <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+                        For too long, football talent has been locked behind geographic and financial barriers. TransferHub was built to bridge the gap between the streets of Nairobi, the youth academies of Brazil, and the biggest clubs in Europe. We believe the next Messi shouldn't be missed just because they weren't discovered.
+                    </p>
                     <button
                         onClick={() => navigate('/register')}
                         className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-10 rounded-xl transition-all shadow-lg"
                     >
-                        Create Free Account
+                        Join the Movement
                     </button>
                 </div>
             </div>
-
-            {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <TrendingUp className="w-6 h-6 text-green-600" />
-                        <span className="text-xl font-bold text-gray-900">TransferHub</span>
-                    </div>
-                    <div className="flex gap-6 text-sm font-medium text-gray-500">
-                        <a href="#" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-gray-900 transition-colors">Terms of Service</a>
-                        <a href="#" className="hover:text-gray-900 transition-colors">Contact</a>
-                    </div>
-                    <p className="text-sm text-gray-400">© 2026 TransferHub. All rights reserved.</p>
-                </div>
-            </footer>
         </div>
     );
 };
