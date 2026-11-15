@@ -28,10 +28,15 @@ const PlayerProfile = () => {
     const [player, setPlayer] = useState(null);
     const [videos, setVideos] = useState([]);
     const [activeVideo, setActiveVideo] = useState(null);
+
+    // Trial Modal State
     const [showTrialModal, setShowTrialModal] = useState(false);
     const [trialData, setTrialData] = useState({ location: '', date: '', message: '' });
     const [isSendingTrial, setIsSendingTrial] = useState(false);
 
+    // ================================================================
+    // FETCH PLAYER & VIDEOS
+    // ================================================================
     useEffect(() => {
         const loadData = async () => {
             setIsLoading(true);
@@ -89,6 +94,9 @@ const PlayerProfile = () => {
         if (id) loadData();
     }, [id, user]);
 
+    // ================================================================
+    // HANDLERS
+    // ================================================================
     const handleWatchlist = async () => {
         if (!isAuthenticated) return navigate('/login');
         try {
@@ -154,26 +162,6 @@ const PlayerProfile = () => {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-gray-900">
-                <Loader2 className="w-10 h-10 animate-spin text-green-600 mb-4" />
-                <p className="text-gray-500">Loading player profile...</p>
-            </div>
-        );
-    }
-
-    if (!player) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-gray-900 p-4">
-                <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-                <h1 className="text-2xl font-bold mb-2">Player Not Found</h1>
-                <button onClick={() => navigate('/players')} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold mt-4 transition-colors">
-                    Back to Player Search
-                </button>
-            </div>
-        );
-    }
     const handleRequestTrial = async (e) => {
         e.preventDefault();
         if (!user) return;
@@ -202,6 +190,30 @@ const PlayerProfile = () => {
         }
     };
 
+    // ================================================================
+    // STATES
+    // ================================================================
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-gray-900">
+                <Loader2 className="w-10 h-10 animate-spin text-green-600 mb-4" />
+                <p className="text-gray-500">Loading player profile...</p>
+            </div>
+        );
+    }
+
+    if (!player) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-gray-900 p-4">
+                <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
+                <h1 className="text-2xl font-bold mb-2">Player Not Found</h1>
+                <button onClick={() => navigate('/players')} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold mt-4 transition-colors">
+                    Back to Player Search
+                </button>
+            </div>
+        );
+    }
+
     const stats = {
         matches: player.matches || 0, goals: player.goals || 0, assists: player.assists || 0,
         minutes: player.minutes || 0, yellowCards: player.yellow_cards || 0, redCards: player.red_cards || 0,
@@ -222,12 +234,25 @@ const PlayerProfile = () => {
                         <button onClick={handleShare} className="p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors">
                             <Share2 className="w-5 h-5" />
                         </button>
+
                         {['scout', 'team'].includes(user?.role) && (
                             <button onClick={handleWatchlist} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${isWatchlisted ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300'}`}>
                                 <Heart className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
                                 <span className="hidden sm:inline">{isWatchlisted ? 'Watchlisted' : 'Watchlist'}</span>
                             </button>
                         )}
+
+                        {/* ⭐ Request Trial Button */}
+                        {['scout', 'team'].includes(user?.role) && (
+                            <button
+                                onClick={() => setShowTrialModal(true)}
+                                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-sm"
+                            >
+                                <Calendar className="w-4 h-4" />
+                                <span className="hidden sm:inline">Request Trial</span>
+                            </button>
+                        )}
+
                         <button onClick={handleContact} className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm">
                             <MessageSquare className="w-4 h-4" /> <span className="hidden sm:inline">Contact</span>
                         </button>
@@ -236,16 +261,11 @@ const PlayerProfile = () => {
             </div>
 
             <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+
+                {/* Success Message */}
                 {successMessage && (
-                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex-1 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 text-sm animate-fadeIn">
-                            <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> {successMessage}
-                        </div>
-                        {['scout', 'team'].includes(user?.role) && (
-                            <button onClick={() => setShowTrialModal(true)} className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-sm">
-                                <Calendar className="w-4 h-4" /> <span className="hidden sm:inline">Request Trial</span>
-                            </button>
-                        )}
+                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 text-sm animate-fadeIn">
+                        <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> {successMessage}
                     </div>
                 )}
 
@@ -468,22 +488,7 @@ const PlayerProfile = () => {
                 </div>
             )}
 
-            <style dangerouslySetInnerHTML={{
-                __html: `
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-        .line-clamp-1 {
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}} />
+            {/* ⭐ REQUEST TRIAL MODAL ⭐ */}
             {showTrialModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowTrialModal(false)}>
                     <div className="bg-white rounded-2xl border border-gray-200 max-w-md w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
@@ -513,6 +518,23 @@ const PlayerProfile = () => {
                     </div>
                 </div>
             )}
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+        .line-clamp-1 {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}} />
         </div>
     );
 };
