@@ -215,7 +215,7 @@ const Landing = () => {
                         <a href="#" className="hover:text-gray-900 transition-colors">Terms of Service</a>
                         <a href="#" className="hover:text-gray-900 transition-colors">Contact</a>
                     </div>
-                    <p className="text-sm text-gray-400">© 2024 TransferHub. All rights reserved.</p>
+                    <p className="text-sm text-gray-400">© 2026 TransferHub. All rights reserved.</p>
                 </div>
             </footer>
         </div>
