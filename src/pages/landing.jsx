@@ -6,7 +6,7 @@ import {
     ChevronRight, CheckCircle2, Sparkles, Video, FileText,
     ArrowRight, Play, LayoutDashboard
 } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
+import Navbar from '../components/layout/navbar';
 import { useAuth } from '../context/AuthContext';
 
 const Landing = () => {
