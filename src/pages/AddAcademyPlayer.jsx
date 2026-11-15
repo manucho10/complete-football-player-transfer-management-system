@@ -15,14 +15,40 @@ const AddAcademyPlayer = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSaving(true);
-        await supabase.from('players').insert({
-            ...formData,
+
+        // 1. Ensure we only send valid columns to the database
+        const payload = {
+            name: formData.name,
+            position: formData.position,
+            age: Number(formData.age),
+            nationality: formData.nationality,
+            bio: formData.bio,
             academy_id: user.id,
             club: user.name || 'Local Academy',
             availability: 'Available',
-            profile_public: true
-        });
+            profile_public: true,
+            is_grassroots: true,
+            rating: 5.0 // Default rating for new players
+        };
+
+        console.log("Sending to Supabase:", payload);
+
+        // 2. Perform the insert and CHECK FOR ERRORS
+        const { data, error } = await supabase
+            .from('players')
+            .insert(payload)
+            .select();
+
         setIsSaving(false);
+
+        if (error) {
+            // ⭐ THIS will show you exactly why it failed
+            console.error("Supabase Insert Error:", error);
+            alert(`Failed to save player: ${error.message} \nDetails: ${error.details}`);
+            return;
+        }
+
+        // Success!
         navigate('/my-academy');
     };
 

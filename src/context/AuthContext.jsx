@@ -224,6 +224,8 @@ export const AuthProvider = ({ children }) => {
                         full_name: formData.fullName,
                         role: formData.role,
                         phone: formData.phone,
+                        academyName: formData.academyName || null,       // ⭐ Must be here
+                        academyLocation: formData.academyLocation || null,
                     },
                 },
             });
