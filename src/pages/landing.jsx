@@ -12,6 +12,25 @@ import { useAuth } from '../context/AuthContext';
 const Landing = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
+    // 1. Define your 4 images
+    const heroImages = [
+        "/stadium.webp",         // Your current stadium image
+        "/agent.webp",          // Save these 4 images in your public folder
+        "/player.webp",
+        "/academy.webp"
+    ];
+
+    // 2. State to track which image is currently showing
+    const [currentImage, setCurrentImage] = useState(0);
+
+    // 3. Effect to change the image every 5 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentImage((prev) => (prev + 1) % heroImages.length);
+        }, 5000); // 5000ms = 5 seconds. Change this to make it faster/slower.
+
+        return () => clearInterval(interval); // Cleanup on unmount
+    }, []);
 
     const roles = [
         { icon: <User className="w-6 h-6" />, title: 'Player', color: 'from-blue-500 to-blue-600', desc: 'Build your digital CV, upload highlights, and get discovered by top clubs.' },
@@ -29,11 +48,16 @@ const Landing = () => {
 
                 {/* 1. Background Image Layer (Using the stadium image) */}
                 {/* Note: Replace 'stadium.jpg' with the actual filename you save the image as in your project */}
-                <img
-                    src="/stadium.webp"
-                    alt="Football stadium at night"
-                    className="absolute inset-0 w-full h-full object-cover object-center animate-zoom origin-center will-change-transform z-0"
-                />
+                {/* 1. Background Image Layer (Slideshow) */}
+                {heroImages.map((img, index) => (
+                    <img
+                        key={img}
+                        src={img}
+                        alt={`Football background ${index + 1}`}
+                        className={`absolute inset-0 w-full h-full object-cover object-center origin-center will-change-transform transition-opacity duration-1000 ease-in-out z-0 ${index === currentImage ? 'opacity-100 animate-zoom' : 'opacity-0'
+                            }`}
+                    />
+                ))}
 
                 {/* 2. Gradient Overlay Layer (Crucial for text readability) */}
                 <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e1f]/80 via-[#0a2e1f]/60 to-[#0a2e1f]/95 z-10"></div>
