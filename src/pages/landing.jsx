@@ -44,28 +44,29 @@ const Landing = () => {
         <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
             <Navbar />
             {/* ==================== 1. HOME (HERO SECTION) ==================== */}
+
+
             <div id="home" className="relative text-white pt-40 pb-32 overflow-hidden flex items-center min-h-[90vh]">
 
-                {/* 1. Background Image Layer (Using the stadium image) */}
-                {/* Note: Replace 'stadium.jpg' with the actual filename you save the image as in your project */}
-                {/* 1. Background Image Layer (Slideshow) */}
+                {/* 1. Background Image Layer (Crossfading Slideshow) */}
                 {heroImages.map((img, index) => (
                     <img
                         key={img}
                         src={img}
                         alt={`Football background ${index + 1}`}
-                        className={`absolute inset-0 w-full h-full object-cover object-center origin-center will-change-transform transition-opacity duration-1000 ease-in-out z-0 ${index === currentImage ? 'opacity-100 animate-zoom' : 'opacity-0'
+                        className={`absolute inset-0 w-full h-full object-cover object-center origin-center will-change-transform transition-opacity duration-[1500ms] ease-in-out z-0 ${index === currentImage ? 'opacity-100 animate-zoom' : 'opacity-0'
                             }`}
                     />
                 ))}
 
                 {/* 2. Gradient Overlay Layer (Crucial for text readability) */}
-                <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e1f]/80 via-[#0a2e1f]/60 to-[#0a2e1f]/95 z-10"></div>
-                {/* 3. Optional: Subtle green glow to match your brand */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e1f]/80 via-[#0a2e1f]/60 to-[#0a2e1f]/95 z-0 pointer-events-none"></div>
 
-                {/* 4. Content Layer */}
+                {/* 3. Optional: Subtle green glow to match your brand */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl z-0 pointer-events-none"></div>
+
+                {/* 4. Content Layer (z-10 to stay above the fading images) */}
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-8 animate-fadeIn shadow-lg">
                         <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
