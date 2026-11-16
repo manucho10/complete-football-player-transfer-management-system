@@ -26,7 +26,7 @@ const AcademyDashboard = () => {
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'roster', label: 'My Academy Roster', icon: <Users className="w-5 h-5" />, path: '/academy-roster' },
         { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
-        { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/academy-messages' },
+        { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
         { id: 'requests', label: 'Transfer Requests', icon: <Inbox className="w-5 h-5" />, path: '/transfer-requests' },
 
     ];
