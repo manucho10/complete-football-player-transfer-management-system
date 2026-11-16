@@ -32,7 +32,7 @@ const Landing = () => {
                 <img
                     src="/stadium.jpg"
                     alt="Football stadium at night"
-                    className="absolute inset-0 w-full h-full object-cover object-center animate-zoom"
+                    className="absolute inset-0 w-full h-full object-cover object-center animate-zoom origin-center will-change-transform"
                 />
 
                 {/* 2. Gradient Overlay Layer (Crucial for text readability) */}
