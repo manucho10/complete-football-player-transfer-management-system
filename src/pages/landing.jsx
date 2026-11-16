@@ -42,7 +42,7 @@ const Landing = () => {
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl"></div>
 
                 {/* 4. Content Layer */}
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
+                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-8 animate-fadeIn shadow-lg">
                         <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
                         <span className="text-xs font-semibold tracking-wide uppercase text-green-300">
