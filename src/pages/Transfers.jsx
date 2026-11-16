@@ -127,9 +127,10 @@ const Transfers = () => {
 
         setIsSubmitting(true);
         try {
+            // 1. Fetch the player's details, including academy_id
             const { data: playerData, error: playerError } = await supabase
                 .from('players')
-                .select('id, user_id')
+                .select('id, user_id, academy_id, name') // Added academy_id
                 .ilike('name', `%${newOfferData.playerName}%`)
                 .maybeSingle();
 
@@ -139,13 +140,23 @@ const Transfers = () => {
                 return;
             }
 
+            // 2. Determine the recipient (Academy Admin vs. Player)
+            const recipientId = playerData.academy_id || playerData.user_id;
+
+            if (!recipientId) {
+                alert("This player hasn't linked an account or academy yet.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            // 3. Create the offer
             const newOffer = await createTransferOffer({
                 from_user_id: user.id,
                 from_name: user.name || 'My Club',
-                to_user_id: playerData.user_id,
-                player_user_id: playerData.user_id,
+                to_user_id: recipientId,          // 👈 Routes to Academy if they have one
+                player_user_id: playerData.user_id || recipientId,
                 player_id: playerData.id,
-                player_name: newOfferData.playerName,
+                player_name: playerData.name,
                 amount: Number(newOfferData.amount),
                 duration: newOfferData.duration,
                 notes: newOfferData.notes,
@@ -163,6 +174,7 @@ const Transfers = () => {
             setIsSubmitting(false);
         }
     };
+
 
     const handleCompleteTransfer = async () => {
         try {
