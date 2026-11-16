@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, MessageSquare, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/SupabaseClient';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/SupabaseClient';
 
 const AcademyTransferInbox = () => {
     const navigate = useNavigate();
