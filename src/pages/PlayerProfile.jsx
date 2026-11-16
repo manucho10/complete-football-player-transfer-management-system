@@ -125,18 +125,20 @@ const PlayerProfile = () => {
         if (!contactMessage.trim() || !user) return;
         setIsSending(true);
         try {
-            // 1. Determine the target ID (Academy Admin vs. Free Agent Player)
-            // If the player has an academy_id, message the academy.
-            const targetUserId = player.academy_id ? player.academy_id : player.user_id;
+            // 1. Determine who we are messaging
+            // If they have an academy_id, we message the academy. Otherwise, we message the player.
+            const isAcademyPlayer = !!player.academy_id;
+            const targetUserId = isAcademyPlayer ? player.academy_id : player.user_id;
 
+            // 2. Validation
             if (!targetUserId) {
-                throw new Error("This player hasn't linked an account yet.");
+                throw new Error("This player hasn't linked their account.");
             }
             if (targetUserId === user.id) {
                 throw new Error("You cannot message yourself.");
             }
 
-            // 2. Check if a conversation already exists between this user and the target
+            // 3. Check if a conversation already exists
             const { data: existingConv } = await supabase
                 .from('conversations')
                 .select('id')
@@ -145,7 +147,7 @@ const PlayerProfile = () => {
 
             let conversationId = existingConv?.id;
 
-            // 3. If no conversation exists, create one
+            // 4. Create conversation if it doesn't exist
             if (!conversationId) {
                 const { data: newConv, error } = await supabase
                     .from('conversations')
@@ -156,26 +158,27 @@ const PlayerProfile = () => {
                 conversationId = newConv.id;
             }
 
-            // 4. Send the message
+            // 5. Insert the message
             await supabase.from('messages').insert({
                 conversation_id: conversationId,
                 sender_id: user.id,
                 text: contactMessage
             });
 
-            // 5. Update the conversation's last message timestamp
+            // 6. Update conversation timestamp
             await supabase.from('conversations').update({
                 last_message: contactMessage,
                 last_message_at: new Date().toISOString()
             }).eq('id', conversationId);
 
-            // 6. Success! Close modal and reset
+            // 7. Success (dynamic message based on who was messaged)
             setShowContactModal(false);
             setContactMessage('');
-            setSuccessMessage(`Message sent successfully to ${player.academy_id ? 'the Academy' : 'the Player'}!`);
-
-            // Optional: If you want to automatically take them to the Messages page after sending:
-            // navigate(`/messages?with=${conversationId}`);
+            setSuccessMessage(
+                isAcademyPlayer
+                    ? 'Message sent successfully to the Academy Admin!'
+                    : 'Message sent successfully!'
+            );
 
         } catch (error) {
             alert(error.message || 'Failed to send message.');
@@ -184,6 +187,9 @@ const PlayerProfile = () => {
             setTimeout(() => setSuccessMessage(''), 3000);
         }
     };
+
+
+
 
     const handleShare = () => {
         if (navigator.share) {
