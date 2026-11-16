@@ -1,5 +1,5 @@
 // src/pages/Landing.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     TrendingUp, User, Briefcase, Search, Shield, GraduationCap,
