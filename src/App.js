@@ -34,6 +34,9 @@ import AcademyDashboard from './pages/Dashboards/AcademyDashboard';
 import AddAcademyPlayer from './pages/AddAcademyPlayer';
 import AcademyRoster from './pages/AcademyRoster';
 import GrassrootsHub from './pages/GrassrootsHub';
+import TransferRequests from './pages/Academy/TransferRequests';
+import AcademyMessages from './pages/Academy/Messages';
+
 // Placeholder pages
 
 const Unauthorized = () => (
@@ -260,6 +263,25 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/transfer-requests"
+            element={
+              <ProtectedRoute>
+                <TransferRequests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academy-messages"
+            element={
+              <ProtectedRoute>
+                <AcademyMessages />
+              </ProtectedRoute>
+            }
+          />
+
+
+
 
           {/* ============ ROLE-RESTRICTED ROUTES ============ */}
 
