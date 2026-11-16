@@ -32,12 +32,11 @@ const Landing = () => {
                 <img
                     src="/stadium.jpg"
                     alt="Football stadium at night"
-                    className="absolute inset-0 w-full h-full object-cover object-center animate-zoom origin-center will-change-transform"
+                    className="absolute inset-0 w-full h-full object-cover object-center animate-zoom origin-center will-change-transform z-0"
                 />
 
                 {/* 2. Gradient Overlay Layer (Crucial for text readability) */}
-                <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e1f]/80 via-[#0a2e1f]/60 to-[#0a2e1f]/95"></div>
-
+                <div className="absolute inset-0 bg-gradient-to-b from-[#0a2e1f]/80 via-[#0a2e1f]/60 to-[#0a2e1f]/95 z-10"></div
                 {/* 3. Optional: Subtle green glow to match your brand */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl"></div>
