@@ -125,25 +125,58 @@ const PlayerProfile = () => {
         if (!contactMessage.trim() || !user) return;
         setIsSending(true);
         try {
-            const playerUserId = player.user_id;
-            if (!playerUserId) throw new Error("This player hasn't linked their account.");
-            if (playerUserId === user.id) throw new Error("You cannot message yourself.");
+            // 1. Determine the target ID (Academy Admin vs. Free Agent Player)
+            // If the player has an academy_id, message the academy.
+            const targetUserId = player.academy_id ? player.academy_id : player.user_id;
 
-            const { data: existingConv } = await supabase.from('conversations').select('id').or(`and(user1_id.eq.${user.id},user2_id.eq.${playerUserId}),and(user1_id.eq.${playerUserId},user2_id.eq.${user.id})`).maybeSingle();
+            if (!targetUserId) {
+                throw new Error("This player hasn't linked an account yet.");
+            }
+            if (targetUserId === user.id) {
+                throw new Error("You cannot message yourself.");
+            }
+
+            // 2. Check if a conversation already exists between this user and the target
+            const { data: existingConv } = await supabase
+                .from('conversations')
+                .select('id')
+                .or(`and(user1_id.eq.${user.id},user2_id.eq.${targetUserId}),and(user1_id.eq.${targetUserId},user2_id.eq.${user.id})`)
+                .maybeSingle();
+
             let conversationId = existingConv?.id;
 
+            // 3. If no conversation exists, create one
             if (!conversationId) {
-                const { data: newConv, error } = await supabase.from('conversations').insert({ user1_id: user.id, user2_id: playerUserId }).select().single();
+                const { data: newConv, error } = await supabase
+                    .from('conversations')
+                    .insert({ user1_id: user.id, user2_id: targetUserId })
+                    .select()
+                    .single();
                 if (error) throw error;
                 conversationId = newConv.id;
             }
 
-            await supabase.from('messages').insert({ conversation_id: conversationId, sender_id: user.id, text: contactMessage });
-            await supabase.from('conversations').update({ last_message: contactMessage, last_message_at: new Date().toISOString() }).eq('id', conversationId);
+            // 4. Send the message
+            await supabase.from('messages').insert({
+                conversation_id: conversationId,
+                sender_id: user.id,
+                text: contactMessage
+            });
 
+            // 5. Update the conversation's last message timestamp
+            await supabase.from('conversations').update({
+                last_message: contactMessage,
+                last_message_at: new Date().toISOString()
+            }).eq('id', conversationId);
+
+            // 6. Success! Close modal and reset
             setShowContactModal(false);
             setContactMessage('');
-            setSuccessMessage('Message sent successfully!');
+            setSuccessMessage(`Message sent successfully to ${player.academy_id ? 'the Academy' : 'the Player'}!`);
+
+            // Optional: If you want to automatically take them to the Messages page after sending:
+            // navigate(`/messages?with=${conversationId}`);
+
         } catch (error) {
             alert(error.message || 'Failed to send message.');
         } finally {
@@ -254,7 +287,10 @@ const PlayerProfile = () => {
                         )}
 
                         <button onClick={handleContact} className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm">
-                            <MessageSquare className="w-4 h-4" /> <span className="hidden sm:inline">Contact</span>
+                            <MessageSquare className="w-4 h-4" />
+                            <span className="hidden sm:inline">
+                                {player.academy_id ? 'Contact Academy' : 'Contact Player'}
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -450,7 +486,9 @@ const PlayerProfile = () => {
                                     <MessageSquare className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold text-gray-900">Contact {player.name}</h2>
+                                    <h2 className="text-lg font-bold text-gray-900">
+                                        Contact {player.academy_id ? `${player.academy?.academy_name || 'Academy'}` : player.name}
+                                    </h2>
                                     <p className="text-xs text-gray-500">Send a message about this player</p>
                                 </div>
                             </div>
