@@ -20,8 +20,8 @@ const PlayerDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
-    // ⭐ Determine if the logged-in user is an Academy Player
-    const isAcademyPlayer = user?.role === 'player' && !!user?.academy_id;
+    // ⭐ Check if the user is an Academy player
+    const isAcademyPlayer = !!user?.academy_id;
 
     useEffect(() => {
         if (!user) return;
@@ -39,6 +39,7 @@ const PlayerDashboard = () => {
         loadData();
     }, [user]);
 
+    // Navigation items - Academy players still get access to Messages and Analytics
     const navItems = [
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-5 h-5" />, path: '/analytics' },
@@ -80,7 +81,7 @@ const PlayerDashboard = () => {
         type: a.type === 'offer' ? 'offer' : a.type === 'message' ? 'message' : 'view'
     })) || [];
 
-    // ⭐ RESTRICT QUICK ACTIONS BASED ON USER ROLE ⭐
+    // ⭐ RESTRICT QUICK ACTIONS FOR ACADEMY PLAYERS
     const quickActions = isAcademyPlayer
         ? [
             // Academy Player Actions (Safe only)
