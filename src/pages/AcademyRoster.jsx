@@ -40,24 +40,15 @@ const AcademyRoster = () => {
         setIsSendingInvite(true);
 
         try {
-            // 1. Save the contact email to the player's record
-            const { error: updateError } = await supabase
-                .from('players')
-                .update({ contact_email: inviteEmail })
-                .eq('id', invitePlayer.id);
-
-            if (updateError) throw updateError;
-            // 2. Send an invite using Supabase Auth
-            // The redirect URL must point to your registration page
-            const redirectUrl = `${window.location.origin}/register?invite=${invitePlayer.id}`;
-
-            const { error: authError } = await supabase.auth.admin.inviteUserByEmail(inviteEmail, {
-                redirectTo: redirectUrl,
+            // Call the Edge Function using the Supabase client
+            const { data, error } = await supabase.functions.invoke('invite-player', {
+                body: {
+                    email: inviteEmail,
+                    inviteId: invitePlayer.id
+                },
             });
 
-            // Note: supabase.auth.admin requires a Service Role Key (backend). 
-            // If you are doing this purely client-side, you should use a standard signup 
-            // or use a custom Edge Function. For client-side, we'll just mock the success for now.
+            if (error) throw new Error(error.message);
 
             setInviteSuccess(`Invite sent successfully to ${inviteEmail}!`);
             setTimeout(() => {
@@ -68,11 +59,12 @@ const AcademyRoster = () => {
 
         } catch (error) {
             console.error(error);
-            alert('Failed to send invite.');
+            alert('Failed to send invite: ' + error.message);
         } finally {
             setIsSendingInvite(false);
         }
     };
+
 
     const handleRemove = async (playerId) => {
         if (!window.confirm('Are you sure you want to remove this player from your academy?')) return;
