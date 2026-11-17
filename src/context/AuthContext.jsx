@@ -23,12 +23,9 @@ const calculateAge = (dob) => {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [profile, setProfile] = useState(null); // full profile row
+    const [profile, setProfile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // ------------------------------------------------
-    // Helper: fetch the profiles row for a given auth user
-    // ------------------------------------------------
     // ------------------------------------------------
     // Helper: fetch the profiles row for a given auth user
     // ------------------------------------------------
@@ -47,23 +44,19 @@ export const AuthProvider = ({ children }) => {
                 return null;
             }
 
-            // ⭐ If profile doesn't exist yet, check if this is an invite flow
+            // If profile doesn't exist yet, create it
             if (!data) {
-                // Check if the current URL has an invite parameter
                 const isInviteFlow = window.location.search.includes('invite=');
-
                 if (isInviteFlow) {
-                    // Return a temporary profile object. 
-                    // This allows the UI to function without writing to the database yet.
+                    // Return a temporary profile object.
                     return {
                         id: authUser.id,
                         email: authUser.email,
-                        full_name: authUser.email.split('@')[0], // Temporary placeholder name
-                        role: 'player', // Force role to player so they see the right UI
+                        full_name: authUser.email.split('@')[0],
+                        role: 'player',
                     };
                 }
 
-                // If it's NOT an invite flow, create a normal profile
                 const { data: newProfile, error: insertError } = await supabase
                     .from('profiles')
                     .insert({
@@ -86,7 +79,6 @@ export const AuthProvider = ({ children }) => {
                 return newProfile;
             }
 
-            // If profile exists, just return it
             return data;
         } catch (err) {
             console.error('fetchProfile error:', err);
@@ -208,7 +200,6 @@ export const AuthProvider = ({ children }) => {
 
         initAuth();
 
-        // Listen for auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!isMounted) return;
 
@@ -274,7 +265,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     // ------------------------------------------------
-    // 3. REGISTER (Updated to create Player Record)
+    // 3. REGISTER
     // ------------------------------------------------
     const register = async (formData) => {
         setIsLoading(true);
@@ -299,7 +290,6 @@ export const AuthProvider = ({ children }) => {
                 return { success: false, error: error.message };
             }
 
-            // If email confirmation is required (no session yet)
             if (data.user && !data.session) {
                 return {
                     success: true,
@@ -308,11 +298,9 @@ export const AuthProvider = ({ children }) => {
                 };
             }
 
-            // 2. If session exists (instant login), handle Role-Specific Data
             if (data.session?.user) {
                 const userId = data.session.user.id;
 
-                // ⭐ CREATE PLAYER RECORD ⭐
                 if (formData.role === 'player') {
                     try {
                         const { error: playerError } = await supabase
@@ -338,17 +326,14 @@ export const AuthProvider = ({ children }) => {
                     }
                 }
 
-                // 3. Wait briefly for trigger, then fetch profile
                 await new Promise((r) => setTimeout(r, 500));
                 const profileRow = await fetchProfile(data.session.user);
 
-                // ⭐ Fetch player data for the new user
                 let playerData = null;
                 if (formData.role === 'player') {
                     playerData = await fetchPlayerData(userId);
                 }
 
-                // Fallback: Update role-specific fields in profiles table
                 if (profileRow && formData.role) {
                     const updates = buildRoleFields(formData);
                     if (Object.keys(updates).length > 0) {
@@ -380,7 +365,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Helper: pick role-specific fields from formData
     const buildRoleFields = (data) => {
         const fields = {};
         if (data.role === 'player') {
@@ -433,7 +417,6 @@ export const AuthProvider = ({ children }) => {
             if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
             if (updates.avatar_url !== undefined) dbUpdates.avatar_url = updates.avatar_url;
 
-            // Role-specific
             if (updates.position !== undefined) dbUpdates.position = updates.position;
             if (updates.currentClub !== undefined) dbUpdates.current_club = updates.currentClub;
             if (updates.nationality !== undefined) dbUpdates.nationality = updates.nationality;
@@ -445,7 +428,6 @@ export const AuthProvider = ({ children }) => {
             if (updates.league !== undefined) dbUpdates.league = updates.league;
             if (updates.transferBudget !== undefined) dbUpdates.transfer_budget = updates.transferBudget;
 
-            // Preferences
             if (updates.profilePublic !== undefined) dbUpdates.profile_public = updates.profilePublic;
             if (updates.showEmail !== undefined) dbUpdates.show_email = updates.showEmail;
             if (updates.showPhone !== undefined) dbUpdates.show_phone = updates.showPhone;
@@ -478,24 +460,20 @@ export const AuthProvider = ({ children }) => {
         try {
             if (!user?.id) throw new Error('Not authenticated');
 
-            // 1. Create a unique file name (e.g., userId-timestamp.jpg)
             const fileExt = file.name.split('.').pop();
             const fileName = `${user.id}-${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
 
-            // 2. Upload the file to Supabase Storage
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
                 .upload(filePath, file, { upsert: true });
 
             if (uploadError) throw uploadError;
 
-            // 3. Get the public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('avatars')
                 .getPublicUrl(filePath);
 
-            // 4. Save the URL to the profiles table
             const { error: updateError } = await supabase
                 .from('profiles')
                 .update({ avatar_url: publicUrl })
@@ -503,7 +481,6 @@ export const AuthProvider = ({ children }) => {
 
             if (updateError) throw updateError;
 
-            // 5. Update local state
             setUser((prev) => ({ ...prev, avatar_url: publicUrl }));
             setProfile((prev) => ({ ...prev, avatar_url: publicUrl }));
 
@@ -525,7 +502,6 @@ export const AuthProvider = ({ children }) => {
 
             const profileRow = await fetchProfile(session.user);
 
-            // ⭐ Fetch player data if the user is a player
             let playerData = null;
             if (profileRow?.role === 'player' || session.user.user_metadata?.role === 'player') {
                 playerData = await fetchPlayerData(session.user.id);
