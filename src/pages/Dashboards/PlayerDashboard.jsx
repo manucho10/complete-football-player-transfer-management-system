@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Eye, Star, FileText, DollarSign, BarChart3, Video, User,
     Building2, Clock, CheckCircle2, MessageSquare, ArrowUpRight,
-    Loader2, TrendingUp, Sparkles
+    Loader2, TrendingUp, Sparkles, Shield
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
@@ -19,6 +19,9 @@ const PlayerDashboard = () => {
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+    // ⭐ Determine if the logged-in user is an Academy Player
+    const isAcademyPlayer = user?.role === 'player' && !!user?.academy_id;
 
     useEffect(() => {
         if (!user) return;
@@ -77,12 +80,20 @@ const PlayerDashboard = () => {
         type: a.type === 'offer' ? 'offer' : a.type === 'message' ? 'message' : 'view'
     })) || [];
 
-    const quickActions = [
-        { label: 'Upload Highlight', icon: <Video className="w-5 h-5" />, onClick: () => setIsUploadModalOpen(true) },
-        { label: 'Update Profile', icon: <User className="w-5 h-5" />, path: '/profile' },
-        { label: 'View Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
-        { label: 'Browse Clubs', icon: <Building2 className="w-5 h-5" />, path: '/browse-clubs' },
-    ];
+    // ⭐ RESTRICT QUICK ACTIONS BASED ON USER ROLE ⭐
+    const quickActions = isAcademyPlayer
+        ? [
+            // Academy Player Actions (Safe only)
+            { label: 'Upload Highlight', icon: <Video className="w-5 h-5" />, onClick: () => setIsUploadModalOpen(true) },
+            { label: 'View Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
+        ]
+        : [
+            // Free Agent Actions (Normal)
+            { label: 'Upload Highlight', icon: <Video className="w-5 h-5" />, onClick: () => setIsUploadModalOpen(true) },
+            { label: 'Update Profile', icon: <User className="w-5 h-5" />, path: '/profile' },
+            { label: 'View Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
+            { label: 'Browse Clubs', icon: <Building2 className="w-5 h-5" />, path: '/browse-clubs' },
+        ];
 
     return (
         <DashboardLayout roleConfig={roleConfig.player} navItems={navItems} recentActivity={recentActivity}>
@@ -97,9 +108,16 @@ const PlayerDashboard = () => {
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-medium border border-green-200">
-                            <span className="w-2 h-2 rounded-full bg-green-500"></span> Profile Active
-                        </span>
+                        {/* ⭐ Show Managed Badge for Academy Players ⭐ */}
+                        {isAcademyPlayer ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-sm font-medium border border-orange-200 shadow-sm">
+                                <Shield className="w-4 h-4" /> Managed by Academy
+                            </span>
+                        ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-medium border border-green-200">
+                                <span className="w-2 h-2 rounded-full bg-green-500"></span> Profile Active
+                            </span>
+                        )}
                     </div>
                 </div>
 

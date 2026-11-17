@@ -76,9 +76,31 @@ export const AuthProvider = ({ children }) => {
     };
 
     // ------------------------------------------------
+    // ⭐ Helper: Fetch Player-Specific Data (Academy ID, etc.)
+    // ------------------------------------------------
+    const fetchPlayerData = async (userId) => {
+        try {
+            const { data, error } = await supabase
+                .from('players')
+                .select('academy_id, agent_id, team_id, has_linked_account, is_grassroots')
+                .eq('user_id', userId)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Error fetching player data:', error);
+                return null;
+            }
+            return data;
+        } catch (err) {
+            console.error('fetchPlayerData error:', err);
+            return null;
+        }
+    };
+
+    // ------------------------------------------------
     // Map auth user + profile → app user shape
     // ------------------------------------------------
-    const buildUser = (authUser, profileRow) => {
+    const buildUser = (authUser, profileRow, playerData = null) => {
         if (!authUser) return null;
 
         return {
@@ -99,8 +121,15 @@ export const AuthProvider = ({ children }) => {
             country: profileRow?.country || null,
             bio: profileRow?.bio || null,
             avatar_url: profileRow?.avatar_url || null,
-            team_id: profileRow?.team_id || null,           // ⭐ Add this
-            scoutClub: profileRow?.scout_club || null,      // ⭐ Add this
+            team_id: profileRow?.team_id || null,
+            scoutClub: profileRow?.scout_club || null,
+
+            // ⭐ NEW: Academy/Player specific fields
+            academy_id: playerData?.academy_id || null,
+            agent_id: playerData?.agent_id || null,
+            has_linked_account: playerData?.has_linked_account || false,
+            is_grassroots: playerData?.is_grassroots || false,
+
             // Role-specific fields
             position: profileRow?.position || null,
             currentClub: profileRow?.current_club || null,
@@ -131,17 +160,22 @@ export const AuthProvider = ({ children }) => {
 
         const initAuth = async () => {
             try {
-                const {
-                    data: { session },
-                } = await supabase.auth.getSession();
+                const { data: { session } } = await supabase.auth.getSession();
 
                 if (!isMounted) return;
 
                 if (session?.user) {
                     const profileRow = await fetchProfile(session.user);
+
+                    // ⭐ Fetch player data if the user is a player
+                    let playerData = null;
+                    if (profileRow?.role === 'player' || session.user.user_metadata?.role === 'player') {
+                        playerData = await fetchPlayerData(session.user.id);
+                    }
+
                     if (!isMounted) return;
                     setProfile(profileRow);
-                    setUser(buildUser(session.user, profileRow));
+                    setUser(buildUser(session.user, profileRow, playerData));
                 } else {
                     setUser(null);
                     setProfile(null);
@@ -156,16 +190,21 @@ export const AuthProvider = ({ children }) => {
         initAuth();
 
         // Listen for auth state changes
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!isMounted) return;
 
             if (session?.user) {
                 const profileRow = await fetchProfile(session.user);
+
+                // ⭐ Fetch player data if the user is a player
+                let playerData = null;
+                if (profileRow?.role === 'player' || session.user.user_metadata?.role === 'player') {
+                    playerData = await fetchPlayerData(session.user.id);
+                }
+
                 if (!isMounted) return;
                 setProfile(profileRow);
-                setUser(buildUser(session.user, profileRow));
+                setUser(buildUser(session.user, profileRow, playerData));
             } else {
                 setUser(null);
                 setProfile(null);
@@ -197,8 +236,15 @@ export const AuthProvider = ({ children }) => {
             }
 
             const profileRow = await fetchProfile(data.user);
+
+            // ⭐ Fetch player data if it's a player
+            let playerData = null;
+            if (profileRow?.role === 'player' || data.user.user_metadata?.role === 'player') {
+                playerData = await fetchPlayerData(data.user.id);
+            }
+
             setProfile(profileRow);
-            setUser(buildUser(data.user, profileRow));
+            setUser(buildUser(data.user, profileRow, playerData));
 
             return { success: true, user: data.user, profile: profileRow };
         } catch (error) {
@@ -224,7 +270,7 @@ export const AuthProvider = ({ children }) => {
                         full_name: formData.fullName,
                         role: formData.role,
                         phone: formData.phone,
-                        academyName: formData.academyName || null,       // ⭐ Must be here
+                        academyName: formData.academyName || null,
                         academyLocation: formData.academyLocation || null,
                     },
                 },
@@ -277,6 +323,12 @@ export const AuthProvider = ({ children }) => {
                 await new Promise((r) => setTimeout(r, 500));
                 const profileRow = await fetchProfile(data.session.user);
 
+                // ⭐ Fetch player data for the new user
+                let playerData = null;
+                if (formData.role === 'player') {
+                    playerData = await fetchPlayerData(userId);
+                }
+
                 // Fallback: Update role-specific fields in profiles table
                 if (profileRow && formData.role) {
                     const updates = buildRoleFields(formData);
@@ -290,14 +342,14 @@ export const AuthProvider = ({ children }) => {
 
                         if (!updErr && updated) {
                             setProfile(updated);
-                            setUser(buildUser(data.session.user, updated));
+                            setUser(buildUser(data.session.user, updated, playerData));
                             return { success: true, user: data.session.user, profile: updated };
                         }
                     }
                 }
 
                 setProfile(profileRow);
-                setUser(buildUser(data.session.user, profileRow));
+                setUser(buildUser(data.session.user, profileRow, playerData));
                 return { success: true, user: data.session.user, profile: profileRow };
             }
 
@@ -399,8 +451,9 @@ export const AuthProvider = ({ children }) => {
             return { success: false, error: error.message };
         }
     };
+
     // ------------------------------------------------
-    // 7. UPLOAD AVATAR
+    // 6. UPLOAD AVATAR
     // ------------------------------------------------
     const uploadAvatar = async (file) => {
         try {
@@ -443,19 +496,24 @@ export const AuthProvider = ({ children }) => {
     };
 
     // ------------------------------------------------
-    // 6. REFRESH PROFILE
+    // 7. REFRESH PROFILE
     // ------------------------------------------------
     const refreshProfile = async () => {
         try {
-            const {
-                data: { session },
-            } = await supabase.auth.getSession();
+            const { data: { session } } = await supabase.auth.getSession();
 
             if (!session?.user) return null;
 
             const profileRow = await fetchProfile(session.user);
+
+            // ⭐ Fetch player data if the user is a player
+            let playerData = null;
+            if (profileRow?.role === 'player' || session.user.user_metadata?.role === 'player') {
+                playerData = await fetchPlayerData(session.user.id);
+            }
+
             setProfile(profileRow);
-            setUser(buildUser(session.user, profileRow));
+            setUser(buildUser(session.user, profileRow, playerData));
             return profileRow;
         } catch (err) {
             console.error('refreshProfile error:', err);

@@ -33,6 +33,8 @@ const Transfers = () => {
     const [counterSalary, setCounterSalary] = useState('');
     const [isNegotiating, setIsNegotiating] = useState(false);
 
+    // ⭐ Check if the current user is an Academy Player
+    const isAcademyPlayer = user?.role === 'player' && !!user?.academy_id;
 
     useEffect(() => {
         if (!user) return;
@@ -127,10 +129,9 @@ const Transfers = () => {
 
         setIsSubmitting(true);
         try {
-            // 1. Fetch the player's details, including academy_id
             const { data: playerData, error: playerError } = await supabase
                 .from('players')
-                .select('id, user_id, academy_id, name') // Added academy_id
+                .select('id, user_id, academy_id, name')
                 .ilike('name', `%${newOfferData.playerName}%`)
                 .maybeSingle();
 
@@ -140,7 +141,6 @@ const Transfers = () => {
                 return;
             }
 
-            // 2. Determine the recipient (Academy Admin vs. Player)
             const recipientId = playerData.academy_id || playerData.user_id;
 
             if (!recipientId) {
@@ -149,11 +149,10 @@ const Transfers = () => {
                 return;
             }
 
-            // 3. Create the offer
             const newOffer = await createTransferOffer({
                 from_user_id: user.id,
                 from_name: user.name || 'My Club',
-                to_user_id: recipientId,          // 👈 Routes to Academy if they have one
+                to_user_id: recipientId,
                 player_user_id: playerData.user_id || recipientId,
                 player_id: playerData.id,
                 player_name: playerData.name,
@@ -174,7 +173,6 @@ const Transfers = () => {
             setIsSubmitting(false);
         }
     };
-
 
     const handleCompleteTransfer = async () => {
         try {
@@ -473,12 +471,19 @@ const Transfers = () => {
                                                 <XCircle className="w-4 h-4" /> Reject
                                             </button>
 
-                                            {((user.id === selectedOffer.from_user_id && !selectedOffer.team_accepted) ||
-                                                (user.id === selectedOffer.player_user_id && !selectedOffer.player_accepted)) && (
+                                            {/* ⭐ SAFEGUARDING RESTRICTION: Academy Player cannot accept directly ⭐ */}
+                                            {isAcademyPlayer && user.id === selectedOffer.player_user_id ? (
+                                                <div className="flex-1 inline-flex items-center justify-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 py-3 px-4 rounded-xl text-sm font-bold shadow-sm">
+                                                    <Clock className="w-4 h-4" /> Pending Academy Signature
+                                                </div>
+                                            ) : (
+                                                ((user.id === selectedOffer.from_user_id && !selectedOffer.team_accepted) ||
+                                                    (user.id === selectedOffer.player_user_id && !selectedOffer.player_accepted)) && (
                                                     <button onClick={() => handleStatusChange(selectedOffer.id, 'accept')} className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl text-sm font-bold transition-all flex-1 shadow-sm">
                                                         <Check className="w-4 h-4" /> Accept Terms
                                                     </button>
-                                                )}
+                                                )
+                                            )}
                                         </>
                                     )}
                                 </div>

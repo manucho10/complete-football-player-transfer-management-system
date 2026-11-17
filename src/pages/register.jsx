@@ -1,6 +1,6 @@
 // src/pages/Register.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
     Mail, Lock, Eye, EyeOff, User, Briefcase, Search, Shield,
     ArrowLeft, ArrowRight, AlertCircle, CheckCircle2, Loader2,
@@ -8,10 +8,13 @@ import {
     TrendingUp, GraduationCap,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/SupabaseClient'; // 👈 Import Supabase
 
 const Register = () => {
     const navigate = useNavigate();
+    const location = useLocation(); // 👈 For reading the invite URL
     const { register, isAuthenticated, isLoading: authLoading } = useAuth();
+
     const [step, setStep] = useState(1);
 
     const [formData, setFormData] = useState({
@@ -29,6 +32,10 @@ const Register = () => {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+
+    // 👈 Extract the invite ID from URL if it exists
+    const queryParams = new URLSearchParams(location.search);
+    const invitePlayerId = queryParams.get('invite');
 
     useEffect(() => {
         if (isAuthenticated && !authLoading) {
@@ -91,7 +98,8 @@ const Register = () => {
 
     const validateStep3 = () => {
         const newErrors = {};
-        if (formData.role === 'player') {
+        // If they are invited, we can bypass the strict player profile requirements
+        if (formData.role === 'player' && !invitePlayerId) {
             if (!formData.position) newErrors.position = 'Position is required';
             if (!formData.currentClub.trim()) newErrors.currentClub = 'Current club is required';
             if (!formData.nationality.trim()) newErrors.nationality = 'Nationality is required';
@@ -137,6 +145,23 @@ const Register = () => {
         const result = await register(formData);
 
         if (result.success) {
+            // ⭐ NEW: If there is an invite ID, link the player profile to this new account
+            if (invitePlayerId && result.user) {
+                try {
+                    const { error: linkError } = await supabase
+                        .from('players')
+                        .update({
+                            user_id: result.user.id,
+                            has_linked_account: true
+                        })
+                        .eq('id', invitePlayerId);
+
+                    if (linkError) console.error("Failed to link player profile:", linkError);
+                } catch (err) {
+                    console.error("Error linking profile:", err);
+                }
+            }
+
             setSuccessMessage('Account created successfully! Redirecting...');
             setTimeout(() => {
                 navigate('/dashboard');
@@ -203,9 +228,13 @@ const Register = () => {
 
                     {/* Header */}
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Create your account</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            {invitePlayerId ? 'Claim Your Profile' : 'Create your account'}
+                        </h2>
                         <p className="text-sm text-gray-600">
-                            Already have an account?{' '}
+                            {invitePlayerId
+                                ? 'Create a password to link your account to your academy profile.'
+                                : 'Already have an account?'}{' '}
                             <Link to="/login" className="font-semibold text-green-600 hover:text-green-500">
                                 Sign in
                             </Link>
@@ -353,27 +382,32 @@ const Register = () => {
                                 {/* Player Fields */}
                                 {formData.role === 'player' && (
                                     <>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Position</label>
-                                                <select name="position" value={formData.position} onChange={handleChange} className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.position ? 'border-red-300' : 'border-gray-300'}`}>
-                                                    <option value="">Select position</option>
-                                                    <option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Date of Birth</label>
-                                                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500" />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Current Club</label>
-                                            <input type="text" name="currentClub" value={formData.currentClub} onChange={handleChange} placeholder="e.g., FC Barcelona" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.currentClub ? 'border-red-300' : 'border-gray-300'}`} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Nationality</label>
-                                            <input type="text" name="nationality" value={formData.nationality} onChange={handleChange} placeholder="e.g., Nigerian" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.nationality ? 'border-red-300' : 'border-gray-300'}`} />
-                                        </div>
+                                        {/* Only show these fields if NOT an invited player */}
+                                        {!invitePlayerId && (
+                                            <>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Position</label>
+                                                        <select name="position" value={formData.position} onChange={handleChange} className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.position ? 'border-red-300' : 'border-gray-300'}`}>
+                                                            <option value="">Select position</option>
+                                                            <option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Date of Birth</label>
+                                                        <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Current Club</label>
+                                                    <input type="text" name="currentClub" value={formData.currentClub} onChange={handleChange} placeholder="e.g., FC Barcelona" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.currentClub ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Nationality</label>
+                                                    <input type="text" name="nationality" value={formData.nationality} onChange={handleChange} placeholder="e.g., Nigerian" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.nationality ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                            </>
+                                        )}
                                     </>
                                 )}
 

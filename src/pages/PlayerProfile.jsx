@@ -34,6 +34,9 @@ const PlayerProfile = () => {
     const [trialData, setTrialData] = useState({ location: '', date: '', message: '' });
     const [isSendingTrial, setIsSendingTrial] = useState(false);
 
+    // ⭐ Determine if viewing user is an academy-restricted player
+    const isAcademyPlayerViewing = user?.role === 'player' && !!user?.academy_id;
+
     // ================================================================
     // FETCH PLAYER & VIDEOS
     // ================================================================
@@ -126,7 +129,6 @@ const PlayerProfile = () => {
         setIsSending(true);
         try {
             // 1. Determine who we are messaging
-            // If they have an academy_id, we message the academy. Otherwise, we message the player.
             const isAcademyPlayer = !!player.academy_id;
             const targetUserId = isAcademyPlayer ? player.academy_id : player.user_id;
 
@@ -171,7 +173,7 @@ const PlayerProfile = () => {
                 last_message_at: new Date().toISOString()
             }).eq('id', conversationId);
 
-            // 7. Success (dynamic message based on who was messaged)
+            // 7. Success
             setShowContactModal(false);
             setContactMessage('');
             setSuccessMessage(
@@ -187,9 +189,6 @@ const PlayerProfile = () => {
             setTimeout(() => setSuccessMessage(''), 3000);
         }
     };
-
-
-
 
     const handleShare = () => {
         if (navigator.share) {
@@ -274,30 +273,39 @@ const PlayerProfile = () => {
                             <Share2 className="w-5 h-5" />
                         </button>
 
-                        {['scout', 'team'].includes(user?.role) && (
-                            <button onClick={handleWatchlist} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${isWatchlisted ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300'}`}>
-                                <Heart className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
-                                <span className="hidden sm:inline">{isWatchlisted ? 'Watchlisted' : 'Watchlist'}</span>
-                            </button>
-                        )}
+                        {/* ⭐ NEW: If Academy Player is viewing, show badge instead of actions */}
+                        {isAcademyPlayerViewing ? (
+                            <div className="bg-orange-50 text-orange-700 border border-orange-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 shadow-sm">
+                                <Shield className="w-4 h-4" /> Managed by Academy
+                            </div>
+                        ) : (
+                            <>
+                                {['scout', 'team'].includes(user?.role) && (
+                                    <button onClick={handleWatchlist} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${isWatchlisted ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300'}`}>
+                                        <Heart className={`w-4 h-4 ${isWatchlisted ? 'fill-current' : ''}`} />
+                                        <span className="hidden sm:inline">{isWatchlisted ? 'Watchlisted' : 'Watchlist'}</span>
+                                    </button>
+                                )}
 
-                        {/* ⭐ Request Trial Button */}
-                        {['scout', 'team'].includes(user?.role) && (
-                            <button
-                                onClick={() => setShowTrialModal(true)}
-                                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-sm"
-                            >
-                                <Calendar className="w-4 h-4" />
-                                <span className="hidden sm:inline">Request Trial</span>
-                            </button>
-                        )}
+                                {/* Request Trial Button */}
+                                {['scout', 'team'].includes(user?.role) && (
+                                    <button
+                                        onClick={() => setShowTrialModal(true)}
+                                        className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-sm"
+                                    >
+                                        <Calendar className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Request Trial</span>
+                                    </button>
+                                )}
 
-                        <button onClick={handleContact} className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm">
-                            <MessageSquare className="w-4 h-4" />
-                            <span className="hidden sm:inline">
-                                {player.academy_id ? 'Contact Academy' : 'Contact Player'}
-                            </span>
-                        </button>
+                                <button onClick={handleContact} className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm">
+                                    <MessageSquare className="w-4 h-4" />
+                                    <span className="hidden sm:inline">
+                                        {player.academy_id ? 'Contact Academy' : 'Contact Player'}
+                                    </span>
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

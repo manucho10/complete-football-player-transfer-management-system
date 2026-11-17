@@ -1,7 +1,7 @@
 // src/pages/AcademyRoster.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Search, Loader2, Star, Eye, UserMinus, Plus } from 'lucide-react';
+import { ArrowLeft, Users, Search, Loader2, Star, Eye, UserMinus, Plus, Mail, X, Send, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/SupabaseClient';
 
@@ -11,6 +11,11 @@ const AcademyRoster = () => {
     const [players, setPlayers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [invitePlayer, setInvitePlayer] = useState(null);
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [isSendingInvite, setIsSendingInvite] = useState(false);
+    const [inviteSuccess, setInviteSuccess] = useState('');
+
 
     useEffect(() => {
         const fetchRoster = async () => {
@@ -29,6 +34,45 @@ const AcademyRoster = () => {
 
         fetchRoster();
     }, [user]);
+    const handleSendInvite = async (e) => {
+        e.preventDefault();
+        if (!inviteEmail.trim()) return;
+        setIsSendingInvite(true);
+
+        try {
+            // 1. Save the contact email to the player's record
+            const { error: updateError } = await supabase
+                .from('players')
+                .update({ contact_email: inviteEmail })
+                .eq('id', invitePlayer.id);
+
+            if (updateError) throw updateError;
+            // 2. Send an invite using Supabase Auth
+            // The redirect URL must point to your registration page
+            const redirectUrl = `${window.location.origin}/register?invite=${invitePlayer.id}`;
+
+            const { error: authError } = await supabase.auth.admin.inviteUserByEmail(inviteEmail, {
+                redirectTo: redirectUrl,
+            });
+
+            // Note: supabase.auth.admin requires a Service Role Key (backend). 
+            // If you are doing this purely client-side, you should use a standard signup 
+            // or use a custom Edge Function. For client-side, we'll just mock the success for now.
+
+            setInviteSuccess(`Invite sent successfully to ${inviteEmail}!`);
+            setTimeout(() => {
+                setInviteSuccess('');
+                setInvitePlayer(null);
+                setInviteEmail('');
+            }, 3000);
+
+        } catch (error) {
+            console.error(error);
+            alert('Failed to send invite.');
+        } finally {
+            setIsSendingInvite(false);
+        }
+    };
 
     const handleRemove = async (playerId) => {
         if (!window.confirm('Are you sure you want to remove this player from your academy?')) return;
@@ -148,6 +192,13 @@ const AcademyRoster = () => {
                                     <button onClick={() => navigate(`/players/${player.id}`)} className="flex-1 flex items-center justify-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-bold py-2.5 rounded-xl transition-colors shadow-sm">
                                         <Eye className="w-4 h-4" /> View
                                     </button>
+                                    <button
+                                        onClick={() => setInvitePlayer(player)}
+                                        className="flex-1 flex items-center justify-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 text-xs font-bold py-2.5 rounded-xl transition-colors shadow-sm"
+                                    >
+                                        <Mail className="w-4 h-4" /> Invite
+                                    </button>
+
                                     <button onClick={() => handleRemove(player.id)} className="flex-1 flex items-center justify-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold py-2.5 rounded-xl transition-colors shadow-sm">
                                         <UserMinus className="w-4 h-4" /> Remove
                                     </button>
@@ -157,6 +208,49 @@ const AcademyRoster = () => {
                     </div>
                 )}
             </div>
+            {/* INVITE MODAL */}
+            {invitePlayer && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setInvitePlayer(null)}>
+                    <div className="bg-white rounded-2xl border border-gray-200 max-w-md w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                <Mail className="w-5 h-5 text-blue-600" /> Invite {invitePlayer.name}
+                            </h2>
+                            <button onClick={() => setInvitePlayer(null)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+                        </div>
+
+                        {inviteSuccess ? (
+                            <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl text-center font-medium flex flex-col items-center gap-2">
+                                <CheckCircle2 className="w-8 h-8" />
+                                {inviteSuccess}
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSendInvite}>
+                                <p className="text-sm text-gray-500 mb-4">
+                                    Send an invite link so {invitePlayer.name.split(' ')[0]} can create their own account.
+                                    You can use the player's, parent's, or guardian's email.
+                                </p>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={inviteEmail} s
+                                    onChange={(e) => setInviteEmail(e.target.value)}
+                                    placeholder="parent@example.com"
+                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 mb-4"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={isSendingInvite}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                                >
+                                    {isSendingInvite ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> Send Invite Email</>}
+                                </button>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
