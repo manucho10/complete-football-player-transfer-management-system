@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
                 return null;
             }
 
-            // If profile doesn't exist yet, create it
+            // If profile doesn't exist yet, check if this is an invite flow
             if (!data) {
                 const isInviteFlow = window.location.search.includes('invite=');
                 if (isInviteFlow) {
@@ -109,10 +109,22 @@ export const AuthProvider = ({ children }) => {
     };
 
     // ------------------------------------------------
-    // Map auth user + profile → app user shape
+    // Map auth user + profile → app user shape (ASYNC)
     // ------------------------------------------------
-    const buildUser = (authUser, profileRow, playerData = null) => {
+    const buildUser = async (authUser, profileRow) => {
         if (!authUser) return null;
+
+        let playerData = null;
+
+        // ⭐ FETCH PLAYER DATA DIRECTLY HERE
+        if (profileRow?.role === 'player' || authUser.user_metadata?.role === 'player') {
+            const { data } = await supabase
+                .from('players')
+                .select('academy_id, agent_id, team_id, has_linked_account, is_grassroots')
+                .eq('user_id', authUser.id)
+                .maybeSingle();
+            playerData = data;
+        }
 
         return {
             // Auth fields
@@ -120,14 +132,8 @@ export const AuthProvider = ({ children }) => {
             email: authUser.email,
             token: authUser.id,
             // Profile fields
-            name:
-                profileRow?.full_name ||
-                authUser.user_metadata?.full_name ||
-                authUser.email.split('@')[0],
-            role:
-                profileRow?.role ||
-                authUser.user_metadata?.role ||
-                'player',
+            name: profileRow?.full_name || authUser.user_metadata?.full_name || authUser.email.split('@')[0],
+            role: profileRow?.role || authUser.user_metadata?.role || 'player',
             phone: profileRow?.phone || null,
             country: profileRow?.country || null,
             bio: profileRow?.bio || null,
@@ -135,7 +141,7 @@ export const AuthProvider = ({ children }) => {
             team_id: profileRow?.team_id || null,
             scoutClub: profileRow?.scout_club || null,
 
-            // ⭐ NEW: Academy/Player specific fields
+            // ⭐ ACADEMY PLAYER FIELDS
             academy_id: playerData?.academy_id || null,
             agent_id: playerData?.agent_id || null,
             has_linked_account: playerData?.has_linked_account || false,
@@ -177,16 +183,12 @@ export const AuthProvider = ({ children }) => {
 
                 if (session?.user) {
                     const profileRow = await fetchProfile(session.user);
-
-                    // ⭐ Fetch player data if the user is a player
-                    let playerData = null;
-                    if (profileRow?.role === 'player' || session.user.user_metadata?.role === 'player') {
-                        playerData = await fetchPlayerData(session.user.id);
-                    }
+                    // ⭐ Await the async buildUser function
+                    const builtUser = await buildUser(session.user, profileRow);
 
                     if (!isMounted) return;
                     setProfile(profileRow);
-                    setUser(buildUser(session.user, profileRow, playerData));
+                    setUser(builtUser);
                 } else {
                     setUser(null);
                     setProfile(null);
@@ -205,16 +207,12 @@ export const AuthProvider = ({ children }) => {
 
             if (session?.user) {
                 const profileRow = await fetchProfile(session.user);
-
-                // ⭐ Fetch player data if the user is a player
-                let playerData = null;
-                if (profileRow?.role === 'player' || session.user.user_metadata?.role === 'player') {
-                    playerData = await fetchPlayerData(session.user.id);
-                }
+                // ⭐ Await the async buildUser function
+                const builtUser = await buildUser(session.user, profileRow);
 
                 if (!isMounted) return;
                 setProfile(profileRow);
-                setUser(buildUser(session.user, profileRow, playerData));
+                setUser(builtUser);
             } else {
                 setUser(null);
                 setProfile(null);
@@ -246,15 +244,11 @@ export const AuthProvider = ({ children }) => {
             }
 
             const profileRow = await fetchProfile(data.user);
-
-            // ⭐ Fetch player data if it's a player
-            let playerData = null;
-            if (profileRow?.role === 'player' || data.user.user_metadata?.role === 'player') {
-                playerData = await fetchPlayerData(data.user.id);
-            }
+            // ⭐ Await the async buildUser function
+            const builtUser = await buildUser(data.user, profileRow);
 
             setProfile(profileRow);
-            setUser(buildUser(data.user, profileRow, playerData));
+            setUser(builtUser);
 
             return { success: true, user: data.user, profile: profileRow };
         } catch (error) {
@@ -329,11 +323,6 @@ export const AuthProvider = ({ children }) => {
                 await new Promise((r) => setTimeout(r, 500));
                 const profileRow = await fetchProfile(data.session.user);
 
-                let playerData = null;
-                if (formData.role === 'player') {
-                    playerData = await fetchPlayerData(userId);
-                }
-
                 if (profileRow && formData.role) {
                     const updates = buildRoleFields(formData);
                     if (Object.keys(updates).length > 0) {
@@ -345,15 +334,19 @@ export const AuthProvider = ({ children }) => {
                             .single();
 
                         if (!updErr && updated) {
+                            // ⭐ Await the async buildUser function
+                            const builtUser = await buildUser(data.session.user, updated);
                             setProfile(updated);
-                            setUser(buildUser(data.session.user, updated, playerData));
+                            setUser(builtUser);
                             return { success: true, user: data.session.user, profile: updated };
                         }
                     }
                 }
 
+                // ⭐ Await the async buildUser function
+                const builtUser = await buildUser(data.session.user, profileRow);
                 setProfile(profileRow);
-                setUser(buildUser(data.session.user, profileRow, playerData));
+                setUser(builtUser);
                 return { success: true, user: data.session.user, profile: profileRow };
             }
 
@@ -501,14 +494,11 @@ export const AuthProvider = ({ children }) => {
             if (!session?.user) return null;
 
             const profileRow = await fetchProfile(session.user);
-
-            let playerData = null;
-            if (profileRow?.role === 'player' || session.user.user_metadata?.role === 'player') {
-                playerData = await fetchPlayerData(session.user.id);
-            }
+            // ⭐ Await the async buildUser function
+            const builtUser = await buildUser(session.user, profileRow);
 
             setProfile(profileRow);
-            setUser(buildUser(session.user, profileRow, playerData));
+            setUser(builtUser);
             return profileRow;
         } catch (err) {
             console.error('refreshProfile error:', err);
