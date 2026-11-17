@@ -29,6 +29,9 @@ export const AuthProvider = ({ children }) => {
     // ------------------------------------------------
     // Helper: fetch the profiles row for a given auth user
     // ------------------------------------------------
+    // ------------------------------------------------
+    // Helper: fetch the profiles row for a given auth user
+    // ------------------------------------------------
     const fetchProfile = async (authUser) => {
         if (!authUser) return null;
 
@@ -44,8 +47,23 @@ export const AuthProvider = ({ children }) => {
                 return null;
             }
 
-            // If profile doesn't exist yet, create it
+            // ⭐ If profile doesn't exist yet, check if this is an invite flow
             if (!data) {
+                // Check if the current URL has an invite parameter
+                const isInviteFlow = window.location.search.includes('invite=');
+
+                if (isInviteFlow) {
+                    // Return a temporary profile object. 
+                    // This allows the UI to function without writing to the database yet.
+                    return {
+                        id: authUser.id,
+                        email: authUser.email,
+                        full_name: authUser.email.split('@')[0], // Temporary placeholder name
+                        role: 'player', // Force role to player so they see the right UI
+                    };
+                }
+
+                // If it's NOT an invite flow, create a normal profile
                 const { data: newProfile, error: insertError } = await supabase
                     .from('profiles')
                     .insert({
@@ -68,6 +86,7 @@ export const AuthProvider = ({ children }) => {
                 return newProfile;
             }
 
+            // If profile exists, just return it
             return data;
         } catch (err) {
             console.error('fetchProfile error:', err);
