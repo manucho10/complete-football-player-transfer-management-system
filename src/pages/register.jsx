@@ -162,11 +162,37 @@ const Register = () => {
                 });
                 if (authError) throw authError;
 
-                // 2. Link the player profile to this new account
+                const { data: { user } } = await supabase.auth.getUser();
+
+                // 2. Fetch the real player name from the players table
+                const { data: playerData } = await supabase
+                    .from('players')
+                    .select('name')
+                    .eq('id', invitePlayerId)
+                    .single();
+
+                const playerName = playerData?.name || user.email.split('@')[0];
+
+                // 3. Create the profile row for this new user
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: user.id,
+                        email: user.email,
+                        full_name: playerName, // Use the real player name!
+                        role: 'player',
+                    });
+
+                // If the profile already exists (e.g., they clicked the link twice), ignore the error
+                if (profileError && profileError.code !== '23505') {
+                    throw profileError;
+                }
+
+                // 4. Link the player profile to this new account
                 const { error: linkError } = await supabase
                     .from('players')
                     .update({
-                        user_id: (await supabase.auth.getUser()).data.user.id,
+                        user_id: user.id,
                         has_linked_account: true,
                     })
                     .eq('id', invitePlayerId);
