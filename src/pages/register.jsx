@@ -156,58 +156,68 @@ const Register = () => {
 
             setIsLoading(true);
             try {
-                // 1. Update the password for the currently logged-in invited user
+                // 1. Update the password
                 const { error: authError } = await supabase.auth.updateUser({
                     password: formData.password
                 });
                 if (authError) throw authError;
 
-                const { data: { user } } = await supabase.auth.getUser();
+                // 2. Get the authenticated user
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                if (userError || !user) throw new Error("Could not find authenticated user. Please log in again.");
 
-                // 2. Fetch the real player name from the players table
-                const { data: playerData } = await supabase
+                // 3. Fetch the real player name
+                const { data: playerData, error: fetchError } = await supabase
                     .from('players')
                     .select('name')
                     .eq('id', invitePlayerId)
                     .single();
 
+                if (fetchError) throw fetchError;
+
                 const playerName = playerData?.name || user.email.split('@')[0];
 
-                // 3. Create the profile row for this new user
+                // 4. Create the profile row (or update if it exists)
                 const { error: profileError } = await supabase
                     .from('profiles')
-                    .insert({
+                    .upsert({
                         id: user.id,
                         email: user.email,
-                        full_name: playerName, // Use the real player name!
+                        full_name: playerName,
                         role: 'player',
                     });
 
-                // If the profile already exists (e.g., they clicked the link twice), ignore the error
-                if (profileError && profileError.code !== '23505') {
-                    throw profileError;
-                }
+                if (profileError) throw profileError;
 
-                // 4. Link the player profile to this new account
-                const { error: linkError } = await supabase
+                // 5. ⭐ LINK THE PLAYER TO THE USER ID (The missing piece)
+                const { data: updatedPlayer, error: linkError } = await supabase
                     .from('players')
                     .update({
                         user_id: user.id,
                         has_linked_account: true,
                     })
-                    .eq('id', invitePlayerId);
+                    .eq('id', invitePlayerId)
+                    .select();
 
                 if (linkError) throw linkError;
 
+                if (!updatedPlayer || updatedPlayer.length === 0) {
+                    throw new Error("Failed to link player record. Player ID not found.");
+                }
+
                 setSuccessMessage('Profile claimed successfully! Redirecting...');
-                setTimeout(() => navigate('/dashboard'), 1500);
+
+                // ⭐ 6. FORCE A HARD REFRESH
+                // This ensures AuthContext re-runs and fetches the new user_id/academy_id
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
 
             } catch (error) {
                 setErrors({ general: error.message || 'Failed to claim profile.' });
-            } finally {
                 setIsLoading(false);
             }
-            return; // Stop here
+            return;
         }
 
         // ================================================================
@@ -229,6 +239,13 @@ const Register = () => {
 
         setIsLoading(false);
     };
+
+
+
+
+
+
+
 
     const passwordStrength = getPasswordStrength();
 
