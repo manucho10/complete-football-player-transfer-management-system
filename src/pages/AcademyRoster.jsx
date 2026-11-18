@@ -16,7 +16,6 @@ const AcademyRoster = () => {
     const [isSendingInvite, setIsSendingInvite] = useState(false);
     const [inviteSuccess, setInviteSuccess] = useState('');
 
-
     useEffect(() => {
         const fetchRoster = async () => {
             if (!user) return;
@@ -34,8 +33,16 @@ const AcademyRoster = () => {
 
         fetchRoster();
     }, [user]);
+
     const handleSendInvite = async (e) => {
         e.preventDefault();
+
+        // ⭐ SAFETY CHECK: Ensure we have the player ID
+        if (!invitePlayer || !invitePlayer.id) {
+            alert("Error: Could not find the player's ID. Please refresh the page and try again.");
+            return;
+        }
+
         if (!inviteEmail.trim()) return;
         setIsSendingInvite(true);
 
@@ -64,7 +71,6 @@ const AcademyRoster = () => {
             setIsSendingInvite(false);
         }
     };
-
 
     const handleRemove = async (playerId) => {
         if (!window.confirm('Are you sure you want to remove this player from your academy?')) return;
@@ -200,6 +206,7 @@ const AcademyRoster = () => {
                     </div>
                 )}
             </div>
+
             {/* INVITE MODAL */}
             {invitePlayer && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setInvitePlayer(null)}>
@@ -226,7 +233,7 @@ const AcademyRoster = () => {
                                 <input
                                     type="email"
                                     required
-                                    value={inviteEmail} s
+                                    value={inviteEmail}
                                     onChange={(e) => setInviteEmail(e.target.value)}
                                     placeholder="parent@example.com"
                                     className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 mb-4"
