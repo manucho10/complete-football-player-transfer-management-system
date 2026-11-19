@@ -43,35 +43,48 @@ const AcademyTransferInbox = () => {
     const handleAction = async (id, action) => {
         try {
             const offer = requests.find(r => r.id === id);
+            if (!offer) return;
 
             if (action === 'approved') {
-                // Forward the offer to the Player
-                await supabase
+                // 1. Update the transfer to route to the PLAYER (not the academy)
+                const { error: transferError } = await supabase
                     .from('transfers')
                     .update({
-                        to_user_id: offer.player_user_id,
+                        to_user_id: offer.player_user_id, // ⭐ Forward to the player
                         status: 'negotiating'
                     })
                     .eq('id', id);
 
-                // Optional: Send a notification to the Player
-                await supabase.from('notifications').insert({
-                    user_id: offer.player_user_id,
-                    title: 'New Transfer Offer Approved',
-                    message: `${offer.from_name} has made an offer for you. Your academy has approved the negotiation.`,
-                    type: 'offer',
-                    action_path: '/transfers'
-                });
+                if (transferError) throw transferError;
+
+                // 2. Send a notification to the Player
+                const { error: notifError } = await supabase
+                    .from('notifications')
+                    .insert({
+                        user_id: offer.player_user_id, // The player gets the alert
+                        title: 'New Transfer Offer Approved',
+                        message: `${offer.from_name} has made an offer for you. Your academy has approved the negotiation.`,
+                        type: 'offer', // This matches your Notifications.jsx config
+                        priority: 'high',
+                        action_path: '/transfers', // Where they go when they click it
+                        action_label: 'View Offer'
+                    });
+
+                if (notifError) console.error("Notification error:", notifError);
+
+                alert('Offer approved and forwarded to the player!');
 
             } else {
                 // Decline the offer
-                await supabase
+                const { error: declineError } = await supabase
                     .from('transfers')
                     .update({ status: 'rejected' })
                     .eq('id', id);
+
+                if (declineError) throw declineError;
             }
 
-            // Refresh list to show new status
+            // Refresh the list to show the new status
             fetchRequests();
 
         } catch (error) {
@@ -79,6 +92,7 @@ const AcademyTransferInbox = () => {
             alert('Failed to process request. Please try again.');
         }
     };
+
 
     // ================================================================
     // 3. RENDER
