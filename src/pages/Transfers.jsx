@@ -478,7 +478,8 @@ const Transfers = () => {
                                                 </div>
                                             ) : (
                                                 ((user.id === selectedOffer.from_user_id && !selectedOffer.team_accepted) ||
-                                                    (user.id === selectedOffer.player_user_id && !selectedOffer.player_accepted)) && (
+                                                    (user.id === selectedOffer.player_user_id && !selectedOffer.player_accepted))
+                                                    (user.role === 'academy' && !selectedOffer.player_accepted) && (
                                                     <button onClick={() => handleStatusChange(selectedOffer.id, 'accept')} className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl text-sm font-bold transition-all flex-1 shadow-sm">
                                                         <Check className="w-4 h-4" /> Accept Terms
                                                     </button>

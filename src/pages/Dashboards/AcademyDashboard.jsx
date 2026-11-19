@@ -1,7 +1,7 @@
 // src/pages/dashboards/AcademyDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Users, Plus, BarChart3, TrendingUp, Sparkles, MessageSquare, Loader2, Eye, Star, Calendar, Inbox } from 'lucide-react';
+import { GraduationCap, Users, Plus, BarChart3, TrendingUp, Sparkles, MessageSquare, Loader2, Eye, Star, Calendar, Inbox, FileText } from 'lucide-react';
 import DashboardLayout from '../../components/layout/Dashboardlayout';
 import { roleConfig } from '../../config/roleConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -26,6 +26,7 @@ const AcademyDashboard = () => {
         { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-5 h-5" /> },
         { id: 'roster', label: 'My Academy Roster', icon: <Users className="w-5 h-5" />, path: '/academy-roster' },
         { id: 'ai', label: 'AI Talent Finder', icon: <Sparkles className="w-5 h-5" />, path: '/ai-scout' },
+        { id: 'offers', label: 'Offers', icon: <FileText className="w-5 h-5" />, path: '/transfers' },
         { id: 'messages', label: 'Messages', icon: <MessageSquare className="w-5 h-5" />, path: '/messages' },
         { id: 'requests', label: 'Transfer Requests', icon: <Inbox className="w-5 h-5" />, path: '/transfer-requests' },
 

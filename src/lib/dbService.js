@@ -50,8 +50,8 @@ export const fetchPlayerById = async (id) => {
 // ==========================================
 
 // src/lib/dbService.js
-export const fetchTransfers = async (userId) => {
-    console.log("1. Fetching transfers for User ID:", userId);
+export const fetchTransfers = async (userId, userRole = 'player') => {
+    console.log("1. Fetching transfers for User ID:", userId, "Role:", userRole);
 
     // Fetch ALL transfers
     const { data, error } = await supabase
@@ -70,11 +70,12 @@ export const fetchTransfers = async (userId) => {
     const myTransfers = data.filter(t => {
         const isMine =
             t.from_user_id === userId ||
-            t.to_user_id === userId ||
-            t.player_user_id === userId ||
-            t.agent_id === userId;
+            t.to_user_id === userId ||       // Academy receives here
+            t.player_user_id === userId ||   // Player receives here
+            t.agent_id === userId ||
+            (userRole === 'academy' && t.player_id === userId); // Fallback for academy
 
-        if (isMine) console.log("Found a matching transfer:", t);
+        if (isMine) console.log("✅ Found a matching transfer for this user:", t);
         return isMine;
     });
 
@@ -88,7 +89,6 @@ export const fetchTransfers = async (userId) => {
         toName: t.to_name || 'Unknown Club',
     }));
 };
-
 export const updateTransferStatus = async (transferId, status) => {
     const { data, error } = await supabase
         .from('transfers')
