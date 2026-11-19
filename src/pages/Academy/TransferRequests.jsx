@@ -91,6 +91,7 @@ const AcademyTransferInbox = () => {
             console.error('Failed to update request:', error);
             alert(`Failed to process request: ${error.message || error.details || 'Unknown error'}`); // 👈 Show the real error
         }
+    };
 
 
         // ================================================================
