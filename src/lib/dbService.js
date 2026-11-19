@@ -73,6 +73,7 @@ export const fetchTransfers = async (userId, userRole = 'player') => {
             t.to_user_id === userId ||       // Academy receives here
             t.player_user_id === userId ||   // Player receives here
             t.agent_id === userId ||
+            t.academy_id === userId ||
             (userRole === 'academy' && t.player_id === userId); // Fallback for academy
 
         if (isMine) console.log("✅ Found a matching transfer for this user:", t);

@@ -152,8 +152,9 @@ const Transfers = () => {
             const newOffer = await createTransferOffer({
                 from_user_id: user.id,
                 from_name: user.name || 'My Club',
-                to_user_id: recipientId,
+                to_user_id: recipientId,          // Academy ID (initially)
                 player_user_id: playerData.user_id || recipientId,
+                academy_id: playerData.academy_id || null, // ⭐ SAVE THE ACADEMY ID HERE
                 player_id: playerData.id,
                 player_name: playerData.name,
                 amount: Number(newOfferData.amount),
@@ -421,12 +422,22 @@ const Transfers = () => {
                                     </div>
 
                                     {user.id !== selectedOffer.player_user_id && (
-                                        <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                                            <div>
-                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">To (Selling Club)</p>
-                                                <p className="font-bold text-gray-900 mt-1">{selectedOffer.to_name || 'Unknown'}</p>
+                                        <>
+                                            <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                                                <div>
+                                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">To (Selling Club)</p>
+                                                    <p className="font-bold text-gray-900 mt-1">{selectedOffer.to_name || 'Unknown'}</p>
+                                                </div>
                                             </div>
-                                        </div>
+                                            {selectedOffer.academy_id && (
+                                                <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mt-2">
+                                                    <div>
+                                                        <p className="text-xs font-bold text-orange-500 uppercase tracking-wide">Managed By</p>
+                                                        <p className="font-bold text-orange-700 mt-1">Academy Approved</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>
