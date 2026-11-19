@@ -224,390 +224,391 @@ const Register = () => {
                 setIsLoading(false);
             }
             return;
+        }
 
-            // ================================================================
-            // SCENARIO 2: NORMAL REGISTRATION
-            // ================================================================
-            if (!validateStep3()) return;
+        // ================================================================
+        // SCENARIO 2: NORMAL REGISTRATION
+        // ================================================================
+        if (!validateStep3()) return;
 
-            setIsLoading(true);
-            const result = await register(formData);
+        setIsLoading(true);
+        const result = await register(formData);
 
-            if (result.success) {
-                setSuccessMessage('Account created successfully! Redirecting...');
-                setTimeout(() => {
-                    navigate('/dashboard');
-                }, 1200);
-            } else {
-                setErrors({ general: result.error || 'Registration failed. Please try again.' });
-            }
+        if (result.success) {
+            setSuccessMessage('Account created successfully! Redirecting...');
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1200);
+        } else {
+            setErrors({ general: result.error || 'Registration failed. Please try again.' });
+        }
 
-            setIsLoading(false);
-        };
-
-
-
+        setIsLoading(false);
+    };
 
 
 
 
 
-        const passwordStrength = getPasswordStrength();
 
-        return (
-            <div className="min-h-screen bg-white flex">
-                {/* ==================== LEFT SIDE: BRANDING ==================== */}
-                <div className="hidden lg:flex lg:w-1/2 bg-[#0a2e1f] text-white flex-col justify-between p-12 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-green-500/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
-                    <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4"></div>
 
-                    <Link to="/" className="flex items-center gap-2 relative z-10">
-                        <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                            <TrendingUp className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="text-2xl font-bold tracking-tight">TransferHub</span>
-                    </Link>
 
-                    <div className="relative z-10 max-w-md">
-                        <h1 className="text-4xl font-bold leading-tight mb-6">
-                            {invitePlayerId ? 'Claim your ' : 'Start your journey in '}
-                            <span className="text-green-400">{invitePlayerId ? 'Profile.' : 'Professional Football.'}</span>
-                        </h1>
-                        <p className="text-gray-300 text-lg mb-8">
-                            {invitePlayerId
-                                ? 'Your academy has created a profile for you. Set a password to access your dashboard, view offers, and upload highlights.'
-                                : 'Join the network of players, agents, scouts, and clubs shaping the future of the transfer market.'}
-                        </p>
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3 text-sm text-gray-300">
-                                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                                <span>Free forever for basic accounts</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-gray-300">
-                                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                                <span>Verified club and scout network</span>
-                            </div>
-                        </div>
+    const passwordStrength = getPasswordStrength();
+
+    return (
+        <div className="min-h-screen bg-white flex">
+            {/* ==================== LEFT SIDE: BRANDING ==================== */}
+            <div className="hidden lg:flex lg:w-1/2 bg-[#0a2e1f] text-white flex-col justify-between p-12 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-green-500/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4"></div>
+
+                <Link to="/" className="flex items-center gap-2 relative z-10">
+                    <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-white" />
                     </div>
+                    <span className="text-2xl font-bold tracking-tight">TransferHub</span>
+                </Link>
 
-                    <div className="relative z-10 text-sm text-gray-400">
-                        © 2026 TransferHub. All rights reserved.
+                <div className="relative z-10 max-w-md">
+                    <h1 className="text-4xl font-bold leading-tight mb-6">
+                        {invitePlayerId ? 'Claim your ' : 'Start your journey in '}
+                        <span className="text-green-400">{invitePlayerId ? 'Profile.' : 'Professional Football.'}</span>
+                    </h1>
+                    <p className="text-gray-300 text-lg mb-8">
+                        {invitePlayerId
+                            ? 'Your academy has created a profile for you. Set a password to access your dashboard, view offers, and upload highlights.'
+                            : 'Join the network of players, agents, scouts, and clubs shaping the future of the transfer market.'}
+                    </p>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-sm text-gray-300">
+                            <CheckCircle2 className="w-5 h-5 text-green-400" />
+                            <span>Free forever for basic accounts</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-300">
+                            <CheckCircle2 className="w-5 h-5 text-green-400" />
+                            <span>Verified club and scout network</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* ==================== RIGHT SIDE: FORM ==================== */}
-                <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24 bg-gray-50 relative overflow-y-auto">
+                <div className="relative z-10 text-sm text-gray-400">
+                    © 2026 TransferHub. All rights reserved.
+                </div>
+            </div>
 
-                    <div className="mx-auto w-full max-w-md my-auto">
+            {/* ==================== RIGHT SIDE: FORM ==================== */}
+            <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24 bg-gray-50 relative overflow-y-auto">
 
-                        {/* Header */}
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                {invitePlayerId ? 'Claim Your Profile' : 'Create your account'}
-                            </h2>
-                            <p className="text-sm text-gray-600">
-                                {invitePlayerId
-                                    ? 'Your academy has already set up your stats. Just create a password to take control.'
-                                    : 'Already have an account? '}
-                                {!invitePlayerId && (
-                                    <Link to="/login" className="font-semibold text-green-600 hover:text-green-500">
-                                        Sign in
-                                    </Link>
-                                )}
-                            </p>
+                <div className="mx-auto w-full max-w-md my-auto">
+
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            {invitePlayerId ? 'Claim Your Profile' : 'Create your account'}
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                            {invitePlayerId
+                                ? 'Your academy has already set up your stats. Just create a password to take control.'
+                                : 'Already have an account? '}
+                            {!invitePlayerId && (
+                                <Link to="/login" className="font-semibold text-green-600 hover:text-green-500">
+                                    Sign in
+                                </Link>
+                            )}
+                        </p>
+                    </div>
+
+                    {/* Stepper (Hidden for Invites) */}
+                    {!invitePlayerId && (
+                        <div className="flex items-center justify-between mb-8 relative">
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0"></div>
+                            <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-green-500 rounded-full z-0 transition-all duration-300`} style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
+
+                            {[1, 2, 3].map((num) => (
+                                <div key={num} className="relative z-10 flex flex-col items-center gap-2 bg-gray-50 px-2">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${step >= num ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                                        {step > num ? <Check className="w-4 h-4" /> : num}
+                                    </div>
+                                    <span className={`text-xs font-medium ${step >= num ? 'text-gray-900' : 'text-gray-400'}`}>
+                                        {num === 1 ? 'Role' : num === 2 ? 'Account' : 'Profile'}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
+                    )}
 
-                        {/* Stepper (Hidden for Invites) */}
-                        {!invitePlayerId && (
-                            <div className="flex items-center justify-between mb-8 relative">
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0"></div>
-                                <div className={`absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-green-500 rounded-full z-0 transition-all duration-300`} style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
+                    {/* Messages */}
+                    {successMessage && (
+                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 text-sm animate-fadeIn">
+                            <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> {successMessage}
+                        </div>
+                    )}
+                    {errors.general && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 text-sm animate-fadeIn">
+                            <AlertCircle className="w-5 h-5 flex-shrink-0" /> {errors.general}
+                        </div>
+                    )}
 
-                                {[1, 2, 3].map((num) => (
-                                    <div key={num} className="relative z-10 flex flex-col items-center gap-2 bg-gray-50 px-2">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${step >= num ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
-                                            {step > num ? <Check className="w-4 h-4" /> : num}
-                                        </div>
-                                        <span className={`text-xs font-medium ${step >= num ? 'text-gray-900' : 'text-gray-400'}`}>
-                                            {num === 1 ? 'Role' : num === 2 ? 'Account' : 'Profile'}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Messages */}
-                        {successMessage && (
-                            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 text-sm animate-fadeIn">
-                                <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> {successMessage}
-                            </div>
-                        )}
-                        {errors.general && (
-                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 text-sm animate-fadeIn">
-                                <AlertCircle className="w-5 h-5 flex-shrink-0" /> {errors.general}
-                            </div>
-                        )}
-
-                        {/* ⭐ INVITE UI: SIMPLE PASSWORD SETUP ⭐ */}
-                        {invitePlayerId ? (
-                            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm animate-fadeIn space-y-5">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Set a Password</label>
-                                    <div className="relative">
-                                        <input
-                                            type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange}
-                                            placeholder="Create a strong password"
-                                            className={`w-full bg-gray-50 border rounded-xl px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.password ? 'border-red-300' : 'border-gray-300'}`}
-                                        />
-                                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-                                    {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+                    {/* ⭐ INVITE UI: SIMPLE PASSWORD SETUP ⭐ */}
+                    {invitePlayerId ? (
+                        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm animate-fadeIn space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Set a Password</label>
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange}
+                                        placeholder="Create a strong password"
+                                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.password ? 'border-red-300' : 'border-gray-300'}`}
+                                    />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
                                 </div>
+                                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+                            </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
-                                    <div className="relative">
-                                        <input
-                                            type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
-                                            placeholder="Re-enter your password"
-                                            className={`w-full bg-gray-50 border rounded-xl px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'}`}
-                                        />
-                                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-                                    {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
+                                <div className="relative">
+                                    <input
+                                        type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
+                                        placeholder="Re-enter your password"
+                                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'}`}
+                                    />
+                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
                                 </div>
+                                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
+                            </div>
 
-                                <button type="submit" disabled={isLoading} className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2 mt-2">
-                                    {isLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> Activating...</> : 'Activate My Account'}
-                                </button>
-                            </form>
-                        ) : (
-                            // ⭐ NORMAL REGISTRATION UI (STEPS 1, 2, 3)
-                            <>
-                                {/* STEP 1 */}
-                                {step === 1 && (
-                                    <div className="animate-fadeIn">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                                            {roles.map((role) => (
-                                                <div
-                                                    key={role.id}
-                                                    onClick={() => handleRoleSelect(role.id)}
-                                                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${formData.role === role.id ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
-                                                >
-                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${formData.role === role.id ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-                                                        {role.icon}
-                                                    </div>
-                                                    <h3 className="font-bold text-gray-900 mb-1">{role.title}</h3>
-                                                    <p className="text-xs text-gray-500">{role.description}</p>
+                            <button type="submit" disabled={isLoading} className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2 mt-2">
+                                {isLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> Activating...</> : 'Activate My Account'}
+                            </button>
+                        </form>
+                    ) : (
+                        // ⭐ NORMAL REGISTRATION UI (STEPS 1, 2, 3)
+                        <>
+                            {/* STEP 1 */}
+                            {step === 1 && (
+                                <div className="animate-fadeIn">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                        {roles.map((role) => (
+                                            <div
+                                                key={role.id}
+                                                onClick={() => handleRoleSelect(role.id)}
+                                                className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${formData.role === role.id ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                                            >
+                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${formData.role === role.id ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                                                    {role.icon}
                                                 </div>
-                                            ))}
+                                                <h3 className="font-bold text-gray-900 mb-1">{role.title}</h3>
+                                                <p className="text-xs text-gray-500">{role.description}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {errors.role && (
+                                        <p className="text-xs text-red-500 flex items-center gap-1 mb-4 justify-center">
+                                            <AlertCircle className="w-3 h-3" /> {errors.role}
+                                        </p>
+                                    )}
+                                    <button
+                                        onClick={handleNext}
+                                        disabled={!formData.role}
+                                        className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2"
+                                    >
+                                        Continue <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* STEP 2 */}
+                            {step === 2 && (
+                                <div className="animate-fadeIn">
+                                    <div className="space-y-4 mb-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+                                            <input
+                                                type="text" name="fullName" value={formData.fullName} onChange={handleChange}
+                                                placeholder="John Doe"
+                                                className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.fullName ? 'border-red-300' : 'border-gray-300'}`}
+                                            />
+                                            {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
                                         </div>
-                                        {errors.role && (
-                                            <p className="text-xs text-red-500 flex items-center gap-1 mb-4 justify-center">
-                                                <AlertCircle className="w-3 h-3" /> {errors.role}
-                                            </p>
-                                        )}
-                                        <button
-                                            onClick={handleNext}
-                                            disabled={!formData.role}
-                                            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2"
-                                        >
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+                                            <input
+                                                type="email" name="email" value={formData.email} onChange={handleChange}
+                                                placeholder="you@example.com"
+                                                className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.email ? 'border-red-300' : 'border-gray-300'}`}
+                                            />
+                                            {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                                            <div className="relative">
+                                                <input
+                                                    type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange}
+                                                    placeholder="Create a strong password"
+                                                    className={`w-full bg-white border rounded-xl px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.password ? 'border-red-300' : 'border-gray-300'}`}
+                                                />
+                                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                                </button>
+                                            </div>
+                                            {formData.password && (
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <div className="flex-1 flex gap-1">
+                                                        {[1, 2, 3, 4].map(lvl => (
+                                                            <div key={lvl} className={`h-1 flex-1 rounded-full ${lvl <= passwordStrength.level ? passwordStrength.color : 'bg-gray-200'}`}></div>
+                                                        ))}
+                                                    </div>
+                                                    <span className="text-xs text-gray-500">{passwordStrength.label}</span>
+                                                </div>
+                                            )}
+                                            {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
+                                            <input
+                                                type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
+                                                placeholder="Re-enter your password"
+                                                className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'}`}
+                                            />
+                                            {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button onClick={handleBack} className="flex-1 bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
+                                            <ArrowLeft className="w-4 h-4" /> Back
+                                        </button>
+                                        <button onClick={handleNext} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
                                             Continue <ArrowRight className="w-4 h-4" />
                                         </button>
                                     </div>
-                                )}
+                                </div>
+                            )}
 
-                                {/* STEP 2 */}
-                                {step === 2 && (
-                                    <div className="animate-fadeIn">
-                                        <div className="space-y-4 mb-6">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
-                                                <input
-                                                    type="text" name="fullName" value={formData.fullName} onChange={handleChange}
-                                                    placeholder="John Doe"
-                                                    className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.fullName ? 'border-red-300' : 'border-gray-300'}`}
-                                                />
-                                                {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
-                                                <input
-                                                    type="email" name="email" value={formData.email} onChange={handleChange}
-                                                    placeholder="you@example.com"
-                                                    className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.email ? 'border-red-300' : 'border-gray-300'}`}
-                                                />
-                                                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-                                                <div className="relative">
-                                                    <input
-                                                        type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange}
-                                                        placeholder="Create a strong password"
-                                                        className={`w-full bg-white border rounded-xl px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.password ? 'border-red-300' : 'border-gray-300'}`}
-                                                    />
-                                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                                    </button>
+                            {/* STEP 3 */}
+                            {step === 3 && (
+                                <div className="animate-fadeIn">
+                                    <div className="space-y-4 mb-6">
+                                        {/* Role specific fields (Player, Agent, Scout, Team, Academy) */}
+                                        {formData.role === 'player' && (
+                                            <>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Position</label>
+                                                        <select name="position" value={formData.position} onChange={handleChange} className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.position ? 'border-red-300' : 'border-gray-300'}`}>
+                                                            <option value="">Select position</option>
+                                                            <option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Date of Birth</label>
+                                                        <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                                                    </div>
                                                 </div>
-                                                {formData.password && (
-                                                    <div className="mt-2 flex items-center gap-2">
-                                                        <div className="flex-1 flex gap-1">
-                                                            {[1, 2, 3, 4].map(lvl => (
-                                                                <div key={lvl} className={`h-1 flex-1 rounded-full ${lvl <= passwordStrength.level ? passwordStrength.color : 'bg-gray-200'}`}></div>
-                                                            ))}
-                                                        </div>
-                                                        <span className="text-xs text-gray-500">{passwordStrength.label}</span>
-                                                    </div>
-                                                )}
-                                                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
-                                                <input
-                                                    type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
-                                                    placeholder="Re-enter your password"
-                                                    className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'}`}
-                                                />
-                                                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <button onClick={handleBack} className="flex-1 bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                                                <ArrowLeft className="w-4 h-4" /> Back
-                                            </button>
-                                            <button onClick={handleNext} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
-                                                Continue <ArrowRight className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Current Club</label>
+                                                    <input type="text" name="currentClub" value={formData.currentClub} onChange={handleChange} placeholder="e.g., FC Barcelona" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.currentClub ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Nationality</label>
+                                                    <input type="text" name="nationality" value={formData.nationality} onChange={handleChange} placeholder="e.g., Nigerian" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.nationality ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                            </>
+                                        )}
 
-                                {/* STEP 3 */}
-                                {step === 3 && (
-                                    <div className="animate-fadeIn">
-                                        <div className="space-y-4 mb-6">
-                                            {/* Role specific fields (Player, Agent, Scout, Team, Academy) */}
-                                            {formData.role === 'player' && (
-                                                <>
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Position</label>
-                                                            <select name="position" value={formData.position} onChange={handleChange} className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.position ? 'border-red-300' : 'border-gray-300'}`}>
-                                                                <option value="">Select position</option>
-                                                                <option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option>
-                                                            </select>
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Date of Birth</label>
-                                                            <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500" />
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Current Club</label>
-                                                        <input type="text" name="currentClub" value={formData.currentClub} onChange={handleChange} placeholder="e.g., FC Barcelona" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.currentClub ? 'border-red-300' : 'border-gray-300'}`} />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Nationality</label>
-                                                        <input type="text" name="nationality" value={formData.nationality} onChange={handleChange} placeholder="e.g., Nigerian" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.nationality ? 'border-red-300' : 'border-gray-300'}`} />
-                                                    </div>
-                                                </>
-                                            )}
+                                        {/* Agent Fields */}
+                                        {formData.role === 'agent' && (
+                                            <>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Agency Name</label>
+                                                    <input type="text" name="agencyName" value={formData.agencyName} onChange={handleChange} placeholder="e.g., Elite Sports Management" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.agencyName ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">FIFA License Number</label>
+                                                    <input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} placeholder="e.g., FIFA-AG-2024-12345" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.licenseNumber ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                            </>
+                                        )}
 
-                                            {/* Agent Fields */}
-                                            {formData.role === 'agent' && (
-                                                <>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Agency Name</label>
-                                                        <input type="text" name="agencyName" value={formData.agencyName} onChange={handleChange} placeholder="e.g., Elite Sports Management" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.agencyName ? 'border-red-300' : 'border-gray-300'}`} />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">FIFA License Number</label>
-                                                        <input type="text" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} placeholder="e.g., FIFA-AG-2024-12345" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.licenseNumber ? 'border-red-300' : 'border-gray-300'}`} />
-                                                    </div>
-                                                </>
-                                            )}
+                                        {/* Scout Fields */}
+                                        {formData.role === 'scout' && (
+                                            <>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Club / Agency</label>
+                                                    <input type="text" name="scoutClub" value={formData.scoutClub} onChange={handleChange} placeholder="e.g., Manchester United" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.scoutClub ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Scouting License Number</label>
+                                                    <input type="text" name="scoutLicense" value={formData.scoutLicense} onChange={handleChange} placeholder="e.g., SCT-2024-67890" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.scoutLicense ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                            </>
+                                        )}
 
-                                            {/* Scout Fields */}
-                                            {formData.role === 'scout' && (
-                                                <>
+                                        {/* Team Fields */}
+                                        {formData.role === 'team' && (
+                                            <>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Club / Team Name</label>
+                                                    <input type="text" name="teamName" value={formData.teamName} onChange={handleChange} placeholder="e.g., Real Madrid CF" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.teamName ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Club / Agency</label>
-                                                        <input type="text" name="scoutClub" value={formData.scoutClub} onChange={handleChange} placeholder="e.g., Manchester United" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.scoutClub ? 'border-red-300' : 'border-gray-300'}`} />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Scouting License Number</label>
-                                                        <input type="text" name="scoutLicense" value={formData.scoutLicense} onChange={handleChange} placeholder="e.g., SCT-2024-67890" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.scoutLicense ? 'border-red-300' : 'border-gray-300'}`} />
-                                                    </div>
-                                                </>
-                                            )}
-
-                                            {/* Team Fields */}
-                                            {formData.role === 'team' && (
-                                                <>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Club / Team Name</label>
-                                                        <input type="text" name="teamName" value={formData.teamName} onChange={handleChange} placeholder="e.g., Real Madrid CF" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.teamName ? 'border-red-300' : 'border-gray-300'}`} />
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">League</label>
-                                                            <input type="text" name="league" value={formData.league} onChange={handleChange} placeholder="e.g., La Liga" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.league ? 'border-red-300' : 'border-gray-300'}`} />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Budget (€)</label>
-                                                            <input type="number" name="transferBudget" value={formData.transferBudget} onChange={handleChange} placeholder="e.g., 50000000" className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500" />
-                                                        </div>
-                                                    </div>
-                                                </>
-                                            )}
-                                            {/* Academy Fields */}
-                                            {formData.role === 'academy' && (
-                                                <>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Academy Name</label>
-                                                        <input type="text" name="academyName" value={formData.academyName} onChange={handleChange} placeholder="e.g., Nairobi Youth Academy" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.academyName ? 'border-red-300' : 'border-gray-300'}`} />
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">League</label>
+                                                        <input type="text" name="league" value={formData.league} onChange={handleChange} placeholder="e.g., La Liga" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.league ? 'border-red-300' : 'border-gray-300'}`} />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Location / Region</label>
-                                                        <input type="text" name="academyLocation" value={formData.academyLocation} onChange={handleChange} placeholder="e.g., Nairobi, Kenya" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.academyLocation ? 'border-red-300' : 'border-gray-300'}`} />
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Budget (€)</label>
+                                                        <input type="number" name="transferBudget" value={formData.transferBudget} onChange={handleChange} placeholder="e.g., 50000000" className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500" />
                                                     </div>
-                                                </>
-                                            )}
-                                            {/* Terms */}
-                                            <div className="pt-2">
-                                                <label className="flex items-start gap-2 cursor-pointer">
-                                                    <input type="checkbox" name="agreeTerms" checked={formData.agreeTerms} onChange={handleChange} className="w-4 h-4 mt-1 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
-                                                    <span className="text-sm text-gray-600">
-                                                        I agree to the <a href="#" className="text-green-600 hover:underline">Terms of Service</a> and <a href="#" className="text-green-600 hover:underline">Privacy Policy</a>
-                                                    </span>
-                                                </label>
-                                                {errors.agreeTerms && <p className="mt-1 text-xs text-red-500">{errors.agreeTerms}</p>}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex gap-3">
-                                            <button type="button" onClick={handleBack} disabled={isLoading} className="flex-1 bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                                                <ArrowLeft className="w-4 h-4" /> Back
-                                            </button>
-                                            <button type="submit" onClick={handleSubmit} disabled={isLoading} className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
-                                                {isLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> Creating...</> : 'Create Account'}
-                                            </button>
+                                                </div>
+                                            </>
+                                        )}
+                                        {/* Academy Fields */}
+                                        {formData.role === 'academy' && (
+                                            <>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Academy Name</label>
+                                                    <input type="text" name="academyName" value={formData.academyName} onChange={handleChange} placeholder="e.g., Nairobi Youth Academy" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.academyName ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Location / Region</label>
+                                                    <input type="text" name="academyLocation" value={formData.academyLocation} onChange={handleChange} placeholder="e.g., Nairobi, Kenya" className={`w-full bg-white border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.academyLocation ? 'border-red-300' : 'border-gray-300'}`} />
+                                                </div>
+                                            </>
+                                        )}
+                                        {/* Terms */}
+                                        <div className="pt-2">
+                                            <label className="flex items-start gap-2 cursor-pointer">
+                                                <input type="checkbox" name="agreeTerms" checked={formData.agreeTerms} onChange={handleChange} className="w-4 h-4 mt-1 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+                                                <span className="text-sm text-gray-600">
+                                                    I agree to the <a href="#" className="text-green-600 hover:underline">Terms of Service</a> and <a href="#" className="text-green-600 hover:underline">Privacy Policy</a>
+                                                </span>
+                                            </label>
+                                            {errors.agreeTerms && <p className="mt-1 text-xs text-red-500">{errors.agreeTerms}</p>}
                                         </div>
                                     </div>
-                                )}
-                            </>
-                        )}
 
-                    </div>
+                                    <div className="flex gap-3">
+                                        <button type="button" onClick={handleBack} disabled={isLoading} className="flex-1 bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
+                                            <ArrowLeft className="w-4 h-4" /> Back
+                                        </button>
+                                        <button type="submit" onClick={handleSubmit} disabled={isLoading} className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
+                                            {isLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> Creating...</> : 'Create Account'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+
                 </div>
             </div>
-        );
-    };
+        </div>
+    );
+};
 
-    export default Register;
+export default Register;
