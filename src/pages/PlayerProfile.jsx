@@ -311,11 +311,7 @@ const PlayerProfile = () => {
                                     </button>
                                 )}
                                 <div className="flex items-center gap-2">
-                                    <button onClick={handleShare} className="p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors">
-                                        <Share2 className="w-5 h-5" />
-                                    </button>
 
-                                    {/* ... (Keep the Watchlist and Request Trial buttons exactly as they are) ... */}
 
                                     {/* ⭐ ADD CLIENT BUTTON (AGENT ONLY) ⭐ */}
                                     {user?.role === 'agent' && !player.agent_id && (
@@ -328,13 +324,7 @@ const PlayerProfile = () => {
                                         </button>
                                     )}
 
-                                    {/* Contact Button */}
-                                    <button onClick={handleContact} className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm">
-                                        <MessageSquare className="w-4 h-4" />
-                                        <span className="hidden sm:inline">
-                                            {player.academy_id ? 'Contact Academy' : 'Contact Player'}
-                                        </span>
-                                    </button>
+
                                 </div>
 
                                 {/* Request Trial Button */}
