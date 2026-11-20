@@ -177,32 +177,85 @@ const Transfers = () => {
 
     const handleCompleteTransfer = async () => {
         try {
-            const { data: playerData } = await supabase
-                .from('players')
-                .select('id')
-                .eq('name', selectedOffer.playerName)
-                .maybeSingle();
+            // 1. Find the player in the database
+            // We use player_id if it exists, otherwise fallback to name
+            let playerRecord = null;
 
-            if (!playerData) {
+            if (selectedOffer.player_id) {
+                const { data } = await supabase
+                    .from('players')
+                    .select('*')
+                    .eq('id', selectedOffer.player_id)
+                    .maybeSingle();
+                playerRecord = data;
+            } else {
+                const { data } = await supabase
+                    .from('players')
+                    .select('*')
+                    .eq('name', selectedOffer.playerName)
+                    .maybeSingle();
+                playerRecord = data;
+            }
+
+            if (!playerRecord) {
                 alert("Player record not found in database. Ensure their name matches exactly.");
                 return;
             }
 
+            const previousAcademyId = playerRecord.academy_id;
+
+            // 2. Update the Player: Remove from Academy, add to Team
             await supabase
                 .from('players')
                 .update({
                     team_id: user.id,
-                    club: user.name || 'My Club',
-                    availability: 'Under Contract'
+                    club: user.name || 'New Club',
+                    availability: 'Under Contract',
+                    academy_id: null // ⭐ REMOVE FROM ACADEMY
                 })
-                .eq('id', playerData.id);
+                .eq('id', playerRecord.id);
 
-            alert("Player successfully added to your squad!");
+            // 3. Create Notifications
+            const notificationsToInsert = [];
+
+            // Notification for the Player
+            if (playerRecord.user_id) {
+                notificationsToInsert.push({
+                    user_id: playerRecord.user_id,
+                    title: 'Transfer Complete! 🎉',
+                    message: `You have officially signed with ${user.name || 'your new club'}. Your academy has been notified.`,
+                    type: 'contract',
+                    priority: 'high',
+                    action_path: '/transfers',
+                    action_label: 'View Contract'
+                });
+            }
+
+            // Notification for the Academy (if they had one)
+            if (previousAcademyId) {
+                notificationsToInsert.push({
+                    user_id: previousAcademyId,
+                    title: 'Player Signed by Club',
+                    message: `${playerRecord.name} has been officially signed by ${user.name || 'a new club'}. They have been removed from your roster.`,
+                    type: 'contract',
+                    priority: 'medium',
+                    action_path: '/academy-roster',
+                    action_label: 'View Roster'
+                });
+            }
+
+            // Insert notifications into the database
+            if (notificationsToInsert.length > 0) {
+                await supabase.from('notifications').insert(notificationsToInsert);
+            }
+
+            // 4. Show success and redirect
+            alert("Player successfully added to your squad! Notifications sent.");
             navigate('/squad');
 
         } catch (error) {
             console.error(error);
-            alert("Failed to complete transfer.");
+            alert("Failed to complete transfer: " + error.message);
         }
     };
 
