@@ -5,7 +5,7 @@ import {
     ArrowLeft, Star, MapPin, Calendar, Globe, Building2, TrendingUp,
     Eye, Target, Award, BarChart3, Video, Play, Heart, MessageSquare,
     Share2, X, AlertCircle, CheckCircle2, Trophy, Zap, Shield, Activity,
-    FileText, Loader2, Clock, Plus
+    FileText, Loader2, Clock, Plus, DollarSign
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { fetchPlayerById, fetchPlayerVideos } from '../lib/dbService';
@@ -28,6 +28,10 @@ const PlayerProfile = () => {
     const [player, setPlayer] = useState(null);
     const [videos, setVideos] = useState([]);
     const [activeVideo, setActiveVideo] = useState(null);
+    // Offer Modal State
+    const [showOfferModal, setShowOfferModal] = useState(false);
+    const [offerData, setOfferData] = useState({ amount: '', duration: '4 years', notes: '' });
+    const [isSendingOffer, setIsSendingOffer] = useState(false);
 
     // Trial Modal State
     const [showTrialModal, setShowTrialModal] = useState(false);
@@ -213,6 +217,60 @@ const PlayerProfile = () => {
             setTimeout(() => setSuccessMessage(''), 3000);
         }
     };
+    const handleMakeOffer = async (e) => {
+        e.preventDefault();
+        if (!offerData.amount) return;
+        setIsSendingOffer(true);
+
+        try {
+            // 1. Determine the recipient (Academy Admin vs. Free Agent Player)
+            const recipientId = player.academy_id || player.user_id;
+            if (!recipientId) throw new Error("Player has no linked account or academy.");
+
+            // 2. Insert the offer into the database
+            const { error } = await supabase
+                .from('transfers')
+                .insert({
+                    from_user_id: user.id,
+                    from_name: user.teamName || user.name || 'My Club',
+                    to_user_id: recipientId,
+                    player_user_id: player.user_id || recipientId,
+                    academy_id: player.academy_id || null, // ⭐ Save the academy ID!
+                    player_id: player.id,
+                    player_name: player.name,
+                    amount: Number(offerData.amount),
+                    duration: offerData.duration,
+                    notes: offerData.notes,
+                    status: 'pending',
+                    priority: 'medium',
+                });
+
+            if (error) throw error;
+
+            // 3. If it's an academy player, send a notification to the Academy Admin
+            if (player.academy_id) {
+                await supabase.from('notifications').insert({
+                    user_id: player.academy_id,
+                    title: 'New Transfer Offer',
+                    message: `${user.teamName || user.name} has made an offer for ${player.name}.`,
+                    type: 'offer',
+                    priority: 'high',
+                    action_path: '/transfer-requests',
+                    action_label: 'Review Offer'
+                });
+            }
+
+            alert('Offer submitted successfully!');
+            setShowOfferModal(false);
+            setOfferData({ amount: '', duration: '4 years', notes: '' });
+
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'Failed to submit offer.');
+        } finally {
+            setIsSendingOffer(false);
+        }
+    };
 
     const handleShare = () => {
         if (navigator.share) {
@@ -344,6 +402,16 @@ const PlayerProfile = () => {
                                         {player.academy_id ? 'Contact Academy' : 'Contact Player'}
                                     </span>
                                 </button>
+                                {/* ⭐ MAKE OFFER BUTTON ⭐ */}
+                                {['team', 'agent'].includes(user?.role) && (
+                                    <button
+                                        onClick={() => setShowOfferModal(true)}
+                                        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-sm"
+                                    >
+                                        <DollarSign className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Make Offer</span>
+                                    </button>
+                                )}
                             </>
                         )}
                     </div>
@@ -610,7 +678,67 @@ const PlayerProfile = () => {
                     </div>
                 </div>
             )}
+            {/* ⭐ MAKE OFFER MODAL ⭐ */}
+            {showOfferModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowOfferModal(false)}>
+                    <div className="bg-white rounded-2xl border border-gray-200 max-w-md w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                <DollarSign className="w-5 h-5 text-blue-600" /> Make an Offer
+                            </h2>
+                            <button onClick={() => setShowOfferModal(false)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+                        </div>
 
+                        <form onSubmit={handleMakeOffer} className="space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
+                                <p className="text-xs font-bold text-gray-500 uppercase">Player</p>
+                                <p className="font-bold text-gray-900">{player.name}</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Transfer Fee (€)</label>
+                                <input
+                                    type="number"
+                                    required
+                                    value={offerData.amount}
+                                    onChange={(e) => setOfferData({ ...offerData, amount: e.target.value })}
+                                    placeholder="e.g. 50000"
+                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Contract Duration</label>
+                                <select
+                                    value={offerData.duration}
+                                    onChange={(e) => setOfferData({ ...offerData, duration: e.target.value })}
+                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option>1 year</option><option>2 years</option><option>3 years</option><option>4 years</option><option>5 years</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Notes (Optional)</label>
+                                <textarea
+                                    rows={3}
+                                    value={offerData.notes}
+                                    onChange={(e) => setOfferData({ ...offerData, notes: e.target.value })}
+                                    placeholder="Any additional terms..."
+                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 resize-none"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button type="button" onClick={() => setShowOfferModal(false)} className="flex-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-xl font-bold">Cancel</button>
+                                <button type="submit" disabled={isSendingOffer} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex items-center justify-center">
+                                    {isSendingOffer ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Offer'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
             <style dangerouslySetInnerHTML={{
                 __html: `
         @keyframes fadeIn {
