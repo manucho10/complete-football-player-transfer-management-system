@@ -118,6 +118,30 @@ const PlayerProfile = () => {
             console.error(error);
         }
     };
+    const handleAddClient = async () => {
+        if (!user) return;
+        if (window.confirm(`Are you sure you want to add ${player.name} to your client roster?`)) {
+            try {
+                // 1. Update the player record
+                const { error } = await supabase
+                    .from('players')
+                    .update({ agent_id: user.id })
+                    .eq('id', player.id);
+
+                if (error) throw error;
+
+                setSuccessMessage(`${player.name} has been added to your roster!`);
+
+                // 2. Update local state so the button disappears immediately
+                setPlayer({ ...player, agent_id: user.id });
+
+                setTimeout(() => setSuccessMessage(''), 3000);
+            } catch (error) {
+                console.error(error);
+                alert("Failed to add client: " + error.message);
+            }
+        }
+    };
 
     const handleContact = () => {
         if (!isAuthenticated) return navigate('/login');
@@ -286,6 +310,32 @@ const PlayerProfile = () => {
                                         <span className="hidden sm:inline">{isWatchlisted ? 'Watchlisted' : 'Watchlist'}</span>
                                     </button>
                                 )}
+                                <div className="flex items-center gap-2">
+                                    <button onClick={handleShare} className="p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors">
+                                        <Share2 className="w-5 h-5" />
+                                    </button>
+
+                                    {/* ... (Keep the Watchlist and Request Trial buttons exactly as they are) ... */}
+
+                                    {/* ⭐ ADD CLIENT BUTTON (AGENT ONLY) ⭐ */}
+                                    {user?.role === 'agent' && !player.agent_id && (
+                                        <button
+                                            onClick={handleAddClient}
+                                            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-sm"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            <span className="hidden sm:inline">Add Client</span>
+                                        </button>
+                                    )}
+
+                                    {/* Contact Button */}
+                                    <button onClick={handleContact} className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm">
+                                        <MessageSquare className="w-4 h-4" />
+                                        <span className="hidden sm:inline">
+                                            {player.academy_id ? 'Contact Academy' : 'Contact Player'}
+                                        </span>
+                                    </button>
+                                </div>
 
                                 {/* Request Trial Button */}
                                 {['scout', 'team'].includes(user?.role) && (
