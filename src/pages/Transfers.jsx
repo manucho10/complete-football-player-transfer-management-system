@@ -465,6 +465,7 @@ const Transfers = () => {
                                     </div>
                                 )}
 
+                                {/* ACTION BUTTONS */}
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     <button onClick={() => navigate('/messages')} className="inline-flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-3 px-4 rounded-xl text-sm font-bold transition-all flex-1 shadow-sm">
                                         <MessageSquare className="w-4 h-4" /> Message
@@ -482,19 +483,28 @@ const Transfers = () => {
                                                 <XCircle className="w-4 h-4" /> Reject
                                             </button>
 
-                                            {/* ⭐ SAFEGUARDING RESTRICTION: Academy Player cannot accept directly ⭐ */}
-                                            {isAcademyPlayer && user.id === selectedOffer.player_user_id ? (
+                                            {/* ⭐ CLEAN ACCEPT LOGIC */}
+                                            {(
+                                                // 1. Team can accept if they haven't yet
+                                                (user.id === selectedOffer.from_user_id && !selectedOffer.team_accepted) ||
+                                                // 2. Player can accept if they haven't yet AND they are NOT an academy player
+                                                (user.id === selectedOffer.player_user_id && !selectedOffer.player_accepted && user.role !== 'academy') ||
+                                                // 3. Academy can accept on behalf of the player
+                                                (user.role === 'academy' && !selectedOffer.player_accepted)
+                                            ) && (
+                                                    <button
+                                                        onClick={() => handleStatusChange(selectedOffer.id, 'accept')}
+                                                        className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl text-sm font-bold transition-all flex-1 shadow-sm"
+                                                    >
+                                                        <Check className="w-4 h-4" /> Accept Terms
+                                                    </button>
+                                                )}
+
+                                            {/* Show pending badge for Academy Player */}
+                                            {user.role === 'player' && user.academy_id && user.id === selectedOffer.player_user_id && !selectedOffer.player_accepted && (
                                                 <div className="flex-1 inline-flex items-center justify-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 py-3 px-4 rounded-xl text-sm font-bold shadow-sm">
                                                     <Clock className="w-4 h-4" /> Pending Academy Signature
                                                 </div>
-                                            ) : (
-                                                ((user.id === selectedOffer.from_user_id && !selectedOffer.team_accepted) ||
-                                                    (user.id === selectedOffer.player_user_id && !selectedOffer.player_accepted))
-                                                    (user.role === 'academy' && !selectedOffer.player_accepted) && (
-                                                    <button onClick={() => handleStatusChange(selectedOffer.id, 'accept')} className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl text-sm font-bold transition-all flex-1 shadow-sm">
-                                                        <Check className="w-4 h-4" /> Accept Terms
-                                                    </button>
-                                                )
                                             )}
                                         </>
                                     )}
