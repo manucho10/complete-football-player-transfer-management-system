@@ -175,55 +175,61 @@ const Transfers = () => {
         }
     };
 
+
+
+
     const handleCompleteTransfer = async () => {
         try {
-            // 1. Find the player in the database
-            // We use player_id if it exists, otherwise fallback to name
+            // 1. Find the player
             let playerRecord = null;
 
             if (selectedOffer.player_id) {
-                const { data } = await supabase
+                const { data, error } = await supabase
                     .from('players')
                     .select('*')
                     .eq('id', selectedOffer.player_id)
                     .maybeSingle();
+                if (error) throw new Error("Database error finding player: " + error.message);
                 playerRecord = data;
             } else {
-                const { data } = await supabase
+                const { data, error } = await supabase
                     .from('players')
                     .select('*')
                     .eq('name', selectedOffer.playerName)
                     .maybeSingle();
+                if (error) throw new Error("Database error finding player by name: " + error.message);
                 playerRecord = data;
             }
 
             if (!playerRecord) {
-                alert("Player record not found in database. Ensure their name matches exactly.");
+                alert("Player record not found in database.");
                 return;
             }
 
             const previousAcademyId = playerRecord.academy_id;
 
-            // 2. Update the Player: Remove from Academy, add to Team
-            await supabase
+            // 2. Update the Player (Remove from Academy, add to Team)
+            const { error: updateError } = await supabase
                 .from('players')
                 .update({
                     team_id: user.id,
                     club: user.name || 'New Club',
                     availability: 'Under Contract',
-                    academy_id: null // ⭐ REMOVE FROM ACADEMY
+                    academy_id: null
                 })
                 .eq('id', playerRecord.id);
+
+            // ⭐ If this fails, we stop immediately and show you why
+            if (updateError) throw new Error("Failed to update player record: " + updateError.message);
 
             // 3. Create Notifications
             const notificationsToInsert = [];
 
-            // Notification for the Player
             if (playerRecord.user_id) {
                 notificationsToInsert.push({
                     user_id: playerRecord.user_id,
                     title: 'Transfer Complete! 🎉',
-                    message: `You have officially signed with ${user.name || 'your new club'}. Your academy has been notified.`,
+                    message: `You have officially signed with ${user.name || 'your new club'}.`,
                     type: 'contract',
                     priority: 'high',
                     action_path: '/transfers',
@@ -231,7 +237,6 @@ const Transfers = () => {
                 });
             }
 
-            // Notification for the Academy (if they had one)
             if (previousAcademyId) {
                 notificationsToInsert.push({
                     user_id: previousAcademyId,
@@ -244,18 +249,22 @@ const Transfers = () => {
                 });
             }
 
-            // Insert notifications into the database
+            // Insert notifications
             if (notificationsToInsert.length > 0) {
-                await supabase.from('notifications').insert(notificationsToInsert);
+                const { error: notifError } = await supabase
+                    .from('notifications')
+                    .insert(notificationsToInsert);
+
+                // We log this error but don't stop the transfer if notifications fail
+                if (notifError) console.error("Notification insert failed:", notifError.message);
             }
 
-            // 4. Show success and redirect
-            alert("Player successfully added to your squad! Notifications sent.");
+            alert("Player successfully added to your squad!");
             navigate('/squad');
 
         } catch (error) {
-            console.error(error);
-            alert("Failed to complete transfer: " + error.message);
+            console.error("CRITICAL TRANSFER ERROR:", error);
+            alert(error.message); // ⭐ Show the exact error
         }
     };
 
